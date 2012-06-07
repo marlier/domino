@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Domino</title>
+		<meta name="copyright" content="Copyright (c) 2012" />
+		<script src="https://s3.amazonaws.com/domino-resources/nightly/js/jquery-1.7.2.min.js" type="text/javascript"></script>
+		<script src="https://s3.amazonaws.com/domino-resources/nightly/js/jquery.gchart.js" type="text/javascript"></script>
+		<script src="https://s3.amazonaws.com/domino-resources/nightly/js/highcharts/highcharts.js" type="text/javascript"></script>
+		<script src="https://s3.amazonaws.com/domino-resources/nightly/js/highcharts/modules/exporting.js" type="text/javascript"></script>
+		<script type="text/javascript" src="js/lib.js"></script>
+		<script type="text/javascript" src="js/dash.js"></script>
+		<link rel="stylesheet" type="text/css" href="css/base.css" media="screen, print, projection" />
+		<link href='http://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
+	</head>
+	<body>
+		<div id="wrap">
+
+			<div id="top"></div>
+			
+			<div id="dashboard">
+				<ul>
+					<li>
+						<div id="new_box" class="dash_box">
+							Most Frequent Alerts (7 days)
+							<div id="frequent"></div>
+						</div>
+					</li>
+					<li>
+						<div id="new_box" class="dash_box">
+							Newest Alerts
+							<div id="new"></div>
+						</div>
+					</li>
+					<li>
+						<div id="old_box" class="dash_box">
+							Oldest Alerts
+							<div id="old"></div>
+						</div>
+					</li>
+					<li>
+						<div id="graph_box" class="dash_box">
+							Custom Graph <br />
+							<form>
+							<input id="graph_filter"></input>
+							<input id="segment" value="7"></input>
+							<select name="unit">
+							  <option>Day</option>
+							  <option>Hour</option>
+							  <option>Minute</option>
+							  <option>Second</option>
+							</select>
+							<button type="button" id="graph_button" onclick="get_graph_data('#graph')">Graph!</button>
+							</form>
+							<div id="graph"></div>
+						</div>
+					</li>
+				</ul>
+			</div>
+			
+			<div id="bottom"></div>
+		</div>
+	</body>
+</html>
