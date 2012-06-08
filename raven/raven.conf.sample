@@ -4,16 +4,11 @@
 [defaults]
 
 environment=production
-colo=Arctic
-host=testHost
+colo=datacenter1
+host=hostname
 status=3
 position=0
 server=localhost
 port=8009
 logdir=/var/log/domino
 teams=syseng
-
-[aliases]
-
-# Team aliases is a means to associate a variety of inputs with a specific team
-aliases={ 'prod-service':'syseng', 'devops-service':'devops' }
