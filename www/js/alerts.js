@@ -56,7 +56,7 @@ function print_alerts(alerts,alert_div,sidebar_div) {
 	hosts = unique(hosts);
 	services = unique(services);
 	statuses = unique(statuses);
-	tags = unique(tags).sort();
+	tags = unique(tags);
 	
 	output = '';
 	output = output + '<ul>';
