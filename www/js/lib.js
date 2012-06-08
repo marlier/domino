@@ -1,4 +1,4 @@
-var base_url='http://localhost:8009/api/';
+var base_url='http://ec2-107-20-110-174.compute-1.amazonaws.com:8009/api/';
 var search_terms = new Array();
 
 $(document).ready(function(){

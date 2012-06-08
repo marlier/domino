@@ -1,4 +1,3 @@
-var base_url='http://localhost:8009/api/';
 var service_attrs;
 
 $(document).ready(function(){
@@ -8,7 +7,6 @@ $(document).ready(function(){
 	get_detail("#current");
 	get_detail_graph("#graph");
 	get_detail_history("#history");
-	
 });
 
 
@@ -31,7 +29,6 @@ function get_detail(div){
 
 function get_detail_history(div) {
 	var url = base_url+"query?target=alerthistory&since=30&search="+detail_attrs.join(",");
-	console.debug(url);
 	$.getJSON(url,function(json){
 		if (process_header(json.status, json.status_message)) {
 			print_alerts(json.data,div);
@@ -42,7 +39,6 @@ function get_detail_history(div) {
 
 function get_detail_graph(div) {
 	var url = base_url+"metric?metric=graph&segment=30&unit=DAY&terms="+detail_attrs.join("%2B");
-	console.debug(url);
 	$.getJSON(url,function(json){
 		if (process_header(json.status, json.status_message)) {
 			var datapoints = new Array();
@@ -50,7 +46,6 @@ function get_detail_graph(div) {
 			var minValue = "nil";
 			var maxValue = "nil";
 			$.each(json.data[0].data, function(i,d) {
-				console.debug(d);
 				datapoints.push(d.count);
 				labelpoints.push(new Date(d.date).getDate());
 				if ((minValue > d.min) || (minValue == "nil")) {
@@ -78,6 +73,7 @@ function get_detail_graph(div) {
 				axes: [$.gchart.axis('bottom', labelpoints, 'black'), $.gchart.axis('left', json.data[0].min, json.data[0].max, 'black', 'left')], 
 				legend: 'right' 
 			});
+			$( "#tabs" ).tabs();
 			return json.data;
 		};
 	})
@@ -137,11 +133,11 @@ function print_current(data, div) {
 	output = output + 'Service: '+data.service + '<br />';
 	output = output + 'Colo: '+data.colo + '<br />';
 	output = output + 'Environment: '+data.environment + '<br />';
-	output = output + 'Team: '+data.team + '<br /></br>';
+	output = output + 'Team: '+data.teams[0].name + '<br /></br>';
 	
 	output = output + 'Date: '+new Date(data.createDate+'Z').toDateString()  + '<br />';
 	output = output + 'Message:\
-	'+data.body + '<br />';
+	'+data.message + '<br />';
 
 	$(div).html(output);	
 };
@@ -153,7 +149,7 @@ function print_alerts(data, div) {
 	$.each(data,function(i,a) {
 		output = output + '<div class="alert">';
 		output = output + '<ul>';
-		output = output + '<li onclick="add_search_terms(\'team:' + a.team + '\')">' + a.team + '</li>';
+		output = output + '<li onclick="add_search_terms(\'team:' + a.teams[0].name + '\')">' + a.teams[0].name + '</li>';
 		output = output + '<li onclick="add_search_terms(\'environment:' + a.environment + '\',\'alerts\')">' + a.environment + '</li>';
 		output = output + '<li onclick="add_search_terms(\'colo:' + a.colo + '\')">' + a.colo + '</li>';
 		output = output + '<li onclick="add_search_terms(\'host:' + a.host + '\')">' + a.host + '</li>';

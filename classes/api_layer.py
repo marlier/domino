@@ -347,6 +347,7 @@ class Api():
 		elif self.metric == "graph":
 			if self.segment == None: self.segment = 7
 			if self.unit == None: self.unit = "DAY"
+			if self.search == None: self.search = ''
 			#print self.terms
 			if self.unit.upper() in ["SECOND", "MINUTE", "HOUR", "DAY"]:
 				self.search = self.search.split(",")
