@@ -112,7 +112,7 @@ function graph(div, segment, unit) {
 					title: 'Custom Chart', 
 					titleColor: 'black', 
 					height: 400, 
-					width: 900,
+					width: 400,
 					minValue: minValue,
 					maxValue: maxValue,
 					series: [$.gchart.series(json.data[0].terms, datapoints, 'blue', json.data[0].min, json.data[0].max)], 
@@ -147,17 +147,13 @@ function print_alerts(data, div) {
 	var output = '';
 	
 	$.each(data,function(i,a) {
-		output = output + '<div class="alert">';
+		output = output + '<div class="alert_detail">';
 		output = output + '<ul>';
-		output = output + '<li onclick="add_search_terms(\'team:' + a.teams[0].name + '\')">' + a.teams[0].name + '</li>';
-		output = output + '<li onclick="add_search_terms(\'environment:' + a.environment + '\',\'alerts\')">' + a.environment + '</li>';
-		output = output + '<li onclick="add_search_terms(\'colo:' + a.colo + '\')">' + a.colo + '</li>';
-		output = output + '<li onclick="add_search_terms(\'host:' + a.host + '\')">' + a.host + '</li>';
-		output = output + '<li onclick="add_search_terms(\'service:' + a.service + '\')">' + a.service + '</li>';
-		output = output + '<li onclick="add_search_terms(\'status:' + a.status + '\')">' + a.status + '</li>';
+		output = output + '<li>' + a.teams[0].name + '</li>';
+		output = output + '<li>' + a.status + '</li>';
 		output = output + '</ul>';
-		output = output + '<div class="alert_body" id="'+ a.status +'">' + a.summary;
-		output = output + '<div class="alert_date">' + new Date(a.createDate+'Z').toDateString() + '</div>';
+		output = output + '<div class="alert_detail_msg" id="'+ a.status +'">' + a.summary;
+		output = output + '<div class="alert_detail_date">' + new Date(a.createDate+'Z').toDateString() + '</div>';
 		output = output + '</div>';
 	});
 	$(div).html(output);

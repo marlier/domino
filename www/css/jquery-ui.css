@@ -1,3 +1,5 @@
+/* @override http://ec2-107-20-110-174.compute-1.amazonaws.com//domino/css/jquery-ui.css */
+
 # jquery ui css
 
 #feedback { font-size: 1.4em; }
@@ -17,12 +19,41 @@
 .ui-tabs .ui-tabs-hide { display: none !important; }
 
 #tabs div {
-    margin: 80px 40px; padding: 25px; background: whitesmoke;
+    margin: 20px 0px; 
+    padding: 5px; 
+    background: whitesmoke;
+    width: 800px;
 }
 
 #sortable li.ui-oncall { background: green; }
 #sortable { list-style-type: none ; margin: 0; padding: 0; width: 60% }
 #sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; height: 18px; background: #F39814; color: white;}
-
-
 #sortable li span { position: absolute; margin-left: -1.3em; }
+
+.alert_detail {
+	font-size: 12px;
+	margin: 0 px;
+}
+
+.alert_detail ul {
+	margin:0px;
+	list-style: none;
+	text-align: left;
+	padding: 0px;
+}
+
+.alert_detail li {
+	display: inline-block;
+	margin:0px 2px;
+	padding:4px 8px;
+	text-align:right;
+	background: lightblue;
+	border-top-left-radius: 5px;
+	-moz-border-radius-topleft: 5px;
+	border-top-right-radius: 5px;
+	-moz-border-radius-topright: 5px;
+	cursor: pointer;
+}
+
+.alert_detail_msg {
+}
