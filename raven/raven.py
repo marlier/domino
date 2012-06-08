@@ -62,10 +62,12 @@ def convert_to_dict(var):
 			raise "Bad configuration variable: %s" % (var)
 
 conf['port']=int(conf['port'])
-conf['aliases']=convert_to_dict(conf['aliases'])
 
 if not os.path.exists('%s/%s.log' % (conf['logdir'], 'raven')):
-	os.makedirs(conf['logdir'])
+	try:
+		os.makedirs(conf['logdir'])
+	except:
+		pass
 	f = file('%s/%s.log' % (conf['logdir'], 'raven'), "w+")
 	f.close()
 
@@ -78,7 +80,6 @@ if select.select([sys.stdin,],[],[],0.0)[0]:
 if opts.message == None:
 	print "Error: No message passed. This can be done via stdin or --message (-m)"
 	sys.exit(1)
-if opts.teams in conf['aliases']: opts.teams=conf['aliases'][opts.teams]
 if opts.teams == None: opts.teams=conf['teams']
 if opts.host == None: opts.host=conf['host']
 if opts.service == None: opts.service=conf['service']
