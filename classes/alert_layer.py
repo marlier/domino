@@ -132,7 +132,14 @@ def active(team=None):
 	if team == None:
 		return Mysql.query('''SELECT * FROM alerts WHERE ack != 0 ORDER BY createDate DESC''', "alerts")
 	else:
-		return Mysql.query('''SELECT * FROM alerts WHERE vid!= 0 AND team = '%s' ORDER BY createDate DESC''' % (team), "alerts")
+		all_alerts = Mysql.query('''SELECT * FROM alerts WHERE ack != 0 ORDER BY createDate DESC''', "alerts")
+		team_alerts = []
+		for a in all_alerts:
+			for t in a.teams:
+				if t.id == team:
+					team_alerts.append(a)
+					break
+		return team_alerts
 
 def acked():
 	'''
