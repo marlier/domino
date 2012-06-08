@@ -228,8 +228,6 @@ class Alert():
 				self.id = tmp['id']
 			self.db._cursor.execute('''REPLACE INTO alerts_history (id,message,teams,ack,ackby,acktime,lastPageSent,lastEmailSent,tries,host,service,environment,colo,status,position,tags) VALUES (%s,"%s","%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s",%s,%s,"%s")''', (self.id,self.message,Team.flatten_teams(self.teams),self.ack,self.ackby,self.acktime, self.lastPageSent, self.lastEmailSent, self.tries,self.host,self.service, self.environment, self.colo, self.status, self.position, self.tags))
 			self.db.save()
-			if self.id == 0:
-				
 			return True
 		except Exception, e:
 			logging.error(e.__str__())
