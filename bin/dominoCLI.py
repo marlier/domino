@@ -53,9 +53,9 @@ def alert_status(opts):
 	'''
 	user = None
 	if len(opts.team) > 0:
-		alerts = Alert.status(opts.team)
+		alerts = Alert.active(opts.team)
 	else:
-		alerts = Alert.status()
+		alerts = Alert.active()
 	if len(alerts) == 0: return "No active alerts."
 	if opts.ack == True:
 		if opts._from == '':

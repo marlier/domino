@@ -117,10 +117,10 @@ Press 2 to acknowledge this alert.
 		else:
 			requester = User.get_user_by_phone(d.From)
 			# get the team that is associate with this phone number the user called
-			team = Team.get_team_by_phone(d.To)
+			team = Team.get_team_by_phone(d.To)[0]
 			oncall_users = team.on_call()
 			# if caller is not a oncall user or they are, but calling a different team then they are in
-			if requester == False or check_user(requester, team) == False:
+			if requester == False or Team.check_user(requester, team) == False:
 				if team == '':
 					r.say("Sorry, The phone number you called is not associated with any team. Please contact you system administrator for help.")
 				else:
@@ -136,7 +136,7 @@ Press 2 to acknowledge this alert.
 				# check if d.Digits is the default value (meaning, either the caller hasn't pushed a button and this is the beginning of the call, or they hit 0 to start over
 				if int(d.Digits) == 0:
 					if d.init.lower() == "true":
-						if check_oncall_user(requester, team) == True:
+						if Team.check_oncall_user(requester, team) == True:
 							# figure out where in line the user is on call
 							for i,u in enumerate(team.members):
 								if requester.id == u.id:
@@ -163,7 +163,7 @@ Press 2 to acknowledge this alert.
 					r.redirect(url="%s:%s/call/event?init=false" % (conf['server_address'],conf['port']))
 				elif int(d.Digits) == 3:
 					# calling the other users on call
-					if len(oncall_users) == 1 and check_oncall_user(requester, team) == True:
+					if len(oncall_users) == 1 and Team.check_oncall_user(requester, team) == True:
 						r.say("You're the only person on call. I have no one to forward you to.")
 					else:
 						if len(oncall_users) > 0:
