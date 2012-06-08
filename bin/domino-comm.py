@@ -61,13 +61,14 @@ class sms:
 		web.header('Content-Type', 'text/xml')
 		r = Twilio.twiml.Response()
 		user = User.get_user_by_phone(d.From)
+		team = Team.get_team_by_phone(d.To)[0]
 		# make sure person sending the text is an authorized user of Domino
 		if user == False:
 			logging.error("Unauthorized access attempt via SMS by %s\n%s" % (d.From, d))
 			r.sms("You are not an authorized user")
 		else:
 			# split the output into 160 character segments
-			for text_segment in Twilio.split_sms(domino-cli.run(d.Body + " -m -f " + d.From)):
+			for text_segment in Twilio.split_sms(domino.run("%s -m -t %s -f %s" %(d.Body,team.name,d.From))):
 				r.sms(text_segment)
 		return r
 
@@ -163,13 +164,16 @@ Press 2 to acknowledge this alert.
 					r.redirect(url="%s:%s/call/event?init=false" % (conf['server_address'],conf['port']))
 				elif int(d.Digits) == 3:
 					# calling the other users on call
+					print len(oncall_users)
+					print Team.check_oncall_user(requester, team)
 					if len(oncall_users) == 1 and Team.check_oncall_user(requester, team) == True:
 						r.say("You're the only person on call. I have no one to forward you to.")
 					else:
 						if len(oncall_users) > 0:
 							for user in oncall_users:
-								r.say("Calling %s." % user.name)
-								r.dial(number=user.phone)
+								if user.id != requester.id:
+									r.say("Calling %s." % user.name)
+									r.dial(number=user.phone)
 						else:	
 							r.say("Sorry, no one is currently on call to forward you to.")
 				else:

@@ -114,7 +114,7 @@ def oncall_status(opts):
 	Get a list of people oncall for a specific team
 	'''
 	if len(opts.team) > 0:
-		team = Team.get_team_by_name(opts.team)
+		team = Team.get_team_by_name(opts.team)[0]
 		users = team.on_call()
 	else:
 		return "No team specified (-t)."

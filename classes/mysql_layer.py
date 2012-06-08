@@ -19,7 +19,7 @@ def query(q_string,table):
 	try:
 		_db = Database()
 		_db._cursor.execute( '''%s''' % (q_string))
-		#logging.debug("Running mysql query: %s" % q_string)
+		logging.debug("Running mysql query: %s" % q_string)
 		temp = _db._cursor.fetchall()
 		if len(temp) == 0: return []
 		objects = []
