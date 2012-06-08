@@ -19,6 +19,7 @@ import twilio_layer as Twilio
 import dominoCLI as domino
 import user_layer as User
 import alert_layer as Alert
+import team_layer as Team
 import util_layer as Util
 
 conf = Util.load_conf()
