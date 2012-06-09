@@ -112,7 +112,7 @@ function graph(div, segment, unit) {
 					title: 'Custom Chart', 
 					titleColor: 'black', 
 					height: 400, 
-					width: 400,
+					width: 700,
 					minValue: minValue,
 					maxValue: maxValue,
 					series: [$.gchart.series(json.data[0].terms, datapoints, 'blue', json.data[0].min, json.data[0].max)], 

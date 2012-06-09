@@ -17,7 +17,7 @@ server_address=
 # server debug mode
 # this enables/disable debug mode on incoming server requests like text messages, voice
 # calls and alerts from monitoring hosts
-server_debug=True
+server_debug=False
 
 # log level
 # choices are, INFO, WARNING, ERROR, CRITICAL, DEBUG

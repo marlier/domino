@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # This runs as a service. It listens for API requests
 
-import web
+from flask import Flask
 import os, sys
 import urllib
 import logging
@@ -19,30 +19,17 @@ import util_layer as Util
 conf = Util.load_conf()
 Util.init_logging("api")
 
-# set port and IP to listen for alerts
-# these are inhereited from the conf file
-sys.argv = [conf['api_listen_ip'],conf['api_port']]
+app = Flask(__name__)
 
-# debug mode
-web.config.debug = conf['server_debug']
-
-#load valid urls to listen to for http calls
-urls = (
-    '/api/(.+)', 'api',
-    '/healthcheck', 'healthcheck'
-)
-app = web.application(urls, globals())
-
-class healthcheck:
+@app.route('/healthcheck')
+def healthcheck:
 	'''
 	This checks the system to see if capable of handling api requests
 	'''
-	def GET(self):
-		return Util.healthcheck()
-	def POST(self):
-		return Util.healthcheck()
+	return Util.healthcheck()
 
-class api:
+@app.route('/api')
+def api:
 	'''
 	This class handles new alerts being set to the Domino server
 	'''
@@ -63,4 +50,10 @@ class api:
 		return apicall.fulljson
 
 if __name__ == "__main__":
+	# debug mode
+	app.debug = conf['server_debug']
+	# set port and IP to listen for alerts
+	# these are inhereited from the conf file
+	app.host = conf['api_listen_ip']
+	app.port = conf['api_port']
 	app.run()
