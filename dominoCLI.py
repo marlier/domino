@@ -6,11 +6,10 @@ import sys
 import logging
 from optparse import OptionParser
 
-# add this file location to sys.path
-cmd_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if cmd_folder not in sys.path:
-     sys.path.insert(-1, cmd_folder)
-     sys.path.insert(-1, cmd_folder + "/classes")
+# add classes location to sys.path
+cmd_folder = os.path.dirname((os.path.abspath(__file__)))
+if (cmd_folder + "/classes") not in sys.path:
+	sys.path.insert(-1, cmd_folder + "/classes")
 
 import user_layer as User
 import team_layer as Team

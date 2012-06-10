@@ -14,33 +14,29 @@ import util_layer as Util
 
 conf = Util.load_conf()
 
-def all_alert_history(since=None, count=None):
+def all_alert_history(since=None):
 	'''
 	Get all alerts.
 	'''
-	if since == None and (count == None or count == 0):
+	print since
+	if since == None:
 		return Mysql.query('''SELECT * FROM alerts_history ORDER BY createDate DESC''', "alerts")
-	elif since == None and (count != None or count != 0):
-		return Mysql.query('''SELECT * FROM alerts_history LIMIT %s ORDER BY createDate DESC''' % (count), "alerts")
-	elif since != None and (count == None or count == 0):
-		return Mysql.query('''SELECT * FROM alerts_history WHERE createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s DAY) AND DATE_SUB(CURDATE(),INTERVAL -1 DAY) ORDER BY createDate DESC''' % (since), "alerts")
-	elif since != None and (count != None or count != 0):
-		return Mysql.query('''SELECT * FROM alerts_history WHERE createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s DAY) AND DATE_SUB(CURDATE(),INTERVAL -1 DAY) LIMIT %s ORDER BY createDate DESC''' % (since,count), "alerts")
 	else:
-		logging.error("History query missed logic traps");
+		return Mysql.query('''SELECT * FROM alerts_history WHERE createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s DAY) AND DATE_SUB(CURDATE(),INTERVAL -1 DAY) ORDER BY createDate DESC''' % (int(since)), "alerts")
 
 def frequent_alerts(since=7):
 	'''
 	Get the most frequent alerts
 	'''
 	_db = Mysql.Database()
-	_db._cursor.execute( '''SELECT DISTINCT environment,colo,host,service, COUNT(*) AS num  FROM alerts_history WHERE createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s DAY) AND DATE_SUB(CURDATE(),INTERVAL -1 DAY) GROUP BY environment,colo,host,service  ORDER BY num DESC;''' % (since))
+	_db._cursor.execute( '''SELECT DISTINCT environment,colo,host,service, COUNT(*) AS count  FROM alerts_history WHERE createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s DAY) AND DATE_SUB(CURDATE(),INTERVAL -1 DAY) GROUP BY environment,colo,host,service  ORDER BY count DESC;''' % (since))
 	alerts = _db._cursor.fetchall()
 	_db.close()
-	#alerts = []
-	#for a in raw_alerts:
-	#	alerts.append({'environment':a['environment'], 'colo':a[1], 'host':a[2], 'service':a[3], 'count':a[4]})
-	#logging.debug(alerts)
+	for alert in alerts:
+		for key in alert:
+			if isinstance(alert[key], str):
+				if (alert[key].startswith("'") and alert[key].endswith("'")) or (alert[key].startswith('"') and alert[key].endswith('"')): 
+					alert[key] = alert[key][1:-1]
 	return alerts
 
 def round_date(t,unit):
@@ -113,7 +109,7 @@ def graph_data(amount=7, units="HOUR", terms = None):
 	graph_data = alerts[-(amount - 1):]
 	logging.debug(graph_data)
 	
-	return {'unit':units, 'segment':amount, 'terms':terms, 'data':graph_data, 'min':min, 'max':max}
+	return {'unit':units, 'segment':amount, 'search':terms, 'datapoints':graph_data, 'min':min, 'max':max}
 	
 def all_alerts(team=None):
 	'''
@@ -146,6 +142,12 @@ def acked():
 	Get the last 20 inactive alerts.
 	'''
 	return Mysql.query('''SELECT * FROM alerts WHERE ack = 0 ORDER BY createDate DESC LIMIT 20''', "alerts")
+
+def get_current_alert(environment,colo,host,service):
+	'''
+	Get the current status of an alert specified by environment, colo, host, and service
+	'''
+	return Mysql.query('''SELECT * FROM alerts WHERE environment = '%s' and colo = '%s' and host = '%s' and service = '%s' LIMIT 1''', "alerts")
 
 def fresh_alerts():
 	'''
@@ -345,7 +347,7 @@ class Alert():
 		else:
 			return "Unknown"
 	
-	def delete_alert(self):
+	def delete(self):
 		'''
 		Delete the alert form the db.
 		'''

@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-import sys, os, select, urllib, urllib2
+import sys, os, select, urllib2
 from optparse import OptionParser
 import simplejson as json
 from ConfigParser import SafeConfigParser
 import ast, logging
 
-version="Raven 0.01"
+version="Raven 0.02"
 
 # Parse the command line
 parser = OptionParser()
@@ -75,21 +75,25 @@ if not os.path.exists('%s/%s.log' % (conf['logdir'], 'raven')):
 logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', filename='%s/%s.log' % (conf['logdir'], 'raven'),level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p')
 
 # set default values
+alert = conf
+
 if select.select([sys.stdin,],[],[],0.0)[0]:
-	opts.message = sys.stdin.read()
-if opts.message == None:
+	alert['message'] = sys.stdin.read()
+else:
+	alert['message'] = opts.message
+if alert['message'] == None:
 	print "Error: No message passed. This can be done via stdin or --message (-m)"
 	sys.exit(1)
-if opts.teams == None: opts.teams=conf['teams']
-if opts.host == None: opts.host=conf['host']
-if opts.service == None: opts.service=conf['service']
-if opts.environment == None: opts.environment=conf['environment']
-if opts.colo == None: opts.colo=conf['colo']
-if opts.status == None: opts.status=conf['status']
-if opts.position == None: opts.position=conf['position']
-if opts.tags == None: opts.tags=conf['tags']
-if opts.server == None: opts.server=conf['server']
-if opts.port == None: opts.port=conf['port']
+if opts.teams != None: alert['teams']=opts.team
+if opts.host != None: alert['host']=opts.host
+if opts.service != None: alert['service']=opts.service
+if opts.environment != None: alert['environment']=opts.environment
+if opts.colo != None: alert['colo']=opts.colo
+if opts.status != None: alert['status']=opts.status
+if opts.position != None: alert['position']=opts.position
+if opts.tags != None: alert['tags']=opts.tags
+if opts.server != None: alert['server']=opts.server
+if opts.port != None: alert['port']=opts.port
 
 summary='''Sending a raven: 
     Environment: %s
@@ -102,27 +106,27 @@ summary='''Sending a raven:
     Tags: %s
     Server: %s
     Port: %s
-    Message: %s''' % (opts.environment, opts.colo, opts.host, opts.service, opts.teams, opts.status, opts.position, opts.tags, opts.server, opts.port, opts.message)
+    Message: %s''' % (alert['environment'], alert['colo'], alert['host'], alert['service'], alert['teams'], alert['status'], alert['position'], alert['tags'], alert['server'], alert['port'], alert['message'])
 
 logging.info(summary)
 
 # create encoded url query
-if opts.host.startswith('http'):
-	query='%s:%i/api/create?target=alerts&message=%s&teams=%s&host=%s&service=%s&environment=%s&colo=%s&status=%s&position=%s&tags=%s' % (opts.server, opts.port,urllib.quote_plus(opts.message),urllib.quote_plus(opts.teams),urllib.quote_plus(opts.host),urllib.quote_plus(opts.service),urllib.quote_plus(opts.environment),urllib.quote_plus(opts.colo),opts.status,opts.position,urllib.quote_plus(opts.tags))
-else:
-	query='http://%s:%i/api/create?target=alerts&message=%s&teams=%s&host=%s&service=%s&environment=%s&colo=%s&status=%s&position=%s&tags=%s' % (opts.server, opts.port,urllib.quote_plus(opts.message),urllib.quote_plus(opts.teams),urllib.quote_plus(opts.host),urllib.quote_plus(opts.service),urllib.quote_plus(opts.environment),urllib.quote_plus(opts.colo),opts.status,opts.position,urllib.quote_plus(opts.tags))
+#if opts.host.startswith('http'):
+#	query='%s:%i/api/create?target=alerts&message=%s&teams=%s&host=%s&service=%s&environment=%s&colo=%s&status=%s&position=%s&tags=%s' % (opts.server, opts.port,urllib.quote_plus(opts.message),urllib.quote_plus(opts.teams),urllib.quote_plus(opts.host),urllib.quote_plus(opts.service),urllib.quote_plus(opts.environment),urllib.quote_plus(opts.colo),opts.status,opts.position,urllib.quote_plus(opts.tags))
+#else:
+#	query='http://%s:%i/api/create?target=alerts&message=%s&teams=%s&host=%s&service=%s&environment=%s&colo=%s&status=%s&position=%s&tags=%s' % (opts.server, opts.port,urllib.quote_plus(opts.message),urllib.quote_plus(opts.teams),urllib.quote_plus(opts.host),urllib.quote_plus(opts.service),urllib.quote_plus(opts.environment),urllib.quote_plus(opts.colo),opts.status,opts.position,urllib.quote_plus(opts.tags))
+
+url = "http://%s:%i/api/alert" % (alert['server'], alert['port'])
 
 try:
 	# query the server
-	req = urllib2.Request(query)
+	data = json.dumps(alert)
+	req = urllib2.Request(url, data, {'Content-Type': 'application/json'})
 	response = urllib2.urlopen(req)
 	rawreturn = response.read()
 except urllib2.URLError, e:
+	logging.error(e)
 	print e
-	if e.reason[0] == 61:
-		print "Unable to contact server. Check that the service is running on the server and you are inputting the correct host (-H) and port (-p)"
-	else:
-		print e
 	sys.exit(1)
 
 ret = json.loads(rawreturn)

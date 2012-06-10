@@ -166,7 +166,7 @@ class Team:
 			Util.strace()
 			return False
 			
-	def delete_team(self):
+	def delete(self):
 		'''
 		Delete the team form the db.
 		'''

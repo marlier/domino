@@ -118,7 +118,7 @@ class User:
 		return self.__dict__
 		
 			
-	def delete_user(self):
+	def delete(self):
 		'''
 		Delete the user form the db.
 		'''
