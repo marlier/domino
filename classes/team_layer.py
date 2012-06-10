@@ -191,9 +191,10 @@ class Team:
 			self.createDate = self.createDate.isoformat()
 		if hasattr(self, 'members'):
 			clean_members = []
-			for m in self.members:
-				clean_members.append(m.scrub())
-			self.members = clean_members
+			if isinstance(self.members, list):
+				for m in self.members:
+					clean_members.append(m.scrub())
+				self.members = clean_members
 		return self.__dict__
 			
 	def print_team(self, SMS=False):

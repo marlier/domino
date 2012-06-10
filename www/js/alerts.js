@@ -1,4 +1,4 @@
-var table = "alerts";
+var table = "alert";
 
 $(document).ready(function(){
 	query("#data","#sidebar_data");

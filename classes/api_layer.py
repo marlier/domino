@@ -33,8 +33,8 @@ class Api():
 		self.twilio_token = conf['twilio_token']
 		self.twilio_acct = conf['twilio_acct']
 		self.twilio_number = conf['twilio_number']
-		self.search = None
-		self.since = None
+		self.search = ''
+		self.since = 7
 		#graph data
 		self.segment = 7
 		self.unit = "DAY"
@@ -72,6 +72,18 @@ class Api():
 				self.segment = int(self.segment)
 			except Exception, e:
 				self.populate(1006, "Segment is not a integer")
+				return
+		if self.limit != 0:
+			try:
+				self.limit = int(self.limit)
+			except Exception, e:
+				self.populate(1006, "Limit is not a integer")
+				return
+		if self.offset != 0:
+			try:
+				self.offset = int(self.offset)
+			except Exception, e:
+				self.populate(1006, "Offset is not a integer")
 				return
 				
 		#init database connection
@@ -120,7 +132,6 @@ class Api():
 			else:
 				return self.populate(301, "Invalid analytics name")
 		elif self.objType == "Graph":
-			if self.search == None: self.search = ''
 			if self.unit.upper() in ["SECOND", "MINUTE", "HOUR", "DAY"]:
 				self.search = self.search.split(",")
 				objects = []
@@ -256,6 +267,7 @@ class Api():
 				try:
 					obj = Team.Team(self.id)
 					obj.__dict__.update(data)
+					obj.members = User.get_users(self.members)
 					if obj.save() == True:
 						self.populate(200,"OK")
 					else:
@@ -265,7 +277,7 @@ class Api():
 					Util.strace()
 					return
 			
-	def del_obj(self, objType):
+	def del_obj(self):
 		'''
 		This deletes an object
 		'''

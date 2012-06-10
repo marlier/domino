@@ -1,4 +1,4 @@
-var table = "users";
+var table = "user";
 var id = 0;
 var user_list = new Array();
 
@@ -12,7 +12,6 @@ $(document).bind('cbox_closed', function(){
 
 function print_users(users,user_div,sidebar_div) {
 	console.debug("Printing users");
-	console.debug(users);
 	var output = '';
 	user_list = new Array();
 	
@@ -112,39 +111,53 @@ function save_user(id) {
 		return
 	}
 	
-	if (id === 0) {
-		//creat a new team
-		console.debug("creating new user");
-		var mode = "create";
-	} else {
-		//edit a team
-		console.debug("saving edits to user");
-		var mode = "edit";
-	};
-	
-	var url = base_url+mode+"?target=user&id=" + id + "&name="+ $("input#user_name").val() + "&email=" + $("input#user_email").val() + "&phone=" + $("input#user_phone").val();
-	url = url.replace(/\+/g, "%2B");
-	$.getJSON(url,function(json){
-		if (process_header(json.status, json.status_message)) {
-			// done saving
-			console.log(json.status);
-			console.log(json.status_message);
-			alert("Validation Code: "+json.status_message)
-			$.colorbox.close();
-		};
+	var jsonData = JSON.stringify({
+		"name": $("input#user_name").val(),
+		"email": $("input#user_email").val(),
+		"phone": $("input#user_phone").val()
 	});
+	
+	var url = base_url+"user/" + id
+	
+	$.ajax({
+        type: 'POST',
+        contentType: 'application/json',
+        url: url,
+        dataType: "json",
+        data: jsonData,
+        success: function(data, textStatus, jqXHR){
+			alert("Validation Code: "+data.status_message);
+			$.colorbox.close();
+        },
+        error: function(jqXHR, textStatus, errorThrown){
+            alert('Update user error: ' + textStatus);
+        }
+    });
 };
+
+function formToJSON() {
+    return JSON.stringify({
+        "id": $('#id').val(),
+        "name": $('#name').val(),
+        "grapes": $('#grapes').val(),
+        "country": $('#country').val(),
+        "region": $('#region').val(),
+        "year": $('#year').val(),
+        "description": $('#description').val()
+        });
+}
 
 function delete_user(id) {
 	var r=confirm("Are you sure you want to delete this user?");
 	if (r==true) {
   		//delete a user
 		console.debug("deleting user");
-		var url = base_url+"delete?target=user&id=" + id;
-		$.getJSON(url,function(json){
-			if (process_header(json.status, json.status_message)) {
-				query("#data","#sidebar_data");
-			};
+		var url = base_url+"user/" + id;
+		$.ajax({
+			url: url,
+			type: "DELETE"
+		}).done(function(json){
+			query("#data","#sidebar_data");
 		});
 	};
 };

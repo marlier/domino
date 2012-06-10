@@ -6,7 +6,7 @@ $(document).ready(function(){
 });
 
 function chronological(div, direction) {
-	var url = base_url+"query?target=alerts&count=10&sort=" + direction;
+	var url = base_url+"alert?limit=10&sort=" + direction;
 	$.getJSON(url,function(json){
 		if (process_header(json.status, json.status_message)) {
 				print_alert_list(json.data,div);
@@ -16,7 +16,7 @@ function chronological(div, direction) {
 };
 
 function frequent(div) {
-	var url = base_url+"metric?metric=frequent&count=10";
+	var url = base_url+"analytics?name=frequent&limit=10";
 	$.getJSON(url,function(json){
 		if (process_header(json.status, json.status_message)) {
 				print_frequent_alert_list(json.data,div);
@@ -41,7 +41,7 @@ function print_frequent_alert_list(alerts,div) {
 	$.each(alerts,function(i,a) {
 		output = output + '<div>';
 		output = output + '<ul>';
-		output = output + '<li>' + a.num + '</li><li>' + a.environment + '</li><li>'+ a.colo +'</li><li>'+ a.host +'</li><li>'+ a.service +'</li>';
+		output = output + '<li>' + a.count + '</li><li>' + a.environment + '</li><li>'+ a.colo +'</li><li>'+ a.host +'</li><li>'+ a.service +'</li>';
 		output = output + '</ul>';
 		output = output + '</div>';
 	});
@@ -69,7 +69,7 @@ function get_graph_data(div) {
 
 function graph(div, segment, unit) {
 	timeperiod = $("input[name='timeperiod']:checked").val();
-	var url = base_url+"metric?metric=graph&segment=" + segment + "&unit=" + unit + "&search=" + $("#graph_filter").val();
+	var url = base_url+"graph?segment=" + segment + "&unit=" + unit + "&search=" + $("#graph_filter").val();
 	$.getJSON(url,function(json){
 		if (process_header(json.status, json.status_message)) {
 				var datapoints = new Array();
@@ -77,7 +77,7 @@ function graph(div, segment, unit) {
 				var mydata = new Array();
 				var minValue = "nil";
 				var maxValue = "nil";
-				$.each(json.data[0].data, function(i,d) {
+				$.each(json.data[0].datapoints, function(i,d) {
 					datapoints.push(d.count);
 					labelpoints.push(new Date(d.date+"Z").getDate());
 					if ((minValue > d.min) || (minValue == "nil")) {
@@ -88,10 +88,10 @@ function graph(div, segment, unit) {
 					};
 					mydata.push([Date.parse(new Date(d.date+'Z')),d.count]);
 				});
-				if (json.data[0].terms == 0) {
-					json.data[0].terms = "All";
+				if (json.data[0].search == 0) {
+					json.data[0].search = "All";
 				} else {
-					json.data[0].terms = json.data[0].terms.join();
+					json.data[0].search = json.data[0].search.join();
 				};
 				chart = new Highcharts.Chart({
 					chart: {
@@ -121,19 +121,6 @@ function graph(div, segment, unit) {
 		                data: mydata
 			        }]
 				});
-				/*$(div).gchart('destroy');
-				$(div).gchart({
-					type: 'line',
-					title: 'Custom Chart', 
-					titleColor: 'black', 
-					height: 400, 
-					width: 900,
-					minValue: minValue,
-					maxValue: maxValue,
-					series: [$.gchart.series(json.data[0].terms, datapoints, 'blue', json.data[0].min, json.data[0].max)], 
-    				axes: [$.gchart.axis('bottom', labelpoints, 'black'), $.gchart.axis('left', json.data[0].min, json.data[0].max, 'black', 'left')], 
-    				legend: 'right' 
-				});*/
 		};
 		return json.data;
 	});

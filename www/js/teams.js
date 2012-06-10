@@ -1,4 +1,4 @@
-var table = "teams";
+var table = "team";
 var id = 0;
 user_list = new Array();
 team_list = new Array();
@@ -25,7 +25,7 @@ function print_teams(teams,team_div,sidebar_div) {
 	output = output + '</div>';
 	$(sidebar_div).html(output);
 	
-	var url = base_url+"query?target=users";
+	var url = base_url+"user";
 	$.getJSON(url,function(json){
 		if (process_header(json.status, json.status_message)) {
 			user_list=json.data;
@@ -74,27 +74,30 @@ function print_teamedit(id) {
 		
 		output = output + '<div id="tabs-2">\
 		<h3>Members</h3>';
-		
 		output = output + '<ol id="selectable">';
 		team_members_id = new Array();
-		$.each(team.members,function(i,t) {
-			team_members_id.push(t.id);
-		});
+		if ( team.members ) {
+			$.each(team.members,function(i,t) {
+				team_members_id.push(t.id);
+			});
+		}
 		
-		$.each(user_list,function(i,u) {
-			if ( $.inArray(u.id, team_members_id) > -1 ) {
-				output = output + '<li id=' + u.id + ' class="ui-selected">' + u.name + '</li>';
-			} else {
-				output = output + '<li id=' + u.id + '>' + u.name + '</li>';
-			}
-		});
+		if ( user_list ) {
+			$.each(user_list,function(i,u) {
+				if ( $.inArray(u.id, team_members_id) > -1 ) {
+					output = output + '<li id=' + u.id + ' class="ui-selected">' + u.name + '</li>';
+				} else {
+					output = output + '<li id=' + u.id + '>' + u.name + '</li>';
+				}
+			});
+		}
 		output = output + '</ol>\
-		<span class="note">To select multiple users, control click (or command click for Mac users)</span>\
-		</div>';
-		
+		<span class="note">To select multiple users, control click (or command click for Mac users)</span>'
+		output = output + '</div>';
+
 		output = output + '<div id="tabs-3"><h3>On Call</h3>\
 		Oncall Count: <input id="oncall_count" value="'+team.oncall_count+'"></input><span class="note">(integers only)</span><br />';
-		if (team.members.length === 0) {		
+		if ( !team.members ) {		
 			output = output + '<div id="tabs-3"><h3>On Call</h3>\
 			<br />No team members</div>';
 		} else {
@@ -206,7 +209,6 @@ function save_team(id) {
 	// gather info from tabs
 	var members = new Array();
 	var members = $( "#sortable" ).sortable("toArray");
-	//console.debug("Sorted Members: "+members);
 		
 	var name = $("input#team_name").val();
 	var email = $("input#team_email").val();
@@ -237,27 +239,35 @@ function save_team(id) {
 		return;
 	}
 	
+	if ( members.length === 0 ) {
+		alert("A team cannot be empty. Pick at least one user on a team.");
+		return;
+	}
 	
-	if (id === 0) {
-		//creat a new team
-		console.debug("creating new team");
-		var mode = "create";
-	} else {
-		//edit a team
-		console.debug("saving edits to team");
-		var mode = "edit";
-	};
-	
-	var url = base_url+mode+"?target=team&id="+id+"&name="+ name + "&email=" + email + "&members=" + members.join(',') + "&oncall_count=" + oncall_count + "&catchall=" + catchall + "&phone=" + phone;
-	url = url.replace(/\+/g, "%2B");
-	
-	console.debug(url);
-	$.getJSON(url,function(json){
-		if (process_header(json.status, json.status_message)) {
-			query("#data","#sidebar_data");
-			//$.colorbox.close("Team edited succesfully");
-		};
+	var jsonData = JSON.stringify({
+		"name": name,
+		"email": email,
+		"members": members.join(','),
+		"oncall_count": oncall_count,
+		"catchall": catchall,
+		"phone": phone
 	});
+	
+	var url = base_url+"team/" + id
+	
+	$.ajax({
+        type: 'POST',
+        contentType: 'application/json',
+        url: url,
+        dataType: "json",
+        data: jsonData,
+        success: function(data, textStatus, jqXHR){
+			query("#data","#sidebar_data");
+        },
+        error: function(jqXHR, textStatus, errorThrown){
+            alert('Update team error: ' + textStatus);
+        }
+    });
 
 };
 
@@ -266,12 +276,12 @@ function delete_team(id) {
 	if (r==true) {
   		//delete a user
 		console.debug("deleting team");
-		var url = base_url+"delete?target=team&id=" + id;
-		$.getJSON(url,function(json){
-			if (process_header(json.status, json.status_message)) {
-				query("#data","#sidebar_data");
-				//$.colorbox.close("Team deleted succesfully");
-			};
+		var url = base_url+"team/" + id;
+		$.ajax({
+			url: url,
+			type: "DELETE"
+		}).done(function(json){
+			query("#data","#sidebar_data");
 		});
 	};
 };

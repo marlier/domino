@@ -11,7 +11,7 @@ $(document).ready(function(){
 
 
 function get_detail(div){
-	var url = base_url+"query?target=alerts&search="+detail_attrs.join(",");
+	var url = base_url+"alert?search="+detail_attrs.join(",");
 	console.debug(url);
 	$.getJSON(url,function(json){
 		if (process_header(json.status, json.status_message)) {
@@ -28,7 +28,7 @@ function get_detail(div){
 };
 
 function get_detail_history(div) {
-	var url = base_url+"query?target=alerthistory&since=30&search="+detail_attrs.join(",");
+	var url = base_url+"history&since=30&search="+detail_attrs.join(",");
 	$.getJSON(url,function(json){
 		if (process_header(json.status, json.status_message)) {
 			print_alerts(json.data,div);
@@ -38,7 +38,7 @@ function get_detail_history(div) {
 };
 
 function get_detail_graph(div) {
-	var url = base_url+"metric?metric=graph&segment=30&unit=DAY&terms="+detail_attrs.join("%2B");
+	var url = base_url+"graph&segment=30&unit=DAY&terms="+detail_attrs.join("%2B");
 	$.getJSON(url,function(json){
 		if (process_header(json.status, json.status_message)) {
 			var datapoints = new Array();
@@ -80,10 +80,10 @@ function get_detail_graph(div) {
 }
 
 function graph(div, segment, unit) {
-	terms = $("#graph_filter").val();
+	search = $("#graph_filter").val();
 	console.debug($('select option:selected').text() );
 	timeperiod = $("input[name='timeperiod']:checked").val();
-	var url = base_url+"metric?metric=graph&segment=" + segment + "&unit=" + unit + "&terms=" + terms;
+	var url = base_url+"graph&segment=" + segment + "&unit=" + unit + "&search=" + search;
 	$.getJSON(url,function(json){
 		if (process_header(json.status, json.status_message)) {
 				var datapoints = new Array();
