@@ -57,11 +57,11 @@ def alerthistory():
 	return process_request("History")
 
 @app.route('/api/analytics', methods=['GET'])
-def alerthistory():
+def analytics():
 	return process_request("Analytics")
 
 @app.route('/api/graph', methods=['GET'])
-def alerthistory():
+def graph():
 	return process_request("Graph")
 
 def process_request(objType, id=0):

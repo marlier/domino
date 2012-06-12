@@ -1,4 +1,5 @@
 var base_url='http://ec2-107-20-110-174.compute-1.amazonaws.com:8009/api/';
+var base_url='http://localhost:8009/api/';
 var search_terms = new Array();
 
 $(document).ready(function(){
@@ -7,10 +8,10 @@ $(document).ready(function(){
 });
 
 function query(div,sidebar_div,team,count){
-	count = typeof count !== 'undefined' ? count : 0;
+	count = typeof count !== 'undefined' ? count : 25;
 	team = typeof team !== 'undefined' ? team : "";
 	console.info("Query: " + table);
-	var url = base_url+"query?target="+table+"&count="+count+"&search="+search_terms.join(",");
+	var url = base_url+table+"?limit="+count+"&search="+search_terms.join(",");
 	console.debug(url);
 	$.getJSON(url,function(json){
 		if (process_header(json.status, json.status_message)) {
