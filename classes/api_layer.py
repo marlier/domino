@@ -86,9 +86,6 @@ class Api():
 				self.populate(1006, "Offset is not a integer")
 				return
 				
-		#init database connection
-		self.db = Mysql.Database()
-
 	def healthcheck(self):
 		'''
 		This checks the system to see if capable of handling api requests

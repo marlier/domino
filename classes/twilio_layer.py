@@ -47,8 +47,15 @@ def send_sms(user=None, team=None, alert=None, _message="Nothing"):
 	user.lastAlert = alert.id
 	user.save()
 	myauth = auth()
-	for text_segment in split_sms(_message):
-		myauth.sms.messages.create(to=user.phone, from_=team.phone, body=text_segment)
+	limit = 1
+	for i,text_segment in enumerate(split_sms(_message)):
+		if i < limit:
+			myauth.sms.messages.create(to=user.phone, from_=team.phone, body=text_segment)
+		elif i == limit:
+			text_segment = text_segment[:-3] + '...'
+			myauth.sms.messages.create(to=user.phone, from_=team.phone, body=text_segment)
+		else:
+			break
 
 def make_call(user=None, team=None, alert=None):
 	'''
@@ -57,7 +64,7 @@ def make_call(user=None, team=None, alert=None):
 	logging.debug("Calling user: %s" % user.name)
 	user.lastAlert = alert.id
 	user.save()
-	return auth().calls.create(to=user.phone, from_=team.phone, url='''%s:%s/call/alert?init=True&alert_id=%s''' % (conf['server_address'],conf['port'],alert.id))
+	return auth().calls.create(to=user.phone, from_=team.phone, url='''%s:%s/call/%s?init=True''' % (conf['server_address'],conf['port'],alert.id))
 	
 def validate_phone(user):
 	'''

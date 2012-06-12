@@ -19,7 +19,9 @@ def get_teams(teams_raw):
 	'''
 	Get a list of teams by ids or name, which is comma separated
 	'''
-	if teams_raw == None: return ''
+	if teams_raw == None: return []
+	if (teams_raw.startswith("'") and teams_raw.endswith("'")) or (teams_raw.startswith('"') and teams_raw.endswith('"')): 
+		teams_raw = teams_raw[1:-1]
 	teams = []
 	for t in teams_raw.split(","):
 		try:
@@ -113,7 +115,7 @@ class Team:
 		This initializes a team object. If id is given, loads that team. If not, creates a new team object with default values.
 		'''
 		logging.debug("Initializing team: %s" % id)
-		self.db = Mysql.Database()
+
 		if id == 0:
 			self.name = ''
 			self.email = ''
@@ -133,13 +135,7 @@ class Team:
 		logging.debug("Loading team: %s" % id)
 		
 		try:
-			self.db._cursor.execute( '''SELECT * FROM teams WHERE id = %s LIMIT 1''', id)
-			team = self.db._cursor.fetchone()
-			self.__dict__.update(team)
-			if users == True:
-				self.members = User.get_users(self.members)
-			else:
-				del self.members
+			self = Mysql.query('''SELECT * FROM teams WHERE id = %s LIMIT 1''' % (id), "users")	
 		except Exception, e:
 			logging.error(e.__str__())
 			Util.strace()
@@ -157,29 +153,14 @@ class Team:
 		Save the team to the db.
 		'''
 		logging.debug("Saving team: %s" % self.name)
-		try:
-			self.db._cursor.execute('''REPLACE INTO teams (id,name,email,members,oncall_count,phone,catchall) VALUES (%s,%s,%s,%s,%s,%s,%s)''', (self.id,self.name,self.email,User.flatten_users(self.members),self.oncall_count,self.phone,self.catchall))
-			self.db.save()
-			return True
-		except Exception, e:
-			logging.error(e.__str__())
-			Util.strace()
-			return False
+		return Mysql.save('''REPLACE INTO teams (id,name,email,members,oncall_count,phone,catchall) VALUES (%s,%s,%s,%s,%s,%s,%s)''' % (self.id,self.name,self.email,User.flatten_users(self.members),self.oncall_count,self.phone,self.catchall))
 			
 	def delete(self):
 		'''
 		Delete the team form the db.
 		'''
 		logging.debug("Deleting team: %s" % self.name)
-		try:
-			self.db._cursor.execute('''DELETE FROM teams WHERE id=%s''', (self.id))
-			self.db.save()
-			self.db.close()
-			return True
-		except Exception, e:
-			logging.error(e.__str__())
-			Util.strace()
-			return False
+		return Mysql.delete('teams', self.id)
 			
 	def scrub(self):
 		'''

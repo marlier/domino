@@ -57,6 +57,7 @@ def healthcheck():
 		import mysql_layer as Mysql
 		db = Mysql.Database()
 		dbcheck = db.healthcheck()
+		db.close()
 		
 		import email_layer as Email
 		email = Email.Email()

@@ -14,13 +14,13 @@ def all_users():
 	'''
 	return Mysql.query('''SELECT * FROM users''', "users")
 
-def get_users(user_ids, teams=False):
+def get_users(user_ids):
 	'''
 	Get a list of users by ids, which is comma separated
 	'''
 	users = []
 	for t in user_ids.split(","):
-		users.append(User(t, teams))
+		users.append(User(t))
 	return users
 
 def flatten_users(users):
@@ -48,12 +48,12 @@ def get_user_by_phone(phone):
 		return False
 
 class User:
-	def __init__(self, id=0, teams=True):
+	def __init__(self, id=0):
 		'''
 		This initializes a user object. If id is given, loads that user. If not, creates a new user object with default values.
 		'''
 		logging.debug("Initializing user: %s" % id)
-		self.db = Mysql.Database()
+
 		if id == 0:
 			self.name = ''
 			self.phone = ''
@@ -61,27 +61,16 @@ class User:
 			self.lastAlert = 0
 			self.id = id
 		else:
-			self.load_user(id, teams)
+			self.load_user(id)
 			self.id = int(id)
 
-	def load_user(self, id, teams=True):
+	def load_user(self, id):
 		'''
 		load a user with a specific id
 		'''
 		logging.debug("Loading user: %s" % id)
 		try:
-			self.db._cursor.execute( '''SELECT * FROM users WHERE id = %s LIMIT 1''', id)
-			user = self.db._cursor.fetchone()
-			self.__dict__.update(user)
-			if teams == True:
-				#get teams the user is in
-				self.teams = Team.find_user(id)
-			else:
-				try:
-					del self.teams
-				except:
-					pass
-			
+			return Mysql.query('''SELECT * FROM users WHERE id = %s LIMIT 1''' % (id), "users")
 		except Exception, e:
 			logging.error(e.__str__())
 			Util.strace()
@@ -93,14 +82,7 @@ class User:
 		Save the user to the db.
 		'''
 		logging.debug("Saving user: %s" % self.name)
-		try:
-			self.db._cursor.execute('''REPLACE INTO users (id,name,email,phone,lastAlert) VALUES (%s,%s,%s,%s,%s)''', (self.id,self.name,self.email,self.phone,self.lastAlert))
-			self.db.save()
-			return True
-		except Exception, e:
-			logging.error(e.__str__())
-			Util.strace()
-			return False
+		return Mysql.save('''REPLACE INTO users (id,name,email,phone,lastAlert) VALUES (%s,%s,%s,%s,%s)''', (self.id,self.name,self.email,self.phone,self.lastAlert))
 	
 	def scrub(self):
 		'''
@@ -123,15 +105,7 @@ class User:
 		Delete the user form the db.
 		'''
 		logging.debug("Deleting user: %s" % self.name)
-		try:
-			self.db._cursor.execute('''DELETE FROM users WHERE id=%s''', (self.id))
-			self.db.save()
-			self.db.close()
-			return True
-		except Exception, e:
-			logging.error(e.__str__())
-			Util.strace()
-			return False
+		return Mysql.delete('users', self.id)
 			
 	def print_user(self, SMS=False):
 		'''

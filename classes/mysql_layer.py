@@ -24,19 +24,92 @@ def query(q_string,table):
 		if len(temp) == 0: return []
 		objects = []
 		for t in temp:
+			# remove any quotes around strings that the db may have
+			for key in t:
+				if isinstance(t[key], str):
+					if (t[key].startswith("'") and t[key].endswith("'")) or (t[key].startswith('"') and t[key].endswith('"')): 
+						t[key] = t[key][1:-1]
 			if table == "users":
-				objects.append(User.User(t['id']))
+				tmp = User.User()
+				# get user id
+				uid = t['id']
+				
+				# get all teams and their members
+				_db._cursor.execute('''SELECT id, members FROM teams''')
+				teams = _db._cursor.fetchall()
+				
+				#see if any of the teams has this user id.
+				userTeams = []
+				for z in teams:
+					for m in z['members'].split(','):
+						if int(m) == int(uid):
+							y = Team.Team()
+							y.__dict__.update(z)
+							userTeams.append(y)			
+				t['teams'] = userTeams
 			elif table == "alerts":
-				objects.append(Alert.Alert(t['id']))
+				tmp = Alert.Alert()
+				teams = []
+				# convert teams from ids, to object instances
+				for x in t['teams'].split(','):
+					_db._cursor.execute('''SELECT * FROM teams WHERE id = %s''' % (x))
+					y = _db._cursor.fetchone()
+					z = Team.Team()
+					z.__dict__.update(y)
+					teams.append(z)
+				t['teams'] = teams
 			elif table == "teams":
-				objects.append(Team.Team(t['id']))
+				tmp = Team.Team()
+				members = []
+				# convert members from ids, to object instances
+				for x in t['members'].split(','):
+					_db._cursor.execute('''SELECT * FROM users WHERE id = %s''' % (x))
+					y = _db._cursor.fetchone()
+					z = User.User()
+					z.__dict__.update(y)
+					members.append(z)
+				t['members'] = members
+			tmp.__dict__.update(t)
+			objects.append(tmp)
 		_db.close()
 		return objects
 	except Exception, e:
 		logging.error(e.__str__())
 		Util.strace()
 		return False
-	
+
+def save(sqlstr):
+	'''
+	Save the team to the db.
+	'''
+	try:
+		_db = Mysql.Database()
+		_db._cursor.execute('''%s''' % (sqlstr))
+		_db.save()
+		_db.close()
+		return True
+	except Exception, e:
+		logging.error(e.__str__())
+		Util.strace()
+		return False
+
+
+def delete(table, id):
+	'''
+	Deletes a row from a table
+	'''
+	try:
+		_db = Database()
+		_db._cursor.execute( '''DELETE FROM %s WHERE id=%s''' % (table, id))
+		_db.save()
+		_db.close()
+		return True
+	except Exception, e:
+		logging.error(e.__str__())
+		Util.strace()
+		return False
+
+
 class Database:
 	def __init__(self):
 		'''
@@ -49,7 +122,7 @@ class Database:
 		'''
 		Connect to the db.
 		'''
-		#logging.debug("Connecting to db at %s on port %s, as %s" % (conf['mysql_host'], conf['mysql_port'], conf['mysql_username']))
+		logging.debug("Connecting to db at %s on port %s, as %s" % (conf['mysql_host'], conf['mysql_port'], conf['mysql_username']))
 		try:
 			self._connection = MySQLdb.connect(host=conf['mysql_host'], port=conf['mysql_port'], user=conf['mysql_username'], passwd=conf['mysql_passwd'], db=conf['mysql_db'], cursorclass=MySQLdb.cursors.DictCursor)
 			self._cursor = self._connection.cursor()

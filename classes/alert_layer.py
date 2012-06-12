@@ -70,6 +70,7 @@ def graph_data(amount=7, units="HOUR", terms = None):
 	#print ('''select COUNT(id) as count,createDate from alerts_history WHERE %s createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s %s) AND DATE_SUB(CURDATE(),INTERVAL -1 %s) group by %s(createDate);''' % (terms_query, amount, units, units, units))
 	_db._cursor.execute( '''select COUNT(id) as count,createDate from alerts_history WHERE %s createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s %s) AND DATE_SUB(CURDATE(),INTERVAL -1 %s) group by %s(createDate);''' % (terms_query, amount, units, units, units))
 	raw_alerts = _db._cursor.fetchall()
+	_db.close()
 	d = []
 	alerts = []
 	# convert to dictionary
@@ -174,7 +175,7 @@ class Alert():
 		If id is given, load alert with that id. Otherwise, create a new alert with default attributes.
 		'''
 		logging.debug("Initializing alert: %s" % id)
-		self.db = Mysql.Database()
+
 		if id == 0:
 			self.message = ''
 			self.host = ''
@@ -201,15 +202,7 @@ class Alert():
 		'''
 		logging.debug("Loading alert: %s" % id)
 		try:
-			self.db._cursor.execute( '''SELECT * FROM alerts_history WHERE id = %s LIMIT 1''', id)
-			alert = self.db._cursor.fetchone()
-			# remove strings that are surrounded by quotes
-			for key in alert:
-				if isinstance(alert[key], str):
-					if (alert[key].startswith("'") and alert[key].endswith("'")) or (alert[key].startswith('"') and alert[key].endswith('"')): 
-						alert[key] = alert[key][1:-1]
-			self.__dict__.update(alert)
-			self.teams = Team.get_teams(self.teams)
+			self = Mysql.query('''SELECT * FROM alerts_history WHERE id = %s LIMIT ''' % (id), "alerts")
 		except Exception, e:
 			logging.error(e.__str__())
 			Util.strace()
@@ -221,15 +214,15 @@ class Alert():
 		'''
 		logging.debug("Saving alert: %s" % self.id)
 		try:
-			#print '''REPLACE INTO alerts (id,message,teams,ack,ackby,acktime,lastPageSent,lastEmailSent,tries,host,service,environment,colo,status,position,tags) VALUES (%s,"%s","%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s",%s,%s,"%s")''' % (self.id, self.message, Team.flatten_teams(self.teams), self.ack, self.ackby, self.acktime, self.lastPageSent, self.lastEmailSent, self.tries, self.host, self.service, self.environment, self.colo, self.status, self.position, self.tags)
-			self.db._cursor.execute('''REPLACE INTO alerts (id,message,teams,ack,ackby,acktime,lastPageSent,lastEmailSent,tries,host,service,environment,colo,status,position,tags) VALUES (%s,"%s","%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s",%s,%s,"%s")''', (self.id, self.message, Team.flatten_teams(self.teams), self.ack, self.ackby, self.acktime, self.lastPageSent, self.lastEmailSent, self.tries, self.host, self.service, self.environment, self.colo, self.status, self.position, self.tags))
+			_db = Mysql.Database()
+			_db._cursor.execute('''REPLACE INTO alerts (id,message,teams,ack,ackby,acktime,lastPageSent,lastEmailSent,tries,host,service,environment,colo,status,position,tags) VALUES (%s,"%s","%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s",%s,%s,"%s")''', (self.id, self.message, Team.flatten_teams(self.teams), self.ack, self.ackby, self.acktime, self.lastPageSent, self.lastEmailSent, self.tries, self.host, self.service, self.environment, self.colo, self.status, self.position, self.tags))
 			if self.id == 0:
-				self.db._cursor.execute('''select id from alerts order by id desc limit 1''')
-				tmp = self.db._cursor.fetchone()
-				print tmp
+				_db._cursor.execute('''select id from alerts order by id desc limit 1''')
+				tmp = _db._cursor.fetchone()
 				self.id = tmp['id']
-			self.db._cursor.execute('''REPLACE INTO alerts_history (id,message,teams,ack,ackby,acktime,lastPageSent,lastEmailSent,tries,host,service,environment,colo,status,position,tags) VALUES (%s,"%s","%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s",%s,%s,"%s")''', (self.id,self.message,Team.flatten_teams(self.teams),self.ack,self.ackby,self.acktime, self.lastPageSent, self.lastEmailSent, self.tries,self.host,self.service, self.environment, self.colo, self.status, self.position, self.tags))
-			self.db.save()
+			_db._cursor.execute('''REPLACE INTO alerts_history (id,message,teams,ack,ackby,acktime,lastPageSent,lastEmailSent,tries,host,service,environment,colo,status,position,tags) VALUES (%s,"%s","%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s",%s,%s,"%s")''', (self.id,self.message,Team.flatten_teams(self.teams),self.ack,self.ackby,self.acktime, self.lastPageSent, self.lastEmailSent, self.tries,self.host,self.service, self.environment, self.colo, self.status, self.position, self.tags))
+			_db.save()
+			_db.close()
 			return True
 		except Exception, e:
 			logging.error(e.__str__())
@@ -352,15 +345,7 @@ class Alert():
 		Delete the alert form the db.
 		'''
 		logging.debug("Deleting alert: %s" % self.id)
-		try:
-			self.db._cursor.execute('''DELETE FROM alerts WHERE id=%s''', (self.id))
-			self.db.save()
-			self.db.close()
-			return True
-		except Exception, e:
-			logging.error(e.__str__())
-			Util.strace()
-			return False
+		return Mysql.delete('alerts', self.id)
 			
 	def scrub(self):
 		'''
@@ -379,7 +364,8 @@ class Alert():
 		if hasattr(self, 'teams'):
 			clean_teams = []
 			for t in self.teams:
-				clean_teams.append(t.scrub())
+				if hasattr(t, "scrub"):
+					clean_teams.append(t.scrub())
 			self.teams = clean_teams
 		return self.__dict__
 		
