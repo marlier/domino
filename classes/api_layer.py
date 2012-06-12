@@ -114,12 +114,12 @@ class Api():
 			if self.id==0 or self.id == None:
 				objects = User.all_users()
 			else:
-				objects = [User.User(id)]
+				objects = [User.User(self.id)]
 		elif self.objType == "Team":
 			if self.id==0 or self.id == None:
 				objects = Team.all_teams()
 			else:
-				objects = [Team.Team(id)]
+				objects = [Team.Team(self.id)]
 		elif self.objType == "Analytics":
 			if self.name == None:
 				#return list of analytics names that are supported

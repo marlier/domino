@@ -202,7 +202,7 @@ class Alert():
 		'''
 		logging.debug("Loading alert: %s" % id)
 		try:
-			self = Mysql.query('''SELECT * FROM alerts_history WHERE id = %s LIMIT ''' % (id), "alerts")
+			self.__dict__.update(Mysql.query('''SELECT * FROM alerts_history WHERE id = %s LIMIT ''' % (id), "alerts")[0].__dict__)
 		except Exception, e:
 			logging.error(e.__str__())
 			Util.strace()

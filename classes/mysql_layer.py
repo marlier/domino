@@ -35,7 +35,7 @@ def query(q_string,table):
 				uid = t['id']
 				
 				# get all teams and their members
-				_db._cursor.execute('''SELECT id, members FROM teams''')
+				_db._cursor.execute('''SELECT * FROM teams''')
 				teams = _db._cursor.fetchall()
 				
 				#see if any of the teams has this user id.

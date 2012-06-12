@@ -68,7 +68,6 @@ def process_request(objType, id=0):
 	'''
 	Handles all incoming requests.
 	'''
-	print request.__dict__
 	if request.headers['Content-Type'] == 'application/json':
 		data = request.json
 	else:
