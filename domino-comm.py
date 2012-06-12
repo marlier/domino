@@ -32,31 +32,33 @@ def healthcheck():
 	'''
 	return Util.healthcheck()
 
-@app.route('/sms/', methods=['POST'])
+@app.route('/sms', methods=['GET'])
 def sms():
 	'''
 	This class handles SMS messages
 	'''
 	rawdata = request.args
-	data = {}
+	d = {}
 	# converting from multidict to dict
 	for key, value in rawdata.items():
-		data[key] = value	
+		d[key] = value	
 	logging.info("Receiving SMS message\n%s" % (d))
 	r = Twilio.twiml.Response()
-	user = User.get_user_by_phone(d.From)
-	team = Team.get_team_by_phone(d.To)[0]
+	user = User.get_user_by_phone(d['From'])
+	team = Team.get_team_by_phone(d['To'])[0]
 	# make sure person sending the text is an authorized user of Domino
 	if user == False:
-		logging.error("Unauthorized access attempt via SMS by %s\n%s" % (d.From, d))
+		logging.error("Unauthorized access attempt via SMS by %s\n%s" % (d['From'], d))
 		r.sms("You are not an authorized user")
 	else:
 		# split the output into 160 character segments
-		for text_segment in Twilio.split_sms(domino.run("%s -m -t %s -f %s" %(d.Body,team.name,d.From))):
+		for text_segment in Twilio.split_sms(domino.run("%s -m -t %s -f %s" %(d['Body'],team.name,d['From']))):
 			r.sms(text_segment)
-	return r
+	#resp = Response(r, status=200, mimetype='text/xml')
+	#resp.headers.add('Content-Type', 'text/xml')
+	return str(r)
 
-@app.route('/call/', methods=['POST'])
+@app.route('/call', methods=['GET'])
 def call():
 	'''
 	This class handles phone calls
@@ -79,35 +81,35 @@ def call():
 Press 1 to hear the message.
 Press 2 to acknowledge this alert.
 '''
-		receiver = User.get_user_by_phone(d.To)
-		alert = Alert.Alert(d.alert_id)
+		receiver = User.get_user_by_phone(d['To'])
+		alert = Alert.Alert(d['alert_id'])
 		# check if this is the first interaction for this call session
-		if d.init.lower() == "true":
+		if d['init'].lower() == "true":
 			with r.gather(action="%s:%s/call/alert?alert_id=%s&init=false" % (conf['server_address'],conf['port'],alert.id), timeout=conf['call_timeout'], method="POST", numDigits="1") as g:
 				g.say('''Hello %s, a message from Domino. An alert has been issued with subject "%s". %s.''' % (receiver.name, alert.subject, digitOpts))
 			r.say(timeout_msg)
 		else:
-			if int(d.Digits) == 1:
+			if int(d['Digits']) == 1:
 				with r.gather(action="%s:%s/call/alert?alert_id=%s&init=false" % (conf['server_address'],conf['port'],alert.id), timeout="30", method="POST", numDigits="1") as g:
 					g.say('''%s. %s''' % (alert.message, digitOpts))
 				r.say(timeout_msg)
-			elif int(d.Digits) == 2:
+			elif int(d['Digits']) == 2:
 				if alert.ack_alert(receiver):
 					r.say("The alert has been acknowledged. Thank you and goodbye.")
 					r.redirect(url="%s:%s/call/alert?alert_id=%s&init=false" % (conf['server_address'],conf['port'],alert.id))
 				else:
 					r.say("Sorry, failed to acknowledge the alert. Please try it via SMS")
 					r.redirect(url="%s:%s/call/alert?alert_id=%s&init=false" % (conf['server_address'],conf['port'],alert.id))
-			elif d.Digits == 0:
+			elif d['Digits'] == 0:
 				with r.gather(action="%s:%s/call/alert?alert_id=%s&init=false" % (conf['server_address'],conf['port'],alert.id), timeout="30", method="POST", numDigits="1") as g:
 					g.say('''%s''' % (digitOpts))
 				r.say(timeout_msg)
 			else:
 				r.say("Sorry, didn't understand the digits you entered. Goodbye")
 	else:
-		requester = User.get_user_by_phone(d.From)
+		requester = User.get_user_by_phone(d['From'])
 		# get the team that is associate with this phone number the user called
-		team = Team.get_team_by_phone(d.To)[0]
+		team = Team.get_team_by_phone(d['To'])[0]
 		oncall_users = team.on_call()
 		# if caller is not a oncall user or they are, but calling a different team then they are in
 		if requester == False or Team.check_user(requester, team) == False:
@@ -124,8 +126,8 @@ Press 2 to acknowledge this alert.
 		else:
 			# the caller is calling the same team phone number as the team that they are on
 			# check if d.Digits is the default value (meaning, either the caller hasn't pushed a button and this is the beginning of the call, or they hit 0 to start over
-			if int(d.Digits) == 0:
-				if d.init.lower() == "true":
+			if int(d['Digits']) == 0:
+				if d['init'].lower() == "true":
 					if Team.check_oncall_user(requester, team) == True:
 						# figure out where in line the user is on call
 						for i,u in enumerate(team.members):
@@ -143,15 +145,15 @@ Press 2 to acknowledge this alert.
 					with r.gather(action="%s:%s/call/event?init=false" % (conf['server_address'],conf['port']), timeout=conf['call_timeout'], method="POST", numDigits="1") as g:
 						g.say('''Press 1 if you want to hear the present status of alerts. Press 2 to acknowledge the last alert sent to you. Press 3 to conference call everyone on call into this call.''')
 				r.say(timeout_msg)
-			elif int(d.Digits) == 1:
+			elif int(d['Digits']) == 1:
 				# getting the status of alerts
 				r.say(domino.run("alert status -f " + requester.phone))
 				r.redirect(url="%s:%s/call/event?init=false" % (conf['server_address'],conf['port']))
-			elif int(d.Digits) == 2:
+			elif int(d['Digits']) == 2:
 				# acking the last alert sent to the user calling
 				r.say(domino.run("alert ack -f " + requester.phone))
 				r.redirect(url="%s:%s/call/event?init=false" % (conf['server_address'],conf['port']))
-			elif int(d.Digits) == 3:
+			elif int(d['Digits']) == 3:
 				# calling the other users on call
 				print len(oncall_users)
 				print Team.check_oncall_user(requester, team)
@@ -167,7 +169,7 @@ Press 2 to acknowledge this alert.
 						r.say("Sorry, no one is currently on call to forward you to.")
 			else:
 				r.say("Sorry, number you pressed is not valid. Please try again.")
-	return r
+	return str(r)
 
 def check_alerts():
 	'''
@@ -187,4 +189,4 @@ def check_alerts():
 if __name__ == "__main__":
 	p = Process(target=check_alerts)
 	p.start()
-	app.run(port=conf['api_port'], host=conf['api_listen_ip'], debug=conf['server_debug'])
+	app.run(port=conf['port'], host=conf['listen_ip'], debug=conf['server_debug'])
