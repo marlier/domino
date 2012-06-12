@@ -54,14 +54,12 @@ def sms():
 		# split the output into 160 character segments
 		for text_segment in Twilio.split_sms(domino.run("%s -m -t %s -f %s" %(d['Body'],team.name,d['From']))):
 			r.sms(text_segment)
-	#resp = Response(r, status=200, mimetype='text/xml')
-	#resp.headers.add('Content-Type', 'text/xml')
 	return str(r)
 
-@app.route('/call', methods=['GET'])
-def call():
+@app.route('/call/<int:alert_id>', methods=['GET'])
+def outboundcall():
 	'''
-	This class handles phone calls
+	This class handles phone calls that were initiated by Domino to notify someone of an alert. (outbound phone calls)
 	'''	
 	rawdata = request.args
 	d = {}
@@ -75,38 +73,55 @@ def call():
 	# the message to say when a timeout occurs
 	timeout_msg = "Sorry, didn't get any input from you. Goodbye."
 	# check if this call was initialized by sending an alert
-	if name == "alert":
-		# the digit options to press
-		digitOpts = '''
+	# the digit options to press
+	digitOpts = '''
 Press 1 to hear the message.
 Press 2 to acknowledge this alert.
 '''
-		receiver = User.get_user_by_phone(d['To'])
-		alert = Alert.Alert(d['alert_id'])
-		# check if this is the first interaction for this call session
-		if d['init'].lower() == "true":
-			with r.gather(action="%s:%s/call/alert?alert_id=%s&init=false" % (conf['server_address'],conf['port'],alert.id), timeout=conf['call_timeout'], method="POST", numDigits="1") as g:
-				g.say('''Hello %s, a message from Domino. An alert has been issued with subject "%s". %s.''' % (receiver.name, alert.subject, digitOpts))
+	receiver = User.get_user_by_phone(d['To'])
+	alert = Alert.Alert(alert_id)
+	# check if this is the first interaction for this call session
+	if d['init'].lower() == "true":
+		with r.gather(action="%s:%s/call/%s?init=false" % (conf['server_address'],conf['port'],alert.id), timeout=conf['call_timeout'], method="POST", numDigits="1") as g:
+			g.say('''Hello %s, a message from Domino. An alert has been issued with subject "%s". %s.''' % (receiver.name, alert.subject, digitOpts))
+		r.say(timeout_msg)
+	else:
+		if int(d['Digits']) == 1:
+			with r.gather(action="%s:%s/call/%s?init=false" % (conf['server_address'],conf['port'],alert.id), timeout="30", method="POST", numDigits="1") as g:
+				g.say('''%s. %s''' % (alert.message, digitOpts))
+			r.say(timeout_msg)
+		elif int(d['Digits']) == 2:
+			if alert.ack_alert(receiver):
+				r.say("The alert has been acknowledged. Thank you and goodbye.")
+				r.redirect(url="%s:%s/call/%s?init=false" % (conf['server_address'],conf['port'],alert.id))
+			else:
+				r.say("Sorry, failed to acknowledge the alert. Please try it via SMS")
+				r.redirect(url="%s:%s/call/%s?init=false" % (conf['server_address'],conf['port'],alert.id))
+		elif d['Digits'] == 0:
+			with r.gather(action="%s:%s/call/%s?init=false" % (conf['server_address'],conf['port'],alert.id), timeout="30", method="POST", numDigits="1") as g:
+				g.say('''%s''' % (digitOpts))
 			r.say(timeout_msg)
 		else:
-			if int(d['Digits']) == 1:
-				with r.gather(action="%s:%s/call/alert?alert_id=%s&init=false" % (conf['server_address'],conf['port'],alert.id), timeout="30", method="POST", numDigits="1") as g:
-					g.say('''%s. %s''' % (alert.message, digitOpts))
-				r.say(timeout_msg)
-			elif int(d['Digits']) == 2:
-				if alert.ack_alert(receiver):
-					r.say("The alert has been acknowledged. Thank you and goodbye.")
-					r.redirect(url="%s:%s/call/alert?alert_id=%s&init=false" % (conf['server_address'],conf['port'],alert.id))
-				else:
-					r.say("Sorry, failed to acknowledge the alert. Please try it via SMS")
-					r.redirect(url="%s:%s/call/alert?alert_id=%s&init=false" % (conf['server_address'],conf['port'],alert.id))
-			elif d['Digits'] == 0:
-				with r.gather(action="%s:%s/call/alert?alert_id=%s&init=false" % (conf['server_address'],conf['port'],alert.id), timeout="30", method="POST", numDigits="1") as g:
-					g.say('''%s''' % (digitOpts))
-				r.say(timeout_msg)
-			else:
-				r.say("Sorry, didn't understand the digits you entered. Goodbye")
-	else:
+			r.say("Sorry, didn't understand the digits you entered. Goodbye")
+	return str(r)
+
+@app.route('/call', methods=['GET'])
+def inboundcall():
+	'''
+	This class handles phone calls initiated by a person (inbound phone calls)
+	'''	
+	rawdata = request.args
+	d = {}
+	# converting from multidict to dict
+	for key, value in rawdata.items():
+		d[key] = value
+	if "init" not in d: d['init'] = "true"
+	if "Digits" not in d: d['Digits'] = 0
+	logging.info("Receiving phone call\n%s" % (d))
+	r = Twilio.twiml.Response()
+	# the message to say when a timeout occurs
+	timeout_msg = "Sorry, didn't get any input from you. Goodbye."
+	# check if this call was initialized by sending an alert
 		requester = User.get_user_by_phone(d['From'])
 		# get the team that is associate with this phone number the user called
 		team = Team.get_team_by_phone(d['To'])[0]
@@ -139,20 +154,20 @@ Press 2 to acknowledge this alert.
 							oncall_status = "Currenty, %s is on call" % (oncall_users[0].name)
 						else:
 							oncall_status = "Currenty, no one is on call"
-					with r.gather(action="%s:%s/call/event?init=false" % (conf['server_address'],conf['port']), timeout=conf['call_timeout'], method="POST", numDigits="1") as g:
+					with r.gather(action="%s:%s/call?init=false" % (conf['server_address'],conf['port']), timeout=conf['call_timeout'], method="POST", numDigits="1") as g:
 						g.say('''Hello %s. %s. Press 1 if you want to hear the present status of alerts. Press 2 to acknowledge the last alert sent to you. Press 3 to conference call everyone on call into this call.''' % (requester.name, oncall_status))
 				else:
-					with r.gather(action="%s:%s/call/event?init=false" % (conf['server_address'],conf['port']), timeout=conf['call_timeout'], method="POST", numDigits="1") as g:
+					with r.gather(action="%s:%s/call?init=false" % (conf['server_address'],conf['port']), timeout=conf['call_timeout'], method="POST", numDigits="1") as g:
 						g.say('''Press 1 if you want to hear the present status of alerts. Press 2 to acknowledge the last alert sent to you. Press 3 to conference call everyone on call into this call.''')
 				r.say(timeout_msg)
 			elif int(d['Digits']) == 1:
 				# getting the status of alerts
 				r.say(domino.run("alert status -f " + requester.phone))
-				r.redirect(url="%s:%s/call/event?init=false" % (conf['server_address'],conf['port']))
+				r.redirect(url="%s:%s/call?init=false" % (conf['server_address'],conf['port']))
 			elif int(d['Digits']) == 2:
 				# acking the last alert sent to the user calling
 				r.say(domino.run("alert ack -f " + requester.phone))
-				r.redirect(url="%s:%s/call/event?init=false" % (conf['server_address'],conf['port']))
+				r.redirect(url="%s:%s/call?init=false" % (conf['server_address'],conf['port']))
 			elif int(d['Digits']) == 3:
 				# calling the other users on call
 				print len(oncall_users)
