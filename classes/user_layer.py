@@ -82,7 +82,7 @@ class User:
 		Save the user to the db.
 		'''
 		logging.debug("Saving user: %s" % self.name)
-		return Mysql.save('''REPLACE INTO users (id,name,email,phone,lastAlert) VALUES (%s,%s,%s,%s,%s)''', (self.id,self.name,self.email,self.phone,self.lastAlert))
+		return Mysql.save('''REPLACE INTO users (id,name,email,phone,lastAlert) VALUES (%s,'%s','%s','%s','%s')''' % (self.id,self.name,self.email,self.phone,self.lastAlert))
 	
 	def scrub(self):
 		'''
@@ -113,7 +113,7 @@ class User:
 		'''
 
 		if SMS == True:
-			output = "name:%s|phone: %s \n" % (self.name, self.phone)
+			output = "name:%s\nphone: %s \n" % (self.name, self.phone)
 		else:
 			output = "id:%i\nname:%s\nphone:%s\nemail:%s\n" % (self.id, self.name, self.phone, self.email)
 		logging.debug("Printing user: %s" % output)

@@ -63,7 +63,7 @@ def get_team_by_phone(phone):
 	return Mysql.query('''SELECT * FROM teams WHERE phone = "%s"''' % (phone), "teams")	
 
 
-def find_user(id, users=False):
+def find_user(id):
 	'''
 	This function looks for teams with a specific user in.
 	'''
@@ -71,11 +71,6 @@ def find_user(id, users=False):
 	for t in all_teams():
 		for u in t.members:
 			if int(id) == int(u.id):
-				if users == False:
-					try:
-						del t.members
-					except:
-						pass
 				teams.append(t)
 	return teams
 
@@ -153,7 +148,7 @@ class Team:
 		Save the team to the db.
 		'''
 		logging.debug("Saving team: %s" % self.name)
-		return Mysql.save('''REPLACE INTO teams (id,name,email,members,oncall_count,phone,catchall) VALUES (%s,%s,%s,%s,%s,%s,%s)''' % (self.id,self.name,self.email,User.flatten_users(self.members),self.oncall_count,self.phone,self.catchall))
+		return Mysql.save('''REPLACE INTO teams (id,name,email,members,oncall_count,phone,catchall) VALUES (%s,'%s','%s','%s',%s,'%s',%s)''' % (self.id,self.name,self.email,User.flatten_users(self.members),self.oncall_count,self.phone,self.catchall))
 			
 	def delete(self):
 		'''

@@ -144,7 +144,8 @@ class Api():
 				objects = objects[::-1]
 		# take into account the offset and limit requested
 		objects = objects[self.offset:]
-		objects = objects[:self.limit]
+		if self.limit > 0:
+			objects = objects[:self.limit]
 		dict_objs = []
 		for x in objects:
 			if hasattr(x, "scrub"):

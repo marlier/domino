@@ -37,6 +37,7 @@ def query(q_string,table):
 				# get all teams and their members
 				_db._cursor.execute('''SELECT * FROM teams''')
 				teams = _db._cursor.fetchall()
+				if teams == None: continue
 				
 				#see if any of the teams has this user id.
 				userTeams = []
@@ -45,6 +46,7 @@ def query(q_string,table):
 						if int(m) == int(uid):
 							y = Team.Team()
 							y.__dict__.update(z)
+							del y.members
 							userTeams.append(y)			
 				t['teams'] = userTeams
 			elif table == "alerts":
@@ -54,8 +56,10 @@ def query(q_string,table):
 				for x in t['teams'].split(','):
 					_db._cursor.execute('''SELECT * FROM teams WHERE id = %s''' % (x))
 					y = _db._cursor.fetchone()
+					if y == None: continue
 					z = Team.Team()
 					z.__dict__.update(y)
+					del z.members
 					teams.append(z)
 				t['teams'] = teams
 			elif table == "teams":
@@ -65,6 +69,7 @@ def query(q_string,table):
 				for x in t['members'].split(','):
 					_db._cursor.execute('''SELECT * FROM users WHERE id = %s''' % (x))
 					y = _db._cursor.fetchone()
+					if y == None: continue
 					z = User.User()
 					z.__dict__.update(y)
 					members.append(z)
@@ -83,7 +88,8 @@ def save(sqlstr):
 	Save the team to the db.
 	'''
 	try:
-		_db = Mysql.Database()
+		_db = Database()
+		print sqlstr
 		_db._cursor.execute('''%s''' % (sqlstr))
 		_db.save()
 		_db.close()
