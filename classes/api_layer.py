@@ -173,8 +173,12 @@ class Api():
 				# check to see if this alert is a new different than the one before it
 				lastAlert = Alert.get_current_alert(self.environment, self.colo, self.host, self.service)
 				if len(lastAlert) > 0: lastAlert = lastAlert[0]
-				if len(lastAlert) == 0 or (lastAlert.message == self.message and lastAlert.tags == self.tags and lastAlert.teams == self.teams and lastAlert.host == self.host and lastAlert.service == self.service and lastAlert.colo == self.colo and lastAlert.environment == self.environment): 
-					self.populate(200,"OK",json.dumps("Repeat alert"))
+				if len(lastAlert) == 0 or (lastAlert.host == self.host and lastAlert.service == self.service and lastAlert.colo == self.colo and lastAlert.environment == self.environment and lastAlert.status == self.status):
+					if lastAlert.message == self.message:
+						self.populate(200,"OK",json.dumps("Repeat alert"))
+					else:
+						lastAlert.message = self.message
+						lastAlert.save()
 				else:
 					logging.info("Recieved new alert")
 					# save new alert to the db
