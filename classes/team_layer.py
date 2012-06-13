@@ -141,7 +141,11 @@ class Team:
 		'''
 		Get a list of all users that are currently on call for a specific team.
 		'''
-		return self.members[:self.oncall_count]
+		print self.__dict__
+		if hasattr(self, 'members'):
+			return self.members[:self.oncall_count]
+		else:
+			return []
 	
 	def save(self):
 		'''

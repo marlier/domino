@@ -18,7 +18,6 @@ def all_alert_history(since=None):
 	'''
 	Get all alerts.
 	'''
-	print since
 	if since == None:
 		return Mysql.query('''SELECT * FROM alerts_history ORDER BY createDate DESC''', "alerts")
 	else:
@@ -215,12 +214,12 @@ class Alert():
 		logging.debug("Saving alert: %s" % self.id)
 		try:
 			_db = Mysql.Database()
-			_db._cursor.execute('''REPLACE INTO alerts (id,message,teams,ack,ackby,acktime,lastPageSent,lastEmailSent,tries,host,service,environment,colo,status,position,tags,remote_addr) VALUES (%s,"%s","%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s",%s,%s,"%s","s")''', (self.id, self.message, Team.flatten_teams(self.teams), self.ack, self.ackby, self.acktime, self.lastPageSent, self.lastEmailSent, self.tries, self.host, self.service, self.environment, self.colo, self.status, self.position, self.tags, self.remote_ip_address))
+			_db._cursor.execute('''REPLACE INTO alerts (id,message,teams,ack,ackby,acktime,lastPageSent,lastEmailSent,tries,host,service,environment,colo,status,position,tags,remote_ip_address) VALUES (%s,"%s","%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s",%s,%s,"%s","%s")''', (self.id, self.message, Team.flatten_teams(self.teams), self.ack, self.ackby, self.acktime, self.lastPageSent, self.lastEmailSent, self.tries, self.host, self.service, self.environment, self.colo, self.status, self.position, self.tags, self.remote_ip_address))
 			if self.id == 0:
 				_db._cursor.execute('''select id from alerts order by id desc limit 1''')
 				tmp = _db._cursor.fetchone()
 				self.id = tmp['id']
-			_db._cursor.execute('''REPLACE INTO alerts_history (id,message,teams,ack,ackby,acktime,lastPageSent,lastEmailSent,tries,host,service,environment,colo,status,position,tags,remote_addr) VALUES (%s,"%s","%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s",%s,%s,"%s","s")''', (self.id,self.message,Team.flatten_teams(self.teams),self.ack,self.ackby,self.acktime, self.lastPageSent, self.lastEmailSent, self.tries,self.host,self.service, self.environment, self.colo, self.status, self.position, self.tags, self.remote_ip_address))
+			_db._cursor.execute('''REPLACE INTO alerts_history (id,message,teams,ack,ackby,acktime,lastPageSent,lastEmailSent,tries,host,service,environment,colo,status,position,tags,remote_ip_address) VALUES (%s,"%s","%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s",%s,%s,"%s","%s")''', (self.id,self.message,Team.flatten_teams(self.teams),self.ack,self.ackby,self.acktime, self.lastPageSent, self.lastEmailSent, self.tries,self.host,self.service, self.environment, self.colo, self.status, self.position, self.tags, self.remote_ip_address))
 			_db.save()
 			_db.close()
 			return True
@@ -255,10 +254,20 @@ class Alert():
 			self.tries += 1
 			self.lastPageSent = datetime.datetime.now()
 			self.save()
-			if len(self.teams) == 0: self.teams = Team.get_default_teams()
+			if len(self.teams) == 0:
+				self.teams = Team.get_default_teams()
+			else:
+				teams = []
+				for t in self.teams:
+					if hasattr(t, 'members'):
+						teams.append(t)
+					else:
+						teams.append(Team.Team(t.id))
+				self.teams = teams
 			if len(self.teams) == 0:
 				logging.error("Failed to find any 'catchall' teams. This alert (%i) will not be sent" % (self.id))
 				return False
+			
 			for team in self.teams:
 				if self.position == 2 and len(team.on_call()) > 0:
 					# send page
@@ -297,7 +306,16 @@ class Alert():
 		try:
 			self.lastEmailSent = datetime.datetime.now()
 			self.save()
-			if len(self.teams) == 0: self.teams = Team.get_default_teams()
+			if len(self.teams) == 0:
+				self.teams = Team.get_default_teams()
+			else:
+				teams = []
+				for t in self.teams:
+					if hasattr(t, 'members'):
+						teams.append(t)
+					else:
+						teams.append(Team.Team(t.id))
+				self.teams = teams
 			if len(self.teams) == 0:
 				logging.error("Failed to find any 'catchall' teams. This alert (%i) will not be sent" % (self.id))
 				return False

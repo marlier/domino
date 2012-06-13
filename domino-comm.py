@@ -122,68 +122,68 @@ def inboundcall():
 	# the message to say when a timeout occurs
 	timeout_msg = "Sorry, didn't get any input from you. Goodbye."
 	# check if this call was initialized by sending an alert
-		requester = User.get_user_by_phone(d['From'])
-		# get the team that is associate with this phone number the user called
-		team = Team.get_team_by_phone(d['To'])[0]
-		oncall_users = team.on_call()
-		# if caller is not a oncall user or they are, but calling a different team then they are in
-		if requester == False or Team.check_user(requester, team) == False:
-			if team == '':
-				r.say("Sorry, The phone number you called is not associated with any team. Please contact you system administrator for help.")
-			else:
-				# get the first user on call and forward the call to them
-				if len(oncall_users) > 0:
-					for user in oncall_users:
-						r.say("Calling %s." % user.name)
-						r.dial(number=user.phone)
-				else:
-					r.say("Sorry, currently there is no one on call for %s. Please try again later." % team)
+	requester = User.get_user_by_phone(d['From'])
+	# get the team that is associate with this phone number the user called
+	team = Team.get_team_by_phone(d['To'])[0]
+	oncall_users = team.on_call()
+	# if caller is not a oncall user or they are, but calling a different team then they are in
+	if requester == False or Team.check_user(requester, team) == False:
+		if team == '':
+			r.say("Sorry, The phone number you called is not associated with any team. Please contact you system administrator for help.")
 		else:
-			# the caller is calling the same team phone number as the team that they are on
-			# check if d.Digits is the default value (meaning, either the caller hasn't pushed a button and this is the beginning of the call, or they hit 0 to start over
-			if int(d['Digits']) == 0:
-				if d['init'].lower() == "true":
-					if Team.check_oncall_user(requester, team) == True:
-						# figure out where in line the user is on call
-						for i,u in enumerate(team.members):
-							if requester.id == u.id:
-								oncall_status = "You are currently on call in spot %s" % (i + 1)
-								break
-					else:
-						if len(oncall_users) > 0:
-							oncall_status = "Currenty, %s is on call" % (oncall_users[0].name)
-						else:
-							oncall_status = "Currenty, no one is on call"
-					with r.gather(action="%s:%s/call?init=false" % (conf['server_address'],conf['port']), timeout=conf['call_timeout'], method="POST", numDigits="1") as g:
-						g.say('''Hello %s. %s. Press 1 if you want to hear the present status of alerts. Press 2 to acknowledge the last alert sent to you. Press 3 to conference call everyone on call into this call.''' % (requester.name, oncall_status))
-				else:
-					with r.gather(action="%s:%s/call?init=false" % (conf['server_address'],conf['port']), timeout=conf['call_timeout'], method="POST", numDigits="1") as g:
-						g.say('''Press 1 if you want to hear the present status of alerts. Press 2 to acknowledge the last alert sent to you. Press 3 to conference call everyone on call into this call.''')
-				r.say(timeout_msg)
-			elif int(d['Digits']) == 1:
-				# getting the status of alerts
-				r.say(domino.run("alert status -f " + requester.phone))
-				r.redirect(url="%s:%s/call?init=false" % (conf['server_address'],conf['port']))
-			elif int(d['Digits']) == 2:
-				# acking the last alert sent to the user calling
-				r.say(domino.run("alert ack -f " + requester.phone))
-				r.redirect(url="%s:%s/call?init=false" % (conf['server_address'],conf['port']))
-			elif int(d['Digits']) == 3:
-				# calling the other users on call
-				print len(oncall_users)
-				print Team.check_oncall_user(requester, team)
-				if len(oncall_users) == 1 and Team.check_oncall_user(requester, team) == True:
-					r.say("You're the only person on call. I have no one to forward you to.")
+			# get the first user on call and forward the call to them
+			if len(oncall_users) > 0:
+				for user in oncall_users:
+					r.say("Calling %s." % user.name)
+					r.dial(number=user.phone)
+			else:
+				r.say("Sorry, currently there is no one on call for %s. Please try again later." % team)
+	else:
+		# the caller is calling the same team phone number as the team that they are on
+		# check if d.Digits is the default value (meaning, either the caller hasn't pushed a button and this is the beginning of the call, or they hit 0 to start over
+		if int(d['Digits']) == 0:
+			if d['init'].lower() == "true":
+				if Team.check_oncall_user(requester, team) == True:
+					# figure out where in line the user is on call
+					for i,u in enumerate(team.members):
+						if requester.id == u.id:
+							oncall_status = "You are currently on call in spot %s" % (i + 1)
+							break
 				else:
 					if len(oncall_users) > 0:
-						for user in oncall_users:
-							if user.id != requester.id:
-								r.say("Calling %s." % user.name)
-								r.dial(number=user.phone)
-					else:	
-						r.say("Sorry, no one is currently on call to forward you to.")
+						oncall_status = "Currenty, %s is on call" % (oncall_users[0].name)
+					else:
+						oncall_status = "Currenty, no one is on call"
+				with r.gather(action="%s:%s/call?init=false" % (conf['server_address'],conf['port']), timeout=conf['call_timeout'], method="POST", numDigits="1") as g:
+					g.say('''Hello %s. %s. Press 1 if you want to hear the present status of alerts. Press 2 to acknowledge the last alert sent to you. Press 3 to conference call everyone on call into this call.''' % (requester.name, oncall_status))
 			else:
-				r.say("Sorry, number you pressed is not valid. Please try again.")
+				with r.gather(action="%s:%s/call?init=false" % (conf['server_address'],conf['port']), timeout=conf['call_timeout'], method="POST", numDigits="1") as g:
+					g.say('''Press 1 if you want to hear the present status of alerts. Press 2 to acknowledge the last alert sent to you. Press 3 to conference call everyone on call into this call.''')
+			r.say(timeout_msg)
+		elif int(d['Digits']) == 1:
+			# getting the status of alerts
+			r.say(domino.run("alert status -f " + requester.phone))
+			r.redirect(url="%s:%s/call?init=false" % (conf['server_address'],conf['port']))
+		elif int(d['Digits']) == 2:
+			# acking the last alert sent to the user calling
+			r.say(domino.run("alert ack -f " + requester.phone))
+			r.redirect(url="%s:%s/call?init=false" % (conf['server_address'],conf['port']))
+		elif int(d['Digits']) == 3:
+			# calling the other users on call
+			print len(oncall_users)
+			print Team.check_oncall_user(requester, team)
+			if len(oncall_users) == 1 and Team.check_oncall_user(requester, team) == True:
+				r.say("You're the only person on call. I have no one to forward you to.")
+			else:
+				if len(oncall_users) > 0:
+					for user in oncall_users:
+						if user.id != requester.id:
+							r.say("Calling %s." % user.name)
+							r.dial(number=user.phone)
+				else:	
+					r.say("Sorry, no one is currently on call to forward you to.")
+		else:
+			r.say("Sorry, number you pressed is not valid. Please try again.")
 	return str(r)
 
 def check_alerts():
