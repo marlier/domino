@@ -25,7 +25,7 @@ Util.init_logging("comm")
 
 app = Flask(__name__)
 
-@app.route('/healthcheck')
+@app.route('/api/healthcheck')
 def healthcheck():
 	'''
 	This checks the system to see if capable of handling api requests

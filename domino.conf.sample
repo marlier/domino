@@ -27,6 +27,19 @@ loglevel=DEBUG
 # the log directory to write log files
 logdir=/var/log/domino/
 
+[webui]
+# Listen to ip range
+# setting to 0.0.0.0 will allow connections from all IPs
+# if you want specify an IP for security reasons you can here
+# Or you can specify a subnet (ie 192.168.18.0)
+webui_listen_ip=0.0.0.0
+
+# port number to listen for api calls
+webui_port=8010
+
+# server address
+# used to make http calls
+webui_address=
 
 [api]
 # Listen to ip range
@@ -40,7 +53,7 @@ api_port=8009
 
 # server address
 # used to make http calls
-server_address=
+api_address=
 
 [twilio]
 # write all twilio vars as a python diction as shown in the examples below
