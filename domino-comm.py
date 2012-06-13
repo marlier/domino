@@ -30,7 +30,7 @@ def healthcheck():
 	'''
 	This checks the system to see if capable of handling api requests
 	'''
-	return Util.healthcheck()
+	return Util.healthcheck("comm")
 
 @app.route('/sms', methods=['GET'])
 def sms():

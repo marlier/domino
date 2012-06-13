@@ -4,6 +4,7 @@ import logging
 from email.mime.text import MIMEText
 import smtplib
 import socket
+import urllib
 
 import user_layer as User
 import util_layer as Util
@@ -41,7 +42,10 @@ class Email:
 					self.cc.append(u.email)
 					
 		self.subject = self.alert.subjectize()
-		self.message = self.alert.message
+		self.message = '''%s
+		
+		http://%s?host=%s&environment=%s&colo=%s&service=%s
+		''' % (self.alert.message, conf['server_address'], urllib.urlencode(self.host), urllib.urlencode(self.environment), urllib.urlencode(self.colo), urllib.urlencode(self.service))
 		message = MIMEText(self.message)
 		message['Subject'] = self.subject
 		message['From'] = self.username
@@ -92,11 +96,23 @@ class Email:
 			
 	def healthcheck(self):
 		logging.info("Performing an email test healthcheck.")
-		if self.send_custom_email(to=self.username,subject="Healthcheck Test Email",message=""):
+		message = MIMEText("Test email from Domino")
+		message['Subject'] = "Test Check"
+		message['From'] = self.username
+		message['To'] = "foobar@dummy.com"
+		try:
+			mailServer = smtplib.SMTP(self.smtp, self.port)
+			mailServer.ehlo(socket.gethostname())
+			mailServer.starttls()
+			mailServer.ehlo(socket.gethostname())
+			mailServer.login(self.username,self.passwd)
+			#mailServer.sendmail(self.username,self.to,message.as_string())
+			mailServer.close()
 			logging.info("Email healthcheck was successful.")
 			return True
-		else:
+		except Exception, e:
 			logging.error("Failed to send test email. Healthcheck failed.")
+			Util.strace()
 			return False
 		
 		

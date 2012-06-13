@@ -144,9 +144,9 @@ class Database:
 				c.execute(cmd)
 				cmd = "use %s;" % (conf['mysql_db'])
 				c.execute(cmd)
-				cmd = '''CREATE TABLE IF NOT EXISTS alerts (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, message TEXT, teams CHAR(50), ack INT NOT NULL DEFAULT 0, ackby INT NOT NULL DEFAULT 0, acktime TIMESTAMP, lastPageSent TIMESTAMP, lastEmailSent TIMESTAMP, tries INT NOT NULL DEFAULT 0, host CHAR(50), service CHAR(50), environment CHAR(30), colo CHAR(50), status CHAR(20), position INT NOT NULL DEFAULT 0, tags VARCHAR(255), UNIQUE active(environment,colo,host,service));'''
+				cmd = '''CREATE TABLE IF NOT EXISTS alerts (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, message TEXT, teams CHAR(50), ack INT NOT NULL DEFAULT 0, ackby INT NOT NULL DEFAULT 0, acktime TIMESTAMP, lastPageSent TIMESTAMP, lastEmailSent TIMESTAMP, tries INT NOT NULL DEFAULT 0, host CHAR(50), service CHAR(50), environment CHAR(30), colo CHAR(50), status CHAR(20), position INT NOT NULL DEFAULT 0, tags VARCHAR(255), remote_addr VARCHAR(45), UNIQUE active(environment,colo,host,service));'''
 				c.execute(cmd)
-				cmd = '''CREATE TABLE IF NOT EXISTS alerts_history (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, message TEXT, teams CHAR(50), ack INT NOT NULL DEFAULT 0, ackby INT NOT NULL DEFAULT 0, acktime TIMESTAMP, lastPageSent TIMESTAMP, lastEmailSent TIMESTAMP, tries INT NOT NULL DEFAULT 0, host CHAR(50), service CHAR(50), environment CHAR(30), colo CHAR(50), status CHAR(20), position INT NOT NULL DEFAULT 0, tags VARCHAR(255));'''
+				cmd = '''CREATE TABLE IF NOT EXISTS alerts_history (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, message TEXT, teams CHAR(50), ack INT NOT NULL DEFAULT 0, ackby INT NOT NULL DEFAULT 0, acktime TIMESTAMP, lastPageSent TIMESTAMP, lastEmailSent TIMESTAMP, tries INT NOT NULL DEFAULT 0, host CHAR(50), service CHAR(50), environment CHAR(30), colo CHAR(50), status CHAR(20), position INT NOT NULL DEFAULT 0, tags VARCHAR(255), remote_addr VARCHAR(45));'''
 				c.execute(cmd)
 				cmd = '''CREATE TABLE IF NOT EXISTS users (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, name CHAR(50), email CHAR(50), phone varchar(50), lastAlert INT NOT NULL DEFAULT 0);'''
 				c.execute(cmd)
@@ -214,7 +214,7 @@ class Database:
 		'''
 		try:
  			logging.debug("closing connection to the db")
- 			self._connection.close ()
+ 			self._connection.close()
 			self._cursor.close()
 			return True
 		except Exception, e:

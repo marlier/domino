@@ -57,6 +57,9 @@ server_address=
 # your twilio number(s)
 #twilio_number=+1AAABBBXXXX
 
+# the maximum number of texts a single alert (or otherwise) can send. This is so if you have an 
+# alert with a really large body of text it won't page you with 100 different text.
+text_limit=2
 
 
 [alerting]

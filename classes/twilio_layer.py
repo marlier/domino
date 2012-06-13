@@ -47,11 +47,10 @@ def send_sms(user=None, team=None, alert=None, _message="Nothing"):
 	user.lastAlert = alert.id
 	user.save()
 	myauth = auth()
-	limit = 1
 	for i,text_segment in enumerate(split_sms(_message)):
-		if i < limit:
+		if i < conf['text_limit']:
 			myauth.sms.messages.create(to=user.phone, from_=team.phone, body=text_segment)
-		elif i == limit:
+		elif i == conf['text_limit']:
 			text_segment = text_segment[:-3] + '...'
 			myauth.sms.messages.create(to=user.phone, from_=team.phone, body=text_segment)
 		else:

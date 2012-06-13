@@ -20,12 +20,12 @@ Util.init_logging("api")
 
 app = Flask(__name__)
 
-@app.route('/healthcheck')
+@app.route('/api/healthcheck')
 def healthcheck():
 	'''
 	This checks the system to see if capable of handling api requests
 	'''
-	return Util.healthcheck()
+	return Util.healthcheck("alert")
 
 
 @app.route('/api/alert', methods=['GET', 'POST', 'DELETE'])
@@ -76,6 +76,8 @@ def process_request(objType, id=0):
 		# converting from multidict to dict
 		for key, value in rawdata.items():
 			data[key] = value
+		# add remote ip address to dict
+		data['remote_ip_address'] = request.remote_addr
 	logging.info("Receiving a api request for %s( id:%d )\n%s" % (objType, id, data))
 	apicall = Api.Api(**data)
 	apicall.id = id

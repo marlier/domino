@@ -176,6 +176,7 @@ class Api():
 					newalert.colo = self.colo
 					newalert.environment = self.environment
 					newalert.tags = self.tags
+					newalert.remote_addr = self.remote_ip_address
 					try:
 						newalert.status = int(self.status)
 					except:

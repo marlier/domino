@@ -49,32 +49,39 @@ def strace():
 	if conf['loglevel'] == 'DEBUG':
 		traceback.print_exc(file=open('%s/strace.out' % (conf['logdir']), "a"))
 
-def healthcheck():
+def healthcheck(healthtype):
 	'''
 	This checks the system to see if capable of handling api requests
 	'''
 	logging.info("Initiating a healcheck of the system.")
 	try:
-		import mysql_layer as Mysql
-		db = Mysql.Database()
-		dbcheck = db.healthcheck()
-		db.close()
+		checks = {}
+		if healthtype == "comm" or healthtype == "alert":
+			import mysql_layer as Mysql
+			db_conn = Mysql.Database()
+			dbcheck = db_conn.healthcheck()
+			checks['Database'] = dbcheck
 		
-		import email_layer as Email
-		email = Email.Email()
-		emailcheck = email.healthcheck()
+		if healthtype == "comm":
+			import email_layer as Email
+			email = Email.Email()
+			emailcheck = email.healthcheck()
+			checks['Email'] = emailcheck
 		
-		import twilio_layer as Twilio
-		twiliocheck = Twilio.healthcheck()
-		
-		if dbcheck == True and emailcheck == True and twiliocheck == True:
-			return "OK\n"
-		else:
-			failed = []
-			if dbcheck == False: failed.append("database")
-			if emailcheck == False: failed.append("email")
-			if twiliocheck == False: failed.append("twilio")
+		if healthtype == "comm":
+			import twilio_layer as Twilio
+			twiliocheck = Twilio.healthcheck()
+			checks['Twilio'] = twiliocheck
+
+		failed = []
+		for k,v in checks.items():
+			if checks[k] == False:
+				failed.append(k)
+			
+		if len(failed) > 0:
 			return "One or more health checks failed (%s). Check the logs for more information.\n" % (', '.join(failed))
+		else:
+			return "OK\n"
 	except Exception, e:
 		logging.error(e.__str__())
 		strace()

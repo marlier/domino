@@ -215,12 +215,12 @@ class Alert():
 		logging.debug("Saving alert: %s" % self.id)
 		try:
 			_db = Mysql.Database()
-			_db._cursor.execute('''REPLACE INTO alerts (id,message,teams,ack,ackby,acktime,lastPageSent,lastEmailSent,tries,host,service,environment,colo,status,position,tags) VALUES (%s,"%s","%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s",%s,%s,"%s")''', (self.id, self.message, Team.flatten_teams(self.teams), self.ack, self.ackby, self.acktime, self.lastPageSent, self.lastEmailSent, self.tries, self.host, self.service, self.environment, self.colo, self.status, self.position, self.tags))
+			_db._cursor.execute('''REPLACE INTO alerts (id,message,teams,ack,ackby,acktime,lastPageSent,lastEmailSent,tries,host,service,environment,colo,status,position,tags,remote_addr) VALUES (%s,"%s","%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s",%s,%s,"%s","s")''', (self.id, self.message, Team.flatten_teams(self.teams), self.ack, self.ackby, self.acktime, self.lastPageSent, self.lastEmailSent, self.tries, self.host, self.service, self.environment, self.colo, self.status, self.position, self.tags, self.remote_ip_address))
 			if self.id == 0:
 				_db._cursor.execute('''select id from alerts order by id desc limit 1''')
 				tmp = _db._cursor.fetchone()
 				self.id = tmp['id']
-			_db._cursor.execute('''REPLACE INTO alerts_history (id,message,teams,ack,ackby,acktime,lastPageSent,lastEmailSent,tries,host,service,environment,colo,status,position,tags) VALUES (%s,"%s","%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s",%s,%s,"%s")''', (self.id,self.message,Team.flatten_teams(self.teams),self.ack,self.ackby,self.acktime, self.lastPageSent, self.lastEmailSent, self.tries,self.host,self.service, self.environment, self.colo, self.status, self.position, self.tags))
+			_db._cursor.execute('''REPLACE INTO alerts_history (id,message,teams,ack,ackby,acktime,lastPageSent,lastEmailSent,tries,host,service,environment,colo,status,position,tags,remote_addr) VALUES (%s,"%s","%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s",%s,%s,"%s","s")''', (self.id,self.message,Team.flatten_teams(self.teams),self.ack,self.ackby,self.acktime, self.lastPageSent, self.lastEmailSent, self.tries,self.host,self.service, self.environment, self.colo, self.status, self.position, self.tags, self.remote_ip_address))
 			_db.save()
 			_db.close()
 			return True
