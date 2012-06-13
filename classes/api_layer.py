@@ -179,6 +179,7 @@ class Api():
 					else:
 						lastAlert.message = self.message
 						lastAlert.save()
+						self.populate(200,"OK",json.dumps("Repeat alert, updated message."))
 				else:
 					logging.info("Recieved new alert")
 					# save new alert to the db
