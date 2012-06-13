@@ -1,10 +1,9 @@
-var base_url='http://ec2-107-20-110-174.compute-1.amazonaws.com:8009/api/';
-var base_url='http://localhost:8009/api/';
+var base_url='{{ api_address }}:{{ api_port }}/api/';
 var search_terms = new Array();
 
 $(document).ready(function(){
-	$('#top').load('html/header.html');
-	$('#bottom').load('html/footer.html');
+	$('#top').load('static/html/header.html');
+	$('#bottom').load('static/html/footer.html');
 });
 
 function query(div,sidebar_div,team,count){

@@ -60,43 +60,43 @@ function print_alerts(alerts,alert_div,sidebar_div) {
 	
 	output = '';
 	output = output + '<ul>';
-	output = output + '<li><div id="teams_toggle"><img src="images/disclosureTriangle.png" alt="Teams"/> Teams</div></li>';
+	output = output + '<li><div id="teams_toggle"><img src="static/img/disclosureTriangle.png" alt="Teams"/> Teams</div></li>';
 	output = output + '<ul id="teams_data" class="filter_data">';
 	$.each(teams,function(i,x) {
 		output = output + '<li onclick="add_search_terms(\'teams:' + x + '\')">' + x + '</li>'
 	});
 	output = output + '</ul>';
-	output = output + '<li><div id="environments_toggle"><img src="images/disclosureTriangle.png" alt="Environments"/> Environments</div></li>';
+	output = output + '<li><div id="environments_toggle"><img src="static/img/disclosureTriangle.png" alt="Environments"/> Environments</div></li>';
 	output = output + '<ul id="environments_data" class="filter_data"">';
 	$.each(environments,function(i,x) {
 		output = output + '<li onclick="add_search_terms(\'environment:' + x + '\')">' + x + '</li>'
 	});
 	output = output + '</ul>';
-	output = output + '<li><div id="colos_toggle"><img src="images/disclosureTriangle.png" alt="Colos"/> Colos</div></li>';
+	output = output + '<li><div id="colos_toggle"><img src="static/img/disclosureTriangle.png" alt="Colos"/> Colos</div></li>';
 	output = output + '<ul id="colos_data" class="filter_data"">';
 	$.each(colos,function(i,x) {
 		output = output + '<li onclick="add_search_terms(\'colo:' + x + '\')">' + x + '</li>'
 	});
 	output = output + '</ul>';
-	output = output + '<li><div id="hosts_toggle"><img src="images/disclosureTriangle.png" alt="Hosts"/> Hosts</div></li>';
+	output = output + '<li><div id="hosts_toggle"><img src="static/img/disclosureTriangle.png" alt="Hosts"/> Hosts</div></li>';
 	output = output + '<ul id="hosts_data" class="filter_data"">';
 	$.each(hosts,function(i,x) {
 		output = output + '<li onclick="add_search_terms(\'host:' + x + '\')">' + x + '</li>'
 	});
 	output = output + '</ul>';
-	output = output + '<li><div id="services_toggle"><img src="images/disclosureTriangle.png" alt="Services"/> Services</div></li>';
+	output = output + '<li><div id="services_toggle"><img src="static/img/disclosureTriangle.png" alt="Services"/> Services</div></li>';
 	output = output + '<ul id="services_data" class="filter_data"">';
 	$.each(services,function(i,x) {
 		output = output + '<li onclick="add_search_terms(\'service:' + x + '\')">' + x + '</li>'
 	});
 	output = output + '</ul>';
-	output = output + '<li><div id="statuses_toggle"><img src="images/disclosureTriangle.png" alt="Statuses"/> Statuses</div></li>';
+	output = output + '<li><div id="statuses_toggle"><img src="static/img/disclosureTriangle.png" alt="Statuses"/> Statuses</div></li>';
 	output = output + '<ul id="statuses_data" class="filter_data"">';
 	$.each(statuses,function(i,x) {
 		output = output + '<li onclick="add_search_terms(\'status:' + x + '\')">' + x + '</li>'
 	});
 	output = output + '</ul>';
-	output = output + '<li><div id="tags_toggle"><img src="images/disclosureTriangle.png" alt="Tags"/> Tags</div></li>';
+	output = output + '<li><div id="tags_toggle"><img src="static/img/disclosureTriangle.png" alt="Tags"/> Tags</div></li>';
 	output = output + '<ul id="tags_data" class="filter_data"">';
 	$.each(tags,function(i,x) {
 		output = output + '<li onclick="add_search_terms(\'tags:' + x + '\')">' + x + '</li>'

@@ -35,20 +35,33 @@ def alerts():
 @app.route('/team')
 @app.route('/teams')
 def teams():
-	return render_templates('teams.html')
+	return render_template('teams.html')
 
 @app.route('/user')
 @app.route('/users')
 def users():
-	return render_templates('users.html')
+	return render_template('users.html')
 
 @app.route('/detail')
 @app.route('/details')
 def detail():
-	return render_templates('detail.html')
+	return render_template('detail.html')
+
+@app.route('/static/js/lib.js')
+def libjs(api_address=conf['api_address'], api_port=conf['api_port']):
+	return render_template('lib.js', api_address=api_address, api_port=api_port)
+
 
 with app.test_request_context():
-	url_for('static', filename='loading.gif')
+	url_for('static', filename="dash.js")
+	url_for('static', filename="alerts.js")
+	url_for('static', filename="detail.js")
+	url_for('static', filename="teams.js")
+	url_for('static', filename="users.js")
+	url_for('static', filename="disclosureTriangle.png")
+	url_for('static', filename="base.css")
+	url_for('static', filename="jquery-ui.css")
+	url_for('static', filename="colorbox.css")
 
 if __name__ == "__main__":
 	app.run(port=conf['webui_port'], host=conf['webui_listen_ip'], debug=conf['server_debug'])

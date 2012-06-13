@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # This runs as a service. It listens for API requests
 
-from flask import Flask, request, json
+from flask import Flask, request, json, make_response
 import os, sys
 import urllib
 import logging
 import time
+from datetime import timedelta
 
 # add classes location to sys.path
 cmd_folder = os.path.dirname((os.path.abspath(__file__)))
@@ -29,27 +30,18 @@ def healthcheck():
 
 
 @app.route('/api/alert', methods=['GET', 'POST', 'DELETE'])
-def alert():
-	return process_request("Alert")
-
 @app.route('/api/alert/<int:id>', methods=['GET', 'POST', 'DELETE'])
-def alert_instance(id=None):
+def alert_instance(id=0):
 	return process_request("Alert", id)
 	
 @app.route('/api/user', methods=['GET', 'POST', 'DELETE'])
-def user():
-	return process_request("User")
-
 @app.route('/api/user/<int:id>', methods=['GET', 'POST', 'DELETE'])
-def user_instance(id=None):
+def user_instance(id=0):
 	return process_request("User", id)
 	
 @app.route('/api/team', methods=['GET', 'POST', 'DELETE'])
-def team():
-	return process_request("Team")
-
 @app.route('/api/team/<int:id>', methods=['GET', 'POST', 'DELETE'])
-def team_instance(id=None):
+def team_instance(id=0):
 	return process_request("Team", id)
 
 @app.route('/api/history', methods=['GET'])
@@ -88,7 +80,10 @@ def process_request(objType, id=0):
 		apicall.set_obj(data)
 	elif request.method == 'DELETE':
 		apicall.del_obj()
-	return apicall.fulljson
+	resp = make_response(apicall.fulljson)
+	resp.headers['Access-Control-Allow-Credentials'] = 'true'
+	resp.headers['Access-Control-Allow-Origin'] = '*'
+	return resp
 
 if __name__ == "__main__":
 	app.run(port=conf['api_port'], host=conf['api_listen_ip'], debug=conf['server_debug'])

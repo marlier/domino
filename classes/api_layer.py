@@ -275,10 +275,10 @@ class Api():
 						for i,o in enumerate(orig_members):
 							oncall_list.append(o.id)
 							if o.id != obj.members[i].id:
-								Twilio.send_sms(o, self, None, "You're now on call for team %s in spot %d" $ (self.name, (i+1)))
+								Twilio.send_sms(o, self, None, "You're now on call for team %s in spot %d" % (self.name, (i+1)))
 						for m in obj.members[:self.oncall_count]:
 							if m.id not in oncall_list:
-								Twilio.send_sms(m, self, None, "You're no longer on call for team %s" $ (self.name))
+								Twilio.send_sms(m, self, None, "You're no longer on call for team %s" % (self.name))
 						self.populate(200,"OK")
 					else:
 						self.populate(701,"Failed to save team.")
