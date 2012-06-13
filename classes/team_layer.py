@@ -132,8 +132,7 @@ class Team:
 		try:
 			self.__dict__.update(Mysql.query('''SELECT * FROM teams WHERE id = %s LIMIT 1''' % (id), "users")[0].__dict__)
 		except Exception, e:
-			logging.error(e.__str__())
-			Util.strace()
+			Util.strace(e)
 			self.id = 0
 			return False
 	

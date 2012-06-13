@@ -9,6 +9,7 @@ import util_layer as Util
 import user_layer as User
 import alert_layer as Alert
 import team_layer as Team
+import notification_layer as Notification
 
 conf = Util.load_conf()
 
@@ -74,13 +75,21 @@ def query(q_string,table):
 					z.__dict__.update(y)
 					members.append(z)
 				t['members'] = members
+			elif table == "notifications":
+				tmp = Notification.Notification()
+				_db._cursor.execute('''SELECT * FROM alerts_history WHERE id = %s''' % (tmp.alert))
+				y = _db._cursor.fetchone()
+				if y != None:
+					z = Alert.Alert()
+					z.__dict__.update(y)
+					del z.teams
+					t['alert'] = z
 			tmp.__dict__.update(t)
 			objects.append(tmp)
 		_db.close()
 		return objects
 	except Exception, e:
-		logging.error(e.__str__())
-		Util.strace()
+		Util.strace(e)
 		return False
 
 def save(sqlstr):
@@ -95,8 +104,7 @@ def save(sqlstr):
 		_db.close()
 		return True
 	except Exception, e:
-		logging.error(e.__str__())
-		Util.strace()
+		Util.strace(e)
 		return False
 
 
@@ -111,8 +119,7 @@ def delete(table, id):
 		_db.close()
 		return True
 	except Exception, e:
-		logging.error(e.__str__())
-		Util.strace()
+		Util.strace(e)
 		return False
 
 
@@ -134,8 +141,7 @@ class Database:
 			self._cursor = self._connection.cursor()
 			return True
 		except Exception, e:
-			logging.error(e.__str__())
-			Util.strace()
+			Util.strace(e)
 			try:
 				logging.error("Cannot connect to db, creating new one....")
 				db = MySQLdb.connect(host=conf['mysql_host'], port=conf['mysql_port'], user=conf['mysql_username'], passwd=conf['mysql_passwd'], cursorclass=MySQLdb.cursors.DictCursor)
@@ -144,9 +150,9 @@ class Database:
 				c.execute(cmd)
 				cmd = "use %s;" % (conf['mysql_db'])
 				c.execute(cmd)
-				cmd = '''CREATE TABLE IF NOT EXISTS alerts (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, message TEXT, teams CHAR(50), ack INT NOT NULL DEFAULT 0, ackby INT NOT NULL DEFAULT 0, acktime TIMESTAMP, lastPageSent TIMESTAMP, lastEmailSent TIMESTAMP, tries INT NOT NULL DEFAULT 0, host CHAR(50), service CHAR(50), environment CHAR(30), colo CHAR(50), status CHAR(20), position INT NOT NULL DEFAULT 0, tags VARCHAR(255), remote_ip_address VARCHAR(45), UNIQUE active(environment,colo,host,service));'''
+				cmd = '''CREATE TABLE IF NOT EXISTS alerts (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, message TEXT, teams CHAR(50), ack INT NOT NULL DEFAULT 0, ackby INT NOT NULL DEFAULT 0, acktime TIMESTAMP, lastPageSent TIMESTAMP, lastEmailSent TIMESTAMP, tries INT NOT NULL DEFAULT 0, host CHAR(50), service CHAR(50), environment CHAR(30), colo CHAR(50), status INT NOT NULL DEFAULT 3, position INT NOT NULL DEFAULT 0, tags VARCHAR(255), remote_ip_address VARCHAR(45), UNIQUE active(environment,colo,host,service));'''
 				c.execute(cmd)
-				cmd = '''CREATE TABLE IF NOT EXISTS alerts_history (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, message TEXT, teams CHAR(50), ack INT NOT NULL DEFAULT 0, ackby INT NOT NULL DEFAULT 0, acktime TIMESTAMP, lastPageSent TIMESTAMP, lastEmailSent TIMESTAMP, tries INT NOT NULL DEFAULT 0, host CHAR(50), service CHAR(50), environment CHAR(30), colo CHAR(50), status CHAR(20), position INT NOT NULL DEFAULT 0, tags VARCHAR(255), remote_ip_address VARCHAR(45));'''
+				cmd = '''CREATE TABLE IF NOT EXISTS alerts_history (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, message TEXT, teams CHAR(50), ack INT NOT NULL DEFAULT 0, ackby INT NOT NULL DEFAULT 0, acktime TIMESTAMP, lastPageSent TIMESTAMP, lastEmailSent TIMESTAMP, tries INT NOT NULL DEFAULT 0, host CHAR(50), service CHAR(50), environment CHAR(30), colo CHAR(50), status INT NOT NULL DEFAULT 3, position INT NOT NULL DEFAULT 0, tags VARCHAR(255), remote_ip_address VARCHAR(45));'''
 				c.execute(cmd)
 				cmd = '''CREATE TABLE IF NOT EXISTS users (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, name CHAR(50), email CHAR(50), phone varchar(50), lastAlert INT NOT NULL DEFAULT 0);'''
 				c.execute(cmd)
@@ -154,11 +160,12 @@ class Database:
 				c.execute(cmd)
 				cmd = '''CREATE TABLE IF NOT EXISTS healthcheck (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, name CHAR(30));'''
 				c.execute(cmd)
+				cmd = '''CREATE TABLE IF NOT EXISTS notifications (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, noteType VARCHAR(15), message TEXT, tags VARCHAR(255), status INT NOT NULL DEFAULT 3, link VARCHAR(255), alert INT NOT NULL DEFAULT 0)'''
+				c.execute(cmd)
 				self.connectDB()
 				return True
 			except Exception, e:
-				logging.error(e.__str__())
-				Util.strace()
+				Util.strace(e)
 				return False
 	
 	def healthcheck(self):
@@ -191,8 +198,7 @@ class Database:
 			logging.info("Database healthcheck was successful.")
 			return True
 		except Exception, e:
-			logging.error(e.__str__())
-			Util.strace()
+			Util.strace(e)
 			return False
 			
 	def save(self):
@@ -204,8 +210,7 @@ class Database:
 			self._connection.commit()
 			return True
 		except Exception, e:
-			logging.error(e.__str__())
-			Util.strace()
+			Util.strace(e)
 			return False
 			
 	def close(self):
@@ -218,6 +223,5 @@ class Database:
 			self._cursor.close()
 			return True
 		except Exception, e:
-			logging.error(e.__str__())
-			Util.strace()
+			Util.strace(e)
 			return False

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import logging
+import logging, urllib
 import datetime
 from datetime import date, timedelta
 import math
@@ -10,6 +10,7 @@ import twilio_layer as Twilio
 import user_layer as User
 import team_layer as Team
 import email_layer as Email
+import notification_layer as Notification
 import util_layer as Util
 
 conf = Util.load_conf()
@@ -203,8 +204,7 @@ class Alert():
 		try:
 			self.__dict__.update(Mysql.query('''SELECT * FROM alerts_history WHERE id = %s LIMIT ''' % (id), "alerts")[0].__dict__)
 		except Exception, e:
-			logging.error(e.__str__())
-			Util.strace()
+			Util.strace(e)
 			return False
 	
 	def save(self):
@@ -224,8 +224,7 @@ class Alert():
 			_db.close()
 			return True
 		except Exception, e:
-			logging.error(e.__str__())
-			Util.strace()
+			Util.strace(e)
 			return False
 	
 	def ack_alert(self,user):
@@ -240,8 +239,7 @@ class Alert():
 			self.save()
 			return True
 		except Exception, e:
-			logging.error(e.__str__())
-			Util.strace()
+			Util.strace(e)
 			return False
 	
 	def send_page(self):
@@ -254,6 +252,14 @@ class Alert():
 			self.tries += 1
 			self.lastPageSent = datetime.datetime.now()
 			self.save()
+			newNotification = Notification.Notification()
+			newNotification.noteType = "page"
+			newNotification.alert = self.id
+			newNotification.message = self.message
+			newNotification.tags = self.tags
+			newNotification.status = self.status
+			newNotification.link = "%s:%s/detail?host=%s&environment=%s&colo=%s&service=%s" % (conf['webui_address'], conf['webui_port'], urllib.quote_plus(self.host), urllib.quote_plus(self.environment), urllib.quote_plus(self.colo), urllib.quote_plus(self.service))
+			newNotification.save()
 			if len(self.teams) == 0:
 				self.teams = Team.get_default_teams()
 			else:
@@ -294,8 +300,7 @@ class Alert():
 							Twilio.send_sms(au, team, self, "%s\n%s" % (self.subjectize(), self.summarize()))
 			return True
 		except Exception, e:
-			logging.error(e.__str__())
-			Util.strace()
+			Util.strace(e)
 			return False
 		
 	def send_email(self):
@@ -306,6 +311,14 @@ class Alert():
 		try:
 			self.lastEmailSent = datetime.datetime.now()
 			self.save()
+			newNotification = Notification.Notification()
+			newNotification.noteType = "email"
+			newNotification.alert = self.id
+			newNotification.message = self.message
+			newNotification.tags = self.tags
+			newNotification.status = self.status
+			newNotification.link = "%s:%s/detail?host=%s&environment=%s&colo=%s&service=%s" % (conf['webui_address'], conf['webui_port'], urllib.quote_plus(self.host), urllib.quote_plus(self.environment), urllib.quote_plus(self.colo), urllib.quote_plus(self.service))
+			newNotification.save()
 			if len(self.teams) == 0:
 				self.teams = Team.get_default_teams()
 			else:
@@ -328,8 +341,7 @@ class Alert():
 			else:
 				return True
 		except Exception, e:
-			logging.error(e.__str__())
-			Util.strace()
+			Util.strace(e)
 			return False
 	
 	def subjectize(self):

@@ -44,6 +44,11 @@ def user_instance(id=0):
 def team_instance(id=0):
 	return process_request("Team", id)
 
+@app.route('/api/notification', methods=['GET', 'POST', 'DELETE'])
+@app.route('/api/notification/<int:id>', methods=['GET', 'POST', 'DELETE'])
+def note_instance(id=0):
+	return process_request("Notification", id)
+
 @app.route('/api/history', methods=['GET'])
 def alerthistory():
 	return process_request("History")

@@ -9,6 +9,7 @@ import user_layer as User
 import alert_layer as Alert
 import team_layer as Team
 import email_layer as Email
+import notification_layer as Notification
 import util_layer as Util
 
 conf = Util.load_conf()
@@ -34,7 +35,7 @@ class Api():
 		self.twilio_acct = conf['twilio_acct']
 		self.twilio_number = conf['twilio_number']
 		self.search = ''
-		self.since = 7
+		self.since = 0
 		#graph data
 		self.segment = 7
 		self.unit = "DAY"
@@ -50,6 +51,9 @@ class Api():
 		self.ack = None
 		self.message = None
 		self.user_id = 0
+		
+		# default notification vars
+		self.noteType = "email"
 		
 		# convert the dictionary array received into Api class attributes
 		self.__dict__.update(data)
@@ -120,6 +124,11 @@ class Api():
 				objects = Team.all_teams()
 			else:
 				objects = [Team.Team(self.id)]
+		elif self.objType == "Notification":
+			if self.id==0 or self.id == None:
+				objects = Notification.get_notifications(self.noteType, self.since, self.limit)
+			else:
+				objects = [Notification.Notification(self.id)]
 		elif self.objType == "Analytics":
 			if self.name == None:
 				#return list of analytics names that are supported
@@ -205,7 +214,7 @@ class Api():
 						self.populate(701,"Failed to save alert.")
 				except Exception, e:
 					self.populate(1602,e.__str__())
-					Util.strace()
+					Util.strace(e)
 					return
 		elif self.objType == "User":
 			if self.id == None or self.id == 0:
@@ -243,7 +252,7 @@ class Api():
 						self.populate(701,"Failed to save user.")
 				except Exception, e:
 					self.populate(1602,e.__str__())
-					Util.strace()
+					Util.strace(e)
 					return
 		elif self.objType == "Team":
 			if self.id == None or self.id == 0:
@@ -284,7 +293,7 @@ class Api():
 						self.populate(701,"Failed to save team.")
 				except Exception, e:
 					self.populate(1602,e.__str__())
-					Util.strace()
+					Util.strace(e)
 					return
 			
 	def del_obj(self):
@@ -304,7 +313,7 @@ class Api():
 				self.populate(200,"OK")
 		except Exception, e:
 			self.populate(1502,e.__str__())
-			Util.strace()
+			Util.strace(e)
 			return
 	
 	def filter(self,objects):

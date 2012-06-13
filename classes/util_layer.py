@@ -7,6 +7,7 @@
 from ConfigParser import SafeConfigParser
 import sys, traceback
 import logging
+import notification_layer as Notification
 
 def init_logging(log_file_name = 'server'):
 	'''
@@ -45,10 +46,18 @@ def load_conf(config_file = 'domino.conf'):
 	conf['email_port']=int(conf['email_port'])
 	return conf
 	
-def strace():
+def strace(e):
 	conf = load_conf()
-	if conf['loglevel'] == 'DEBUG':
-		traceback.print_exc(file=open('%s/strace.out' % (conf['logdir']), "a"))
+	logging.error(e.__str__())
+	if conf['loglevel'] == 'DEBUG': traceback.print_exc(file=open('%s/strace.out' % (conf['logdir']), "a"))
+	newNotification = Notification.Notification()
+	newNotification.noteType = "error"
+	newNotification.alert = 0
+	newNotification.message = e.__str__()
+	newNotification.tags = ''
+	newNotification.status = 2
+	newNotification.link = ""
+	newNotification.save()
 
 def healthcheck(healthtype):
 	'''
@@ -84,6 +93,5 @@ def healthcheck(healthtype):
 		else:
 			return "OK\n"
 	except Exception, e:
-		logging.error(e.__str__())
-		strace()
+		strace(e)
 		return "Failed to run all healthchecks.\n"

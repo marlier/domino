@@ -44,7 +44,7 @@ class Email:
 		self.subject = self.alert.subjectize()
 		self.message = '''%s
 		
-%s:%s/detail.html?host=%s&environment=%s&colo=%s&service=%s
+%s:%s/detail?host=%s&environment=%s&colo=%s&service=%s
 		''' % (self.alert.message, conf['webui_address'], conf['webui_port'], urllib.quote_plus(self.alert.host), urllib.quote_plus(self.alert.environment), urllib.quote_plus(self.alert.colo), urllib.quote_plus(self.alert.service))
 		message = MIMEText(self.message)
 		message['Subject'] = self.subject
@@ -63,8 +63,7 @@ class Email:
 			return True
 		except Exception, e:
 			logging.error("Failed to send email to %s\n%s" % (self.to, self.message))
-			logging.error(e.__str__())
-			Util.strace()
+			Util.strace(e)
 			return False
 	
 	def send_custom_email(self, to='', subject='', message=''):
@@ -90,8 +89,7 @@ class Email:
 			return True
 		except Exception, e:
 			logging.error("Failed to send email to %s\n%s" % (self.to, self.message))
-			logging.error(e.__str__())
-			Util.strace()
+			Util.strace(e)
 			return False
 			
 	def healthcheck(self):
@@ -112,7 +110,7 @@ class Email:
 			return True
 		except Exception, e:
 			logging.error("Failed to send test email. Healthcheck failed.")
-			Util.strace()
+			Util.strace(e)
 			return False
 		
 		

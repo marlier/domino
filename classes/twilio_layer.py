@@ -22,7 +22,7 @@ def auth():
 		return TwilioRestClient(conf['twilio_acct'], conf['twilio_token'])
 	except Exception, e:
 		logging.error("Failed to authenticate with the twilio credentials")
-		Util.strace()
+		Util.strace(e)
 		return False
 
 def split_sms(sms):
@@ -78,8 +78,7 @@ def validate_phone(user):
 		if e.status == 400:
 			return {"success":False, "message":e.__str__()}
 		else:
-			logging.error(e.__str__())
-			Util.strace()
+			Util.strace(e)
 			return {"success":False, "message":e.__str__()}
 
 def healthcheck():
