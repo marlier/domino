@@ -148,7 +148,7 @@ def get_current_alert(environment,colo,host,service):
 	'''
 	Get the current status of an alert specified by environment, colo, host, and service
 	'''
-	return Mysql.query('''SELECT * FROM alerts WHERE environment = '%s' and colo = '%s' and host = '%s' and service = '%s' LIMIT 1''', "alerts")
+	return Mysql.query('''SELECT * FROM alerts WHERE environment = "%s" and colo = "%s" and host = "%s" and service = "%s" LIMIT 1''' % (environment, colo, host, service), "alerts")
 
 def fresh_alerts():
 	'''
