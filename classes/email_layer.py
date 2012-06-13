@@ -44,7 +44,7 @@ class Email:
 		self.subject = self.alert.subjectize()
 		self.message = '''%s
 		
-		%s?host=%s&environment=%s&colo=%s&service=%s
+%s/detail.html?host=%s&environment=%s&colo=%s&service=%s
 		''' % (self.alert.message, conf['server_address'], urllib.quote_plus(self.alert.host), urllib.quote_plus(self.alert.environment), urllib.quote_plus(self.alert.colo), urllib.quote_plus(self.alert.service))
 		message = MIMEText(self.message)
 		message['Subject'] = self.subject

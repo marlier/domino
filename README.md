@@ -14,7 +14,7 @@ Documentation
 documentation is available on the github wiki.
 
 Denpencies
- * web.py (http://webpy.org/)
+ * Flask (http://http://flask.pocoo.org/)
  * twilio-python (https://github.com/twilio/twilio-python)
  * MySQLdb (http://sourceforge.net/projects/mysql-python/)
  * Simplejson (http://pypi.python.org/pypi/simplejson/)

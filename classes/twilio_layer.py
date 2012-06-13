@@ -44,8 +44,9 @@ def send_sms(user=None, team=None, alert=None, _message="Nothing"):
 	This method sends a text message to a user.
 	'''
 	logging.debug("Sending sms message to: %s, %s" % (user.name, _message))
-	user.lastAlert = alert.id
-	user.save()
+	if alert != None:
+		user.lastAlert = alert.id
+		user.save()
 	myauth = auth()
 	for i,text_segment in enumerate(split_sms(_message)):
 		if i < conf['text_limit']:

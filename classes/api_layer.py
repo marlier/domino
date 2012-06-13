@@ -265,9 +265,20 @@ class Api():
 			elif self.id != 0:
 				try:
 					obj = Team.Team(self.id)
+					# save the original members of the team to see if its changed
+					orig_members = self.members[:self.oncall_count]
 					obj.__dict__.update(data)
 					obj.members = User.get_users(self.members)
 					if obj.save() == True:
+						# SMS the delta of whose on call
+						oncall_list = []
+						for i,o in enumerate(orig_members):
+							oncall_list.append(o.id)
+							if o.id != obj.members[i].id:
+								Twilio.send_sms(o, self, None, "You're now on call for team %s in spot %d" $ (self.name, (i+1)))
+						for m in obj.members[:self.oncall_count]:
+							if m.id not in oncall_list:
+								Twilio.send_sms(m, self, None, "You're no longer on call for team %s" $ (self.name))
 						self.populate(200,"OK")
 					else:
 						self.populate(701,"Failed to save team.")
