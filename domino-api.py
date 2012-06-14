@@ -75,6 +75,7 @@ def process_request(objType, id=0):
 			data[key] = value
 		# add remote ip address to dict
 		data['remote_ip_address'] = request.remote_addr
+		data['fullurl'] = request.url
 	logging.info("Receiving a api request for %s( id:%d )\n%s" % (objType, id, data))
 	apicall = Api.Api(**data)
 	apicall.id = id
@@ -85,7 +86,10 @@ def process_request(objType, id=0):
 		apicall.set_obj(data)
 	elif request.method == 'DELETE':
 		apicall.del_obj()
-	resp = make_response(apicall.fulljson)
+	if 'format' in data and data['format'] == "xml" and objType == "Notification":
+		resp = make_response(apicall.feed)
+	else:
+		resp = make_response(apicall.fulljson)
 	resp.headers['Access-Control-Allow-Credentials'] = 'true'
 	resp.headers['Access-Control-Allow-Origin'] = '*'
 	return resp

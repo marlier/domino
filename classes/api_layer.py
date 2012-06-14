@@ -2,6 +2,8 @@
 
 import logging, urllib, datetime
 import simplejson as json
+from werkzeug.contrib.atom import AtomFeed
+from urlparse import urljoin
 
 import mysql_layer as Mysql
 import twilio_layer as Twilio
@@ -29,8 +31,8 @@ class Api():
 		self.limit = 25
 		self.offset = 0
 		
-		self.default = 1
-		self.active_count = 0
+		# set defualt attr for teams
+		self.oncall_count = 0
 		self.twilio_token = conf['twilio_token']
 		self.twilio_acct = conf['twilio_acct']
 		self.twilio_number = conf['twilio_number']
@@ -40,7 +42,6 @@ class Api():
 		self.segment = 7
 		self.unit = "DAY"
 		
-		self.terms = None
 		self.sort = None
 		self.status_message = None
 		self.name = None
@@ -51,6 +52,7 @@ class Api():
 		self.ack = None
 		self.message = None
 		self.user_id = 0
+		self.format = "json"
 		
 		# default notification vars
 		self.noteType = "email"
@@ -390,8 +392,16 @@ class Api():
 		self.data = data
 		if self.status % 100 != 0:
 			logging.error(self.status_message)
-		fulljson = {}
-		fulljson['status'] = self.status
-		fulljson['status_message'] = self.status_message
-		fulljson['data'] = self.data
-		self.fulljson = json.dumps(fulljson, skipkeys=True, sort_keys=True, indent=4 * ' ')
+		# generate XML RSS (Atom) feed
+		if self.format == "xml" and self.objType == "Notification":
+			feed = AtomFeed('Domino Notification Feed', feed_url=self.fullurl)
+			for x in self.data:
+				createDate = datetime.datetime.strptime(x['createDate'], '%Y-%m-%dT%H:%M:%S')
+				feed.add("%s: %s" % (x['noteType'], x['id']), unicode(x['message']), id=x['id'], content_type="text", url=x['link'], updated=createDate, published=createDate)
+			self.feed = feed.get_response()
+		else:
+			fulljson = {}
+			fulljson['status'] = self.status
+			fulljson['status_message'] = self.status_message
+			fulljson['data'] = self.data
+			self.fulljson = json.dumps(fulljson, skipkeys=True, sort_keys=True, indent=4 * ' ')
