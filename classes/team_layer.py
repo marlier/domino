@@ -9,11 +9,14 @@ import util_layer as Util
 
 conf = Util.load_conf()
 
-def all_teams():
+def all_teams(since=None):
 	'''
 	Get all teams from the db.
 	'''
-	return Mysql.query('''SELECT * FROM teams''', "teams")
+	if since == None or since == 0:
+		return Mysql.query('''SELECT * FROM teams ORDER BY id DESC''', "teams")
+	else:
+		return Mysql.query('''SELECT * FROM teams WHERE id > %s ORDER BY id DESC''' % (since), "teams")
 
 def get_teams(teams_raw):
 	'''
@@ -120,10 +123,10 @@ class Team:
 			self.phone = conf['twilio_number']
 			self.id = id
 		else:
-			self.load_team(id, users)
+			self.load(id, users)
 			self.id = int(id)
 			
-	def load_team(self, id, users=True):
+	def load(self, id, users=True):
 		'''
 		load a team with a specific id
 		'''

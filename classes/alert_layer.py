@@ -15,21 +15,12 @@ import util_layer as Util
 
 conf = Util.load_conf()
 
-def all_alert_history(since=None):
-	'''
-	Get all alerts.
-	'''
-	if since == None:
-		return Mysql.query('''SELECT * FROM alerts_history ORDER BY createDate DESC''', "alerts")
-	else:
-		return Mysql.query('''SELECT * FROM alerts_history WHERE createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s DAY) AND DATE_SUB(CURDATE(),INTERVAL -1 DAY) ORDER BY createDate DESC''' % (int(since)), "alerts")
-
 def frequent_alerts(since=7):
 	'''
 	Get the most frequent alerts
 	'''
 	_db = Mysql.Database()
-	_db._cursor.execute( '''SELECT DISTINCT environment,colo,host,service, COUNT(*) AS count  FROM alerts_history WHERE createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s DAY) AND DATE_SUB(CURDATE(),INTERVAL -1 DAY) GROUP BY environment,colo,host,service  ORDER BY count DESC;''' % (since))
+	_db._cursor.execute( '''SELECT DISTINCT environment,colo,host,service, COUNT(*) AS count FROM alerts_history WHERE createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s DAY) AND DATE_SUB(CURDATE(),INTERVAL -1 DAY) GROUP BY environment,colo,host,service  ORDER BY count DESC;''' % (since))
 	alerts = _db._cursor.fetchall()
 	_db.close()
 	for alert in alerts:
@@ -81,7 +72,7 @@ def graph_data(amount=7, units="HOUR", terms = None):
 	
 	# fill in gaps in the data array
 	# ensure d list has the oldest date and current date so we can properly fill the gaps
-	now = round_date(datetime.datetime.now(), units)
+	now = round_date(datetime.datetime.utcnow(), units)
 	d.append(now)
 	if units.lower() == "second":
 		d.insert(0,now - datetime.timedelta(seconds=amount))
@@ -111,25 +102,34 @@ def graph_data(amount=7, units="HOUR", terms = None):
 	logging.debug(graph_data)
 	
 	return {'unit':units, 'segment':amount, 'search':terms, 'datapoints':graph_data, 'min':min, 'max':max}
-	
-def all_alerts(team=None):
+
+def all_alert_history(since=None,mylimit=25):
 	'''
-	Get current alerts. This means the current status for each host/service.
+	Get all alerts.
 	'''
-	if team == None:
-		return Mysql.query('''SELECT * FROM alerts ORDER BY createDate DESC''', "alerts")
+	if mylimit == 0: mylimit = 1
+	if since == None:
+		return Mysql.query('''SELECT * FROM alerts_history ORDER BY id DESC LIMIT %s''' % (mylimit), "alerts")
 	else:
-		return Mysql.query('''SELECT * FROM alerts WHERE team = '%s' ORDER BY createDate DESC''' % (team), "alerts")
-	return Mysql.query('''SELECT * FROM alerts ORDER BY createDate DESC''', "alerts")
+		return Mysql.query('''SELECT * FROM alerts_history WHERE createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s DAY) AND DATE_SUB(CURDATE(),INTERVAL -1 DAY) ORDER BY id DESC LIMIT %s''' % (int(since), mylimit), "alerts")
+
+def all_alerts(since=None):
+	'''
+	Get current alerts. This means the current status for each environment/colo/host/service.
+	'''
+	if since == None or since == 0:
+		return Mysql.query('''SELECT * FROM alerts ORDER BY id DESC''', "alerts")
+	else:
+		return Mysql.query('''SELECT * FROM alerts WHERE id > %s ORDER BY id DESC''' % (since), "alerts")
 
 def active(team=None):
 	'''
 	All active alerts
 	'''
 	if team == None:
-		return Mysql.query('''SELECT * FROM alerts WHERE ack != 0 ORDER BY createDate DESC''', "alerts")
+		return Mysql.query('''SELECT * FROM alerts WHERE ack != 0 ORDER BY id DESC''', "alerts")
 	else:
-		all_alerts = Mysql.query('''SELECT * FROM alerts WHERE ack != 0 ORDER BY createDate DESC''', "alerts")
+		all_alerts = Mysql.query('''SELECT * FROM alerts WHERE ack != 0 ORDER BY id DESC''', "alerts")
 		team_alerts = []
 		for a in all_alerts:
 			for t in a.teams:
@@ -138,35 +138,23 @@ def active(team=None):
 					break
 		return team_alerts
 
-def acked():
-	'''
-	Get the last 20 inactive alerts.
-	'''
-	return Mysql.query('''SELECT * FROM alerts WHERE ack = 0 ORDER BY createDate DESC LIMIT 20''', "alerts")
-
 def get_current_alert(environment,colo,host,service):
 	'''
 	Get the current status of an alert specified by environment, colo, host, and service
 	'''
-	return Mysql.query('''SELECT * FROM alerts WHERE environment = "%s" and colo = "%s" and host = "%s" and service = "%s" LIMIT 1''' % (environment, colo, host, service), "alerts")
-
-def fresh_alerts():
-	'''
-	This returns a list of alerts that are considered "fresh". These are compared to incoming alerts to deem that as duplicates of alerts that already exist or not.
-	'''
-	return Mysql.query('''select * from alerts where (NOW() - createDate) < %s ORDER BY createDate DESC''' % (conf['alert_freshness']), "alerts")
+	return Mysql.query('''SELECT * FROM alerts WHERE environment = "'%s'" and colo = "'%s'" and host = "'%s'" and service = "'%s'" LIMIT 1''' % (environment, colo, host, service), "alerts")
 	
 def check_paging_alerts():
 	'''
 	This returns a list of alerts that needs an notification sent out.
 	'''
-	return Mysql.query('''SELECT * FROM alerts WHERE ack != 0 AND (NOW() - lastPageSent) > %s and position != 0 ORDER BY createDate DESC''' % (conf['paging_alert_interval']), "alerts")
+	return Mysql.query('''SELECT * FROM alerts WHERE ack != 0 AND (UTC_TIMESTAMP() - lastPageSent) > %s and position != 0 ORDER BY id DESC''' % (conf['paging_alert_interval']), "alerts")
 	
 def check_email_alerts():
 	'''
 	This returns a list of alerts that needs an notification sent out.
 	'''
-	return Mysql.query('''SELECT * FROM alerts WHERE ack != 0 AND (NOW() - lastEmailSent) > %s and position != 0 ORDER BY createDate DESC''' % (conf['email_alert_interval']), "alerts")
+	return Mysql.query('''SELECT * FROM alerts WHERE ack != 0 AND (UTC_TIMESTAMP() - lastEmailSent) > %s and position != 0 ORDER BY id DESC''' % (conf['email_alert_interval']), "alerts")
 
 class Alert():
 	def __init__(self, id=0):
@@ -193,10 +181,10 @@ class Alert():
 			self.tries = 0
 			self.id = id
 		else:
-			self.load_alert(id)
+			self.load(id)
 			self.id = int(id)
 
-	def load_alert(self, id):
+	def load(self, id):
 		'''
 		Load an alert with a specific id.
 		'''
@@ -216,7 +204,7 @@ class Alert():
 			_db = Mysql.Database()
 			_db._cursor.execute('''REPLACE INTO alerts (id,message,teams,ack,ackby,acktime,lastPageSent,lastEmailSent,tries,host,service,environment,colo,status,position,tags,remote_ip_address) VALUES (%s,"%s","%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s",%s,%s,"%s","%s")''', (self.id, self.message, Team.flatten_teams(self.teams), self.ack, self.ackby, self.acktime, self.lastPageSent, self.lastEmailSent, self.tries, self.host, self.service, self.environment, self.colo, self.status, self.position, self.tags, self.remote_ip_address))
 			if self.id == 0:
-				_db._cursor.execute('''select id from alerts order by id desc limit 1''')
+				_db._cursor.execute('''SELECT id FROM alerts ORDER BY id DESC LIMIT 1''')
 				tmp = _db._cursor.fetchone()
 				self.id = tmp['id']
 			_db._cursor.execute('''REPLACE INTO alerts_history (id,message,teams,ack,ackby,acktime,lastPageSent,lastEmailSent,tries,host,service,environment,colo,status,position,tags,remote_ip_address) VALUES (%s,"%s","%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s","%s",%s,%s,"%s","%s")''', (self.id,self.message,Team.flatten_teams(self.teams),self.ack,self.ackby,self.acktime, self.lastPageSent, self.lastEmailSent, self.tries,self.host,self.service, self.environment, self.colo, self.status, self.position, self.tags, self.remote_ip_address))
@@ -235,7 +223,7 @@ class Alert():
 		try:
 			self.ack = 0
 			self.ackby = user.id
-			self.acktime = datetime.datetime.now()
+			self.acktime = datetime.datetime.utcnow()
 			self.save()
 			return True
 		except Exception, e:
@@ -250,7 +238,7 @@ class Alert():
 		
 		try:
 			self.tries += 1
-			self.lastPageSent = datetime.datetime.now()
+			self.lastPageSent = datetime.datetime.utcnow()
 			self.save()
 			newNotification = Notification.Notification()
 			newNotification.noteType = "page"
@@ -309,7 +297,7 @@ class Alert():
 		'''
 		logging.debug("Sending Email Alert: %s" % self.id)
 		try:
-			self.lastEmailSent = datetime.datetime.now()
+			self.lastEmailSent = datetime.datetime.utcnow()
 			self.save()
 			newNotification = Notification.Notification()
 			newNotification.noteType = "email"

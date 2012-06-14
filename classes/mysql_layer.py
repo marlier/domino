@@ -54,26 +54,26 @@ def query(q_string,table):
 				tmp = Alert.Alert()
 				teams = []
 				# convert teams from ids, to object instances
-				for x in t['teams'].split(','):
-					_db._cursor.execute('''SELECT * FROM teams WHERE id = %s''' % (x))
-					y = _db._cursor.fetchone()
-					if y == None: continue
-					z = Team.Team()
-					z.__dict__.update(y)
-					del z.members
-					teams.append(z)
+				_db._cursor.execute('''SELECT * FROM teams WHERE id IN (%s)''' % (t['teams']))
+				y = _db._cursor.fetchall()
+				if y != None:
+					for x in y:
+						z = Team.Team()
+						z.__dict__.update(x)
+						del z.members
+						teams.append(z)
 				t['teams'] = teams
 			elif table == "teams":
 				tmp = Team.Team()
 				members = []
 				# convert members from ids, to object instances
-				for x in t['members'].split(','):
-					_db._cursor.execute('''SELECT * FROM users WHERE id = %s''' % (x))
-					y = _db._cursor.fetchone()
-					if y == None: continue
-					z = User.User()
-					z.__dict__.update(y)
-					members.append(z)
+				_db._cursor.execute('''SELECT * FROM users WHERE id IN (%s)''' % (t['members']))
+				y = _db._cursor.fetchall()
+				if y != None:
+					for x in y:
+						z = User.User()
+						z.__dict__.update(x)
+						members.append(z)
 				t['members'] = members
 			elif table == "notifications":
 				tmp = Notification.Notification()
@@ -150,17 +150,17 @@ class Database:
 				c.execute(cmd)
 				cmd = "use %s;" % (conf['mysql_db'])
 				c.execute(cmd)
-				cmd = '''CREATE TABLE IF NOT EXISTS alerts (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, message TEXT, teams CHAR(50), ack INT NOT NULL DEFAULT 0, ackby INT NOT NULL DEFAULT 0, acktime TIMESTAMP, lastPageSent TIMESTAMP, lastEmailSent TIMESTAMP, tries INT NOT NULL DEFAULT 0, host CHAR(50), service CHAR(50), environment CHAR(30), colo CHAR(50), status INT NOT NULL DEFAULT 3, position INT NOT NULL DEFAULT 0, tags VARCHAR(255), remote_ip_address VARCHAR(45), UNIQUE active(environment,colo,host,service));'''
+				cmd = '''CREATE TABLE IF NOT EXISTS alerts (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP DEFAULT UTC_TIMESTAMP(), message TEXT, teams CHAR(50), ack INT NOT NULL DEFAULT 0, ackby INT NOT NULL DEFAULT 0, acktime TIMESTAMP, lastPageSent TIMESTAMP, lastEmailSent TIMESTAMP, tries INT NOT NULL DEFAULT 0, host CHAR(20), service CHAR(50), environment CHAR(20), colo CHAR(20), status INT NOT NULL DEFAULT 3, position INT NOT NULL DEFAULT 1, tags VARCHAR(255), remote_ip_address VARCHAR(45), UNIQUE active(environment,colo,host,service));'''
 				c.execute(cmd)
-				cmd = '''CREATE TABLE IF NOT EXISTS alerts_history (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, message TEXT, teams CHAR(50), ack INT NOT NULL DEFAULT 0, ackby INT NOT NULL DEFAULT 0, acktime TIMESTAMP, lastPageSent TIMESTAMP, lastEmailSent TIMESTAMP, tries INT NOT NULL DEFAULT 0, host CHAR(50), service CHAR(50), environment CHAR(30), colo CHAR(50), status INT NOT NULL DEFAULT 3, position INT NOT NULL DEFAULT 0, tags VARCHAR(255), remote_ip_address VARCHAR(45));'''
+				cmd = '''CREATE TABLE IF NOT EXISTS alerts_history (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP DEFAULT UTC_TIMESTAMP(), message TEXT, teams CHAR(50), ack INT NOT NULL DEFAULT 0, ackby INT NOT NULL DEFAULT 0, acktime TIMESTAMP, lastPageSent TIMESTAMP, lastEmailSent TIMESTAMP, tries INT NOT NULL DEFAULT 0, host CHAR(20), service CHAR(50), environment CHAR(20), colo CHAR(20), status INT NOT NULL DEFAULT 3, position INT NOT NULL DEFAULT 1, tags VARCHAR(255), remote_ip_address VARCHAR(45));'''
 				c.execute(cmd)
-				cmd = '''CREATE TABLE IF NOT EXISTS users (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, name CHAR(50), email CHAR(50), phone varchar(50), lastAlert INT NOT NULL DEFAULT 0);'''
+				cmd = '''CREATE TABLE IF NOT EXISTS users (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT UTC_TIMESTAMP(), name CHAR(50), email CHAR(50), phone varchar(50), lastAlert INT NOT NULL DEFAULT 0);'''
 				c.execute(cmd)
-				cmd = '''CREATE TABLE IF NOT EXISTS teams (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, name CHAR(50), email CHAR(50), oncall_count INT NOT NULL DEFAULT 0, catchall INT NOT NULL DEFAULT 1, members TEXT, phone CHAR(12));'''
+				cmd = '''CREATE TABLE IF NOT EXISTS teams (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT UTC_TIMESTAMP(), name CHAR(50), email CHAR(50), oncall_count INT NOT NULL DEFAULT 0, catchall INT NOT NULL DEFAULT 1, members TEXT, phone CHAR(12));'''
 				c.execute(cmd)
-				cmd = '''CREATE TABLE IF NOT EXISTS healthcheck (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, name CHAR(30));'''
+				cmd = '''CREATE TABLE IF NOT EXISTS healthcheck (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT UTC_TIMESTAMP(), name CHAR(30));'''
 				c.execute(cmd)
-				cmd = '''CREATE TABLE IF NOT EXISTS notifications (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, noteType VARCHAR(15), message TEXT, tags VARCHAR(255), status INT NOT NULL DEFAULT 3, link VARCHAR(255), alert INT NOT NULL DEFAULT 0)'''
+				cmd = '''CREATE TABLE IF NOT EXISTS notifications (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT UTC_TIMESTAMP(), noteType VARCHAR(15), message TEXT, tags VARCHAR(255), status INT NOT NULL DEFAULT 3, link VARCHAR(255), alert INT NOT NULL DEFAULT 0)'''
 				c.execute(cmd)
 				self.connectDB()
 				return True

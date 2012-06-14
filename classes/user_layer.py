@@ -8,12 +8,15 @@ import team_layer as Team
 import twilio_layer as twilio
 import util_layer as Util
 
-def all_users():
+def all_users(since=None):
 	'''
 	Get all users from the db.
 	'''
-	return Mysql.query('''SELECT * FROM users''', "users")
-
+	if since == None or since == 0:
+		return Mysql.query('''SELECT * FROM users ORDER BY id DESC''', "users")
+	else:
+		return Mysql.query('''SELECT * FROM users WHERE id > %s ORDER BY id DESC''' % (since), "users")
+		
 def get_users(user_ids):
 	'''
 	Get a list of users by ids, which is comma separated
@@ -61,10 +64,10 @@ class User:
 			self.lastAlert = 0
 			self.id = id
 		else:
-			self.load_user(id)
+			self.load(id)
 			self.id = int(id)
 
-	def load_user(self, id):
+	def load(self, id):
 		'''
 		load a user with a specific id
 		'''

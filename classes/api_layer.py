@@ -3,7 +3,7 @@
 import logging, urllib, datetime
 import simplejson as json
 from werkzeug.contrib.atom import AtomFeed
-from urlparse import urljoin
+from datetime import date
 
 import mysql_layer as Mysql
 import twilio_layer as Twilio
@@ -20,86 +20,99 @@ Util.init_logging("api")
 class Api():
 	'''
 	This API class is designed to return json via http request
-	Not even close to being done (obviously)
 	'''
 	def __init__(self, **data):
 		'''
 		Initialize the api class
 		'''
 		# set some default attribute values
-		#pagination
+		
+		# default option vars
 		self.limit = 25
 		self.offset = 0
+		self.search = ''
+		self.since = 0
+		self.sort = 'newest'
 		
 		# set defualt attr for teams
 		self.oncall_count = 0
 		self.twilio_token = conf['twilio_token']
 		self.twilio_acct = conf['twilio_acct']
 		self.twilio_number = conf['twilio_number']
-		self.search = ''
-		self.since = 0
-		#graph data
+
+		# graph data
 		self.segment = 7
 		self.unit = "DAY"
 		
-		self.sort = None
+		# default json vars
 		self.status_message = None
+		
+		# default user vars
 		self.name = None
 		self.phone = None
 		self.email = None
 		self.teams = None
-		self.id = None
-		self.ack = None
+		self.id = 0
+		
+		# default alert vars
+		self.ack = 1
 		self.message = None
-		self.user_id = 0
-		self.format = "json"
+		self.position = 1
+		self.status = 3
 		
 		# default notification vars
 		self.noteType = "email"
+		self.format = "json"
 		
 		# convert the dictionary array received into Api class attributes
 		self.__dict__.update(data)
 		
 		# making sure values are correct var type
-		if self.id != None:
-			try:
-				self.id = int(self.id)
-			except Exception, e:
-				self.populate(1003, "ID is not a integer")
-				return
-		if self.user_id != 0:
-			try:
-				self.user_id = int(self.user_id)
-			except Exception, e:
-				self.populate(1005, "User_id is not a integer")
-				return
-		if self.segment != 0:
-			try:
-				self.segment = int(self.segment)
-			except Exception, e:
-				self.populate(1006, "Segment is not a integer")
-				return
-		if self.limit != 0:
-			try:
-				self.limit = int(self.limit)
-			except Exception, e:
-				self.populate(1006, "Limit is not a integer")
-				return
-		if self.offset != 0:
-			try:
-				self.offset = int(self.offset)
-			except Exception, e:
-				self.populate(1006, "Offset is not a integer")
-				return
-				
-	def healthcheck(self):
-		'''
-		This checks the system to see if capable of handling api requests
-		'''
-		if Util.healthcheck():
-			self.populate(200,"Healthchecks were successful")
-		else:
-			self.populate(500,"Healthchecks were not successful.")
+		try:
+			self.id = int(self.id)
+		except Exception, e:
+			self.populate(1003, "ID is not a integer")
+			return
+		try:
+			self.segment = int(self.segment)
+		except Exception, e:
+			self.populate(1006, "Segment is not a integer")
+			return
+		try:
+			self.limit = int(self.limit)
+		except Exception, e:
+			self.populate(1007, "Limit is not a integer")
+			return
+		try:
+			self.offset = int(self.offset)
+		except Exception, e:
+			self.populate(1008, "Offset is not a integer")
+			return
+		try:
+			self.since = int(self.since)
+		except Exception, e:
+			self.populate(1009, "Since is not a integer")
+			return
+		try:
+			self.status = int(self.status)
+		except Exception, e:
+			self.populate(1010, "Status is not a integer")
+			return
+		try:
+			self.position = int(self.position)
+		except Exception, e:
+			self.populate(1011, "Position is not a integer")
+			return
+		try:
+			self.ack = int(self.ack)
+		except Exception, e:
+			self.populate(1012, "Ack is not a integer")
+			return
+		try:
+			self.oncall_count = int(self.oncall_count)
+		except Exception, e:
+			self.populate(1013, "Oncall_count is not a integer")
+			return
 
 	def get_obj(self):
 		'''
@@ -107,10 +120,10 @@ class Api():
 		'''
 		if self.objType == "Alert" or self.objType == "History":
 			if self.objType == "History":
-				objects = Alert.all_alert_history(self.since)
+				objects = Alert.all_alert_history(self.since,(self.offset + self.limit))
 			else:
 				if self.id==0 or self.id == None:
-					objects = Alert.all_alerts()
+					objects = Alert.all_alerts(self.since)
 				else:
 					objects = [Alert.Alert(self.id)]
 			for o in objects:
@@ -118,12 +131,12 @@ class Api():
 				o.summary = o.summarize()
 		elif self.objType == "User":
 			if self.id==0 or self.id == None:
-				objects = User.all_users()
+				objects = User.all_users(self.since)
 			else:
 				objects = [User.User(self.id)]
 		elif self.objType == "Team":
 			if self.id==0 or self.id == None:
-				objects = Team.all_teams()
+				objects = Team.all_teams(self.since)
 			else:
 				objects = [Team.Team(self.id)]
 		elif self.objType == "Notification":
@@ -151,7 +164,7 @@ class Api():
 		if self.search != None and len(self.search) > 0:
 			objects = self.filter(objects)
 		if self.sort != None and len(self.sort) > 0:
-			if self.sort == "oldest":
+			if self.sort.lower() == "oldest":
 				objects = objects[::-1]
 		# take into account the offset and limit requested
 		objects = objects[self.offset:]
@@ -174,12 +187,13 @@ class Api():
 				#create new alert
 				# check to see if this alert is a new different than the one before it
 				lastAlert = Alert.get_current_alert(self.environment, self.colo, self.host, self.service)
-				if len(lastAlert) > 0: lastAlert = lastAlert[0]
-				if len(lastAlert) == 0 or (lastAlert.host == self.host and lastAlert.service == self.service and lastAlert.colo == self.colo and lastAlert.environment == self.environment and lastAlert.status == self.status):
+				if len(lastAlert) != 0: lastAlert = lastAlert[0]
+				if len(lastAlert) != 0 and (lastAlert.service == self.service and lastAlert.status == self.status and lastAlert.host == self.host and lastAlert.colo == self.colo and lastAlert.environment == self.environment):
 					if lastAlert.message == self.message:
 						self.populate(200,"OK",json.dumps("Repeat alert"))
 					else:
 						lastAlert.message = self.message
+						lastAlert.createDate = datetime.datetime.utcnow()
 						lastAlert.save()
 						self.populate(200,"OK",json.dumps("Repeat alert, updated message."))
 				else:
