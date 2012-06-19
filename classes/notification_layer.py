@@ -61,7 +61,6 @@ class Notification:
 			alert = self.alert
 		else:
 			alert = self.alert.id
-		print '''REPLACE INTO notifications (id,noteType,message,link,tags,status,alert) VALUES (%s,"%s","%s","%s","%s","%s",%s)''' % (self.id,self.noteType,self.message,self.link,self.tags,self.status,alert)
 		return Mysql.save('''REPLACE INTO notifications (id,noteType,message,link,tags,status,alert) VALUES (%s,"%s","%s","%s","%s","%s",%s)''' % (self.id,self.noteType,self.message,self.link,self.tags,self.status,alert))
 	
 	def scrub(self):

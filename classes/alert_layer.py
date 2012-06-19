@@ -175,6 +175,7 @@ class Alert():
 			self.teams = '' #Team.get_default_teams()
 			self.ack = 1
 			self.ackby = 0
+			self.remote_ip_address = '0.0.0.0'
 			self.acktime = '0000-00-00 00:00:00'
 			self.lastPageSent = '0000-00-00 00:00:00'
 			self.lastEmailSent = '0000-00-00 00:00:00'

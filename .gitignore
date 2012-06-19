@@ -16,6 +16,9 @@ develop-eggs
 #configs
 *.conf
 
+#logs
+*.out
+
 # Installer logs
 pip-log.txt
 

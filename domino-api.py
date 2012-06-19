@@ -67,6 +67,8 @@ def process_request(objType, id=0):
 	'''
 	if request.headers['Content-Type'] == 'application/json':
 		data = request.json
+		data['remote_ip_address'] = request.remote_addr
+                data['fullurl'] = request.url
 	else:
 		rawdata = request.args
 		data = {}
