@@ -148,13 +148,13 @@ def check_paging_alerts():
 	'''
 	This returns a list of alerts that needs an notification sent out.
 	'''
-	return Mysql.query('''SELECT * FROM alerts WHERE ack != 0 AND (UTC_TIMESTAMP() - lastPageSent) > %s and position != 0 ORDER BY id DESC''' % (conf['paging_alert_interval']), "alerts")
+	return Mysql.query('''SELECT * FROM alerts WHERE ack != 0 AND (NOW() - lastPageSent) > %s and position != 0 ORDER BY id DESC''' % (conf['paging_alert_interval']), "alerts")
 	
 def check_email_alerts():
 	'''
 	This returns a list of alerts that needs an notification sent out.
 	'''
-	return Mysql.query('''SELECT * FROM alerts WHERE ack != 0 AND (UTC_TIMESTAMP() - lastEmailSent) > %s and position != 0 ORDER BY id DESC''' % (conf['email_alert_interval']), "alerts")
+	return Mysql.query('''SELECT * FROM alerts WHERE ack != 0 AND (NOW() - lastEmailSent) > %s and position != 0 ORDER BY id DESC''' % (conf['email_alert_interval']), "alerts")
 
 class Alert():
 	def __init__(self, id=0):
