@@ -135,7 +135,7 @@ class Database:
 		'''
 		Connect to the db.
 		'''
-		logging.debug("Connecting to db at %s on port %s, as %s" % (conf['mysql_host'], conf['mysql_port'], conf['mysql_username']))
+		#logging.debug("Connecting to db at %s on port %s, as %s" % (conf['mysql_host'], conf['mysql_port'], conf['mysql_username']))
 		try:
 			self._connection = MySQLdb.connect(host=conf['mysql_host'], port=conf['mysql_port'], user=conf['mysql_username'], passwd=conf['mysql_passwd'], db=conf['mysql_db'], cursorclass=MySQLdb.cursors.DictCursor)
 			self._cursor = self._connection.cursor()

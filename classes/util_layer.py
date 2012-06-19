@@ -7,7 +7,6 @@
 from ConfigParser import SafeConfigParser
 import sys, traceback
 import logging
-import notification_layer as Notification
 
 def init_logging(log_file_name = 'server'):
 	'''
@@ -49,6 +48,7 @@ def load_conf(config_file = 'domino.conf'):
 def strace(e):
 	conf = load_conf()
 	logging.error(e.__str__())
+	import notification_layer as Notification
 	if conf['loglevel'] == 'DEBUG': traceback.print_exc(file=open('%s/strace.out' % (conf['logdir']), "a"))
 	newNotification = Notification.Notification()
 	newNotification.noteType = "error"

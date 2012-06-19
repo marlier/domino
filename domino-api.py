@@ -29,23 +29,23 @@ def healthcheck():
 	return Util.healthcheck("alert")
 
 
-@app.route('/api/alert', methods=['GET', 'POST', 'DELETE'])
-@app.route('/api/alert/<int:id>', methods=['GET', 'POST', 'DELETE'])
+@app.route('/api/alert', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
+@app.route('/api/alert/<int:id>', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
 def alert_instance(id=0):
 	return process_request("Alert", id)
 	
-@app.route('/api/user', methods=['GET', 'POST', 'DELETE'])
-@app.route('/api/user/<int:id>', methods=['GET', 'POST', 'DELETE'])
+@app.route('/api/user', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
+@app.route('/api/user/<int:id>', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
 def user_instance(id=0):
 	return process_request("User", id)
 	
-@app.route('/api/team', methods=['GET', 'POST', 'DELETE'])
-@app.route('/api/team/<int:id>', methods=['GET', 'POST', 'DELETE'])
+@app.route('/api/team', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
+@app.route('/api/team/<int:id>', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
 def team_instance(id=0):
 	return process_request("Team", id)
 
-@app.route('/api/notification', methods=['GET', 'POST', 'DELETE'])
-@app.route('/api/notification/<int:id>', methods=['GET', 'POST', 'DELETE'])
+@app.route('/api/notification', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
+@app.route('/api/notification/<int:id>', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
 def note_instance(id=0):
 	return process_request("Notification", id)
 
@@ -80,12 +80,21 @@ def process_request(objType, id=0):
 	apicall = Api.Api(**data)
 	apicall.id = id
 	apicall.objType = objType
+        logging.info("Request Method: %s" % (request.method))
 	if request.method == 'GET':
 		apicall.get_obj()
 	elif request.method == 'POST':
 		apicall.set_obj(data)
 	elif request.method == 'DELETE':
 		apicall.del_obj()
+	elif request.method == 'OPTIONS':
+		resp = make_response()
+		resp.headers['Access-Control-Allow-Credentials'] = 'true'
+		resp.headers['Access-Control-Allow-Origin'] = '*'
+		resp.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
+		resp.headers['Access-Control-Max-Age'] = 1000
+		resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+		return resp
 	if 'format' in data and data['format'] == "xml" and objType == "Notification":
 		resp = make_response(apicall.feed)
 	else:
