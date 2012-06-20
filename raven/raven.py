@@ -4,9 +4,9 @@ import sys, os, select, urllib2
 from optparse import OptionParser
 import simplejson as json
 from ConfigParser import SafeConfigParser
-import ast, logging
+import logging
 
-version="Raven 0.03"
+version="Raven 0.04"
 
 # Parse the command line
 parser = OptionParser()
@@ -44,22 +44,6 @@ for section_name in parser.sections():
 	for name, value in parser.items(section_name):
 		conf[name] = value
 
-# converting these from strings to dict
-def convert_to_dict(var):
-	'''
-	Converts a string (input) to a dictionary (output)
-	'''
-	try:
-		var = ast.literal_eval(var)
-		return var
-	except:
-		# check if value is a single word, in which case, assume as default
-		if len(var.split()) == 1:
-			var={'default':var}
-			return var
-		else:
-			logging.critical("Bad configuration variable: %s" % (var))
-			raise "Bad configuration variable: %s" % (var)
 
 conf['port']=int(conf['port'])
 
