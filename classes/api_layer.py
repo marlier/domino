@@ -187,44 +187,52 @@ class Api():
 				#create new alert
 				# check to see if this alert is a new different than the one before it
 				lastAlert = Alert.get_current_alert(self.environment, self.colo, self.host, self.service)
-				if len(lastAlert) != 0: lastAlert = lastAlert[0]
-				if len(lastAlert) != 0 and (lastAlert.service == self.service and lastAlert.status == self.status and lastAlert.host == self.host and lastAlert.colo == self.colo and lastAlert.environment == self.environment):
-					if lastAlert.message == self.message:
-						self.populate(200,"OK",json.dumps("Repeat alert"))
-					else:
-						lastAlert.message = self.message
-						lastAlert.createDate = datetime.datetime.utcnow()
-						lastAlert.save()
-						self.populate(200,"OK",json.dumps("Repeat alert, updated message."))
-				else:
-					logging.info("Recieved new alert")
-					# save new alert to the db
-					newalert = Alert.Alert()
-					newalert.message = self.message
-					newalert.host = self.host
-					newalert.service = self.service
-					newalert.colo = self.colo
-					newalert.environment = self.environment
-					newalert.tags = self.tags
-					newalert.remote_addr = self.remote_ip_address
-					try:
-						newalert.status = int(self.status)
-					except:
-						pass
-					try:
-						newalert.position = int(self.position)
-					except:
-						pass
-					if newalert.status == 0 or newalert.position == 3:
-						newalert.ack = 0
-					newalert.teams = Team.get_teams(self.teams)
-					if newalert.save() == True:
-						if newalert.send_page() == True and newalert.send_email() == True:
-							self.populate(200,"OK")
+				alertFound = False
+				if len(lastAlert) != 0:
+					lastAlert = lastAlert[0]
+					alertFound = True
+				logging.info("Recieved alert submission")
+				try:
+					if alertFound == True and (lastAlert.service == self.service and lastAlert.status == self.status and lastAlert.host == self.host and lastAlert.colo == self.colo and lastAlert.environment == self.environment):
+						if lastAlert.message == self.message:
+							self.populate(200,"OK",json.dumps("Repeat alert"))
 						else:
-							self.populate(1202, "Failed to send new alert")
+							lastAlert.message = self.message
+							lastAlert.createDate = datetime.datetime.utcnow()
+							lastAlert.save()
+							self.populate(200,"OK",json.dumps("Repeat alert, updated message."))
 					else:
-						self.populate(1202, "Failed to save new alert")
+						# save new alert to the db
+						newalert = Alert.Alert()
+						newalert.message = self.message
+						newalert.host = self.host
+						newalert.service = self.service
+						newalert.colo = self.colo
+						newalert.environment = self.environment
+						newalert.tags = self.tags
+						newalert.remote_addr = self.remote_ip_address
+						try:
+							newalert.status = int(self.status)
+						except:
+							pass
+						try:
+							newalert.position = int(self.position)
+						except:
+							pass
+						if newalert.status == 0 or newalert.position == 3:
+							newalert.ack = 0
+						newalert.teams = Team.get_teams(self.teams)
+						if newalert.save() == True:
+							if newalert.send_page() == True and newalert.send_email() == True:
+								self.populate(200,"OK")
+							else:
+								self.populate(1202, "Failed to send new alert")
+						else:
+							self.populate(1202, "Failed to save new alert")
+				except Exception, e:
+					self.populate(1602,e.__str__())
+                                        Util.strace(e)
+                                        return
 			elif self.id != 0:
 				try:
 					obj = Alert.Alert(self.id)

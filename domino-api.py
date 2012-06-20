@@ -67,22 +67,19 @@ def process_request(objType, id=0):
 	'''
 	if request.headers['Content-Type'] == 'application/json':
 		data = request.json
-		data['remote_ip_address'] = request.remote_addr
-                data['fullurl'] = request.url
 	else:
 		rawdata = request.args
 		data = {}
 		# converting from multidict to dict
 		for key, value in rawdata.items():
 			data[key] = value
-		# add remote ip address to dict
-		data['remote_ip_address'] = request.remote_addr
-		data['fullurl'] = request.url
+	# add remote ip address to dict
+	data['remote_ip_address'] = request.remote_addr
+	data['fullurl'] = request.url
 	logging.info("Receiving a api request for %s( id:%d )\n%s" % (objType, id, data))
 	apicall = Api.Api(**data)
 	apicall.id = id
 	apicall.objType = objType
-        logging.info("Request Method: %s" % (request.method))
 	if request.method == 'GET':
 		apicall.get_obj()
 	elif request.method == 'POST':

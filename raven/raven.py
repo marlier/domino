@@ -6,7 +6,7 @@ import simplejson as json
 from ConfigParser import SafeConfigParser
 import ast, logging
 
-version="Raven 0.02"
+version="Raven 0.03"
 
 # Parse the command line
 parser = OptionParser()
@@ -16,7 +16,7 @@ parser.add_option('-H', '--host', dest='host', help='Hostname', type='string', d
 parser.add_option('-v', '--service', dest='service', help='Service name', type='string', default=None)
 parser.add_option('-e', '--environment', dest='environment', help='Environment (ie Production, QA, Staging)', type='string', default=None)
 parser.add_option('-d', '--colo', dest='colo', help='Colo or datacenter name', type='string', default=None)
-parser.add_option('-s', '--status', dest='status', help='Alert status. 0=OK, 1=Warning, 2=Critical, 3=Unknown', type='int', default=None)
+parser.add_option('-s', '--status', dest='status', help='Alert status. 0=OK, 1=Warning, 2=Critical, 3=Unknown', type='string', default=None)
 parser.add_option('-P', '--position', dest='position', help='Position. 0=No Alert, 1=email only, 2=paging, 3=paging with no acknowledgment required', type='int', default=None)
 parser.add_option('-T', '--tags', dest='tags', help='Tags. A comma separated list of "tags" or "cagetories" this alert is associated', type='string', default=None)
 parser.add_option('-z', '--server', dest='server', help='Domino Server address', type='string', default=None)
@@ -90,6 +90,15 @@ if opts.service != None: alert['service']=opts.service
 if opts.environment != None: alert['environment']=opts.environment
 if opts.colo != None: alert['colo']=opts.colo
 if opts.status != None: alert['status']=opts.status
+if len(opts.status) > 1:
+	if alert['status'].lower() == "ok":
+		alert['status'] = 0
+	elif alert['status'].lower() == "warning":
+		alert['status'] = 1
+	elif alert['status'].lower() == "critical":
+		alert['status'] = 2
+	else:
+		alert['status'] = 3
 if opts.position != None: alert['position']=opts.position
 if opts.tags != None: alert['tags']=opts.tags
 if opts.server != None: alert['server']=opts.server
@@ -109,12 +118,6 @@ summary='''Sending a raven:
     Message: %s''' % (alert['environment'], alert['colo'], alert['host'], alert['service'], alert['teams'], alert['status'], alert['position'], alert['tags'], alert['server'], alert['port'], alert['message'])
 
 logging.info(summary)
-
-# create encoded url query
-#if opts.host.startswith('http'):
-#	query='%s:%i/api/create?target=alerts&message=%s&teams=%s&host=%s&service=%s&environment=%s&colo=%s&status=%s&position=%s&tags=%s' % (opts.server, opts.port,urllib.quote_plus(opts.message),urllib.quote_plus(opts.teams),urllib.quote_plus(opts.host),urllib.quote_plus(opts.service),urllib.quote_plus(opts.environment),urllib.quote_plus(opts.colo),opts.status,opts.position,urllib.quote_plus(opts.tags))
-#else:
-#	query='http://%s:%i/api/create?target=alerts&message=%s&teams=%s&host=%s&service=%s&environment=%s&colo=%s&status=%s&position=%s&tags=%s' % (opts.server, opts.port,urllib.quote_plus(opts.message),urllib.quote_plus(opts.teams),urllib.quote_plus(opts.host),urllib.quote_plus(opts.service),urllib.quote_plus(opts.environment),urllib.quote_plus(opts.colo),opts.status,opts.position,urllib.quote_plus(opts.tags))
 
 url = "http://%s:%i/api/alert" % (alert['server'], alert['port'])
 
