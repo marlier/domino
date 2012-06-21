@@ -45,7 +45,7 @@ function get_detail_graph(div) {
 			var labelpoints = new Array();
 			var minValue = "nil";
 			var maxValue = "nil";
-			$.each(json.data[0].data, function(i,d) {
+			$.each(json.data[0].datapoints, function(i,d) {
 				datapoints.push(d.count);
 				labelpoints.push(new Date(d.date).getDate());
 				if ((minValue > d.min) || (minValue == "nil")) {
@@ -55,10 +55,11 @@ function get_detail_graph(div) {
 					maxValue = d.max
 				};
 			});
+			console.debug(json.data[0]);
 			if (json.data[0].terms == 0) {
 				json.data[0].terms = "All";
 			} else {
-				json.data[0].terms = json.data[0].terms.join();
+				json.data[0].terms = json.data[0].search.join();
 			};
 			$(div).gchart('destroy');
 			$(div).gchart({
@@ -91,7 +92,6 @@ function graph(div, segment, unit) {
 				var minValue = "nil";
 				var maxValue = "nil";
 				$.each(json.data[0].data, function(i,d) {
-					console.debug(d);
 					datapoints.push(d.count);
 					labelpoints.push(new Date(d.date).getDate());
 					if ((minValue > d.min) || (minValue == "nil")) {
