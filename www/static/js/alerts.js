@@ -39,7 +39,7 @@ function print_alerts(alerts,alert_div,sidebar_div) {
 		output = output + '<li onclick="add_search_terms(\'host:' + a.host + '\')">' + a.host + '</li>';
 		output = output + '<li onclick="add_search_terms(\'service:' + a.service + '\')">' + a.service + '</li>';
 		output = output + '<li onclick="add_search_terms(\'status:' + a.status + '\')">' + a.status + '</li>';
-		output = output + '<li><a href="./detail.html?host='+a.host+'&environment='+a.environment+'&colo='+a.colo+'&service='+a.service+'">View</a></li>';
+		output = output + '<li><a href="./detail?host='+a.host+'&environment='+a.environment+'&colo='+a.colo+'&service='+a.service+'">View</a></li>';
 		output = output + '</ul>';
 		output = output + '<div class="alert_body" id="'+ a.status +'">' + a.summary;
 		d = new Date(a.createDate+"Z");		
