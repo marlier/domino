@@ -7,7 +7,7 @@ $(document).ready(function(){
 });
 
 function query(div,sidebar_div,team,count){
-	count = typeof count !== 'undefined' ? count : 25;
+	count = typeof count !== 'undefined' ? count : 0;
 	team = typeof team !== 'undefined' ? team : "";
 	console.info("Query: " + table);
 	var url = base_url+table+"?limit="+count+"&search="+search_terms.join(",");

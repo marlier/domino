@@ -24,6 +24,12 @@ def query(q_string,table):
 		temp = _db._cursor.fetchall()
 		if len(temp) == 0: return []
 		objects = []
+		if table == "users" or table == "alerts":
+			_db._cursor.execute('''SELECT * FROM teams''')
+			teams = _db._cursor.fetchall()
+		elif table == "teams":
+			_db._cursor.execute('''SELECT * FROM users''')
+			users = _db._cursor.fetchall()
 		for t in temp:
 			# remove any quotes around strings that the db may have
 			for key in t:
@@ -36,8 +42,6 @@ def query(q_string,table):
 				uid = t['id']
 				
 				# get all teams and their members
-				_db._cursor.execute('''SELECT * FROM teams''')
-				teams = _db._cursor.fetchall()
 				if teams == None: continue
 				
 				#see if any of the teams has this user id.
@@ -52,17 +56,17 @@ def query(q_string,table):
 				t['teams'] = userTeams
 			elif table == "alerts":
 				tmp = Alert.Alert()
-				teams = []
+				alert_teams = []
 				# convert teams from ids, to object instances
-				_db._cursor.execute('''SELECT * FROM teams WHERE id IN (%s)''' % (t['teams']))
-				y = _db._cursor.fetchall()
-				if y != None:
-					for x in y:
-						z = Team.Team()
-						z.__dict__.update(x)
-						del z.members
-						teams.append(z)
-				t['teams'] = teams
+				t['teams'] = t['teams'].split(',')
+				if teams != None:
+					for x in teams:
+						if str(x['id']) in t['teams']:
+							z = Team.Team()
+							z.__dict__.update(x)
+							del z.members
+							alert_teams.append(z)
+				t['teams'] = alert_teams
 			elif table == "teams":
 				tmp = Team.Team()
 				members = []
