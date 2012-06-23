@@ -346,7 +346,7 @@ class Alert():
 		'''
 		Take alert attributes in put them into a one-liner
 		'''
-		return "%s: %s - %s/%s" % (self.colo, self.status_wordform(), self.host, self.service)
+		return "%s(%s): %s - %s/%s" % (self.colo, self.environment, self.status_wordform(), self.host, self.service)
 	
 	def summarize(self):
 		'''

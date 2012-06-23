@@ -12,6 +12,7 @@ port=8008
 
 # server address
 # used to make http calls
+# must start with http(s)://
 server_address=
 
 # server debug mode
@@ -39,6 +40,7 @@ webui_port=8010
 
 # server address
 # used to make http calls
+# must start with http(s)://
 webui_address=
 
 [api]
@@ -53,6 +55,7 @@ api_port=8009
 
 # server address
 # used to make http calls
+# must start with http(s)://
 api_address=
 
 [twilio]

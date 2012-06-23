@@ -114,6 +114,21 @@ class Api():
 			self.populate(1013, "Oncall_count is not a integer")
 			return
 
+	def ack(self):
+		'''
+		Ack an alert
+		'''
+		try:
+			alert = Alert.Alert(self.id)
+			alert.ack = 0
+			alert.save()
+			self.populate(200, "OK")
+			return
+		except Exception, e:
+			self.populate(1689,e.__str__())
+			Util.strace(e)
+			return
+
 	def get_obj(self):
 		'''
 		This gets an object(s)
@@ -182,17 +197,17 @@ class Api():
 		'''
 		This sets or saves an alert, or creates a new one
 		'''
-		if self.objType == "Alert":
-			if self.id == None or self.id == 0:
-				#create new alert
-				# check to see if this alert is a new different than the one before it
-				lastAlert = Alert.get_current_alert(self.environment, self.colo, self.host, self.service)
-				alertFound = False
-				if len(lastAlert) != 0:
-					lastAlert = lastAlert[0]
-					alertFound = True
-				logging.info("Recieved alert submission")
-				try:
+		try:
+			if self.objType == "Alert":
+				if self.id == None or self.id == 0:
+					#create new alert
+					# check to see if this alert is a new different than the one before it
+					lastAlert = Alert.get_current_alert(self.environment, self.colo, self.host, self.service)
+					alertFound = False
+					if len(lastAlert) != 0:
+						lastAlert = lastAlert[0]
+						alertFound = True
+					logging.info("Recieved alert submission")
 					if alertFound == True and (lastAlert.service == self.service and lastAlert.status == self.status and lastAlert.host == self.host and lastAlert.colo == self.colo and lastAlert.environment == self.environment):
 						if lastAlert.message == self.message:
 							self.populate(200,"OK",json.dumps("Repeat alert"))
@@ -229,102 +244,101 @@ class Api():
 								self.populate(1202, "Failed to send new alert")
 						else:
 							self.populate(1202, "Failed to save new alert")
-				except Exception, e:
-					self.populate(1602,e.__str__())
-                                        Util.strace(e)
-                                        return
-			elif self.id != 0:
-				try:
-					obj = Alert.Alert(self.id)
-					obj.__dict__.update(data)
-					if obj.save() == True:
-						self.populate(200,"OK")
-					else:
-						self.populate(701,"Failed to save alert.")
-				except Exception, e:
-					self.populate(1602,e.__str__())
-					Util.strace(e)
-					return
-		elif self.objType == "User":
-			if self.id == None or self.id == 0:
-				if self.name == None or len(self.name) <= 0:
-					self.populate(1301,"No name parameter given in user creation")
-					return
-				if self.email == None or len(self.email) <= 0 or "@" not in self.email:
-					self.populate(1302,"No or invalid email parameter given in user creation")
-					return
-				if self.phone == None or len(self.phone) != 12:
-					self.populate(1303,"No or invalid phone number parameter given in user creation")
-					return
-				newuser = User.User()
-				newuser.name = self.name
-				newuser.email = self.email
-				newuser.phone = self.phone
-				if newuser.save():
-					logging.info("Sucessfully created new user: %s" % (newuser.name))
-					valid_code = Twilio.validate_phone(newuser)
-					if valid_code['success'] == False:
-						self.populate(1401,valid_code['message'])
+				elif self.id != 0:
+					try:
+						obj = Alert.Alert(self.id)
+						obj.__dict__.update(data)
+						if obj.save() == True:
+							self.populate(200,"OK")
+						else:
+							self.populate(701,"Failed to save alert.")
+					except Exception, e:
+						self.populate(1602,e.__str__())
+						Util.strace(e)
 						return
-					elif valid_code['success'] == True:
-						self.populate(1400,"Validation Code: %s" % (valid_code))
+			elif self.objType == "User":
+				if self.id == None or self.id == 0:
+					if self.name == None or len(self.name) <= 0:
+						self.populate(1301,"No name parameter given in user creation")
 						return
-				else:
-					self.populate(1305, "Failed to save team data")
-			elif self.id != 0:
-				try:
-					obj = User.User(self.id)
-					obj.__dict__.update(data)
-					if obj.save() == True:
+					if self.email == None or len(self.email) <= 0 or "@" not in self.email:
+						self.populate(1302,"No or invalid email parameter given in user creation")
+						return
+					if self.phone == None or len(self.phone) != 12:
+						self.populate(1303,"No or invalid phone number parameter given in user creation")
+						return
+					newuser = User.User()
+					newuser.name = self.name
+					newuser.email = self.email
+					newuser.phone = self.phone
+					if newuser.save():
+						logging.info("Sucessfully created new user: %s" % (newuser.name))
+						valid_code = Twilio.validate_phone(newuser)
+						if valid_code['success'] == False:
+							self.populate(1401,valid_code['message'])
+							return
+						elif valid_code['success'] == True:
+							self.populate(1400,"Validation Code: %s" % (valid_code))
+							return
+					else:
+						self.populate(1305, "Failed to save team data")
+				elif self.id != 0:
+					try:
+						obj = User.User(self.id)
+						obj.__dict__.update(data)
+						if obj.save() == True:
+							self.populate(200,"OK")
+						else:
+							self.populate(701,"Failed to save user.")
+					except Exception, e:
+						self.populate(1602,e.__str__())
+						Util.strace(e)
+						return
+			elif self.objType == "Team":
+				if self.id == None or self.id == 0:
+					if self.name == None or len(self.name) <= 0:
+						self.populate(1901,"No name parameter given in team creation")
+						return
+					newteam = Team.Team()
+					newteam.name = self.name
+					newteam.email = self.email
+					newteam.members = User.get_users(self.members)
+					newteam.oncall_count = self.oncall_count
+					newteam.catchall = self.catchall
+					if len(self.phone) == 11 and self.phone[0:1] != "+": self.phone = "+%s" % (self.phone) 
+					newteam.phone = self.phone
+					if newteam.save():
 						self.populate(200,"OK")
 					else:
-						self.populate(701,"Failed to save user.")
-				except Exception, e:
-					self.populate(1602,e.__str__())
-					Util.strace(e)
-					return
-		elif self.objType == "Team":
-			if self.id == None or self.id == 0:
-				if self.name == None or len(self.name) <= 0:
-					self.populate(1901,"No name parameter given in team creation")
-					return
-				newteam = Team.Team()
-				newteam.name = self.name
-				newteam.email = self.email
-				newteam.members = User.get_users(self.members)
-				newteam.oncall_count = self.oncall_count
-				newteam.catchall = self.catchall
-				if len(self.phone) == 11 and self.phone[0:1] != "+": self.phone = "+%s" % (self.phone) 
-				newteam.phone = self.phone
-				if newteam.save():
-					self.populate(200,"OK")
-				else:
-					self.populate(1902, "Failed to save team data")
-			elif self.id != 0:
-				try:
-					obj = Team.Team(self.id)
-					# save the original members of the team to see if its changed
-					orig_members = self.members[:self.oncall_count]
-					obj.__dict__.update(data)
-					obj.members = User.get_users(self.members)
-					if obj.save() == True:
-						# SMS the delta of whose on call
-						oncall_list = []
-						for i,o in enumerate(orig_members):
-							oncall_list.append(o.id)
-							if o.id != obj.members[i].id:
-								Twilio.send_sms(o, self, None, "You're now on call for team %s in spot %d" % (self.name, (i+1)))
-						for m in obj.members[:self.oncall_count]:
-							if m.id not in oncall_list:
-								Twilio.send_sms(m, self, None, "You're no longer on call for team %s" % (self.name))
-						self.populate(200,"OK")
-					else:
-						self.populate(701,"Failed to save team.")
-				except Exception, e:
-					self.populate(1602,e.__str__())
-					Util.strace(e)
-					return
-			
+						self.populate(1902, "Failed to save team data")
+				elif self.id != 0:
+					try:
+						obj = Team.Team(self.id)
+						# save the original members of the team to see if its changed
+						orig_members = self.members[:self.oncall_count]
+						obj.__dict__.update(data)
+						obj.members = User.get_users(self.members)
+						if obj.save() == True:
+							# SMS the delta of whose on call
+							oncall_list = []
+							for i,o in enumerate(orig_members):
+								oncall_list.append(o.id)
+								if o.id != obj.members[i].id:
+									Twilio.send_sms(o, self, None, "You're now on call for team %s in spot %d" % (self.name, (i+1)))
+							for m in obj.members[:self.oncall_count]:
+								if m.id not in oncall_list:
+									Twilio.send_sms(m, self, None, "You're no longer on call for team %s" % (self.name))
+							self.populate(200,"OK")
+						else:
+							self.populate(701,"Failed to save team.")
+					except Exception, e:
+						self.populate(1602,e.__str__())
+						Util.strace(e)
+						return
+		except Exception, e:
+			self.populate(1677,e.__str__())
+			Util.strace(e)
+			return
 	def del_obj(self):
 		'''
 		This deletes an object

@@ -33,7 +33,17 @@ def healthcheck():
 @app.route('/api/alert/<int:id>', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
 def alert_instance(id=0):
 	return process_request("Alert", id)
-	
+
+@app.route('/api/alert/<int:id>/ack', methods=['POST', 'OPTIONS'])
+def ack_alert(id=0):
+	apicall = Api.Api(**data)
+	apicall.id = id
+	apicall.ack(id)
+	resp = make_response(apicall.fulljson)
+	resp.headers['Access-Control-Allow-Credentials'] = 'true'
+	resp.headers['Access-Control-Allow-Origin'] = '*'
+	return resp
+
 @app.route('/api/user', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
 @app.route('/api/user/<int:id>', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
 def user_instance(id=0):
