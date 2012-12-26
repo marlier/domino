@@ -17,7 +17,6 @@ parser.add_option('-v', '--service', dest='service', help='Service name', type='
 parser.add_option('-e', '--environment', dest='environment', help='Environment (ie Production, QA, Staging)', type='string', default=None)
 parser.add_option('-d', '--colo', dest='colo', help='Colo or datacenter name', type='string', default=None)
 parser.add_option('-s', '--status', dest='status', help='Alert status. 0=OK, 1=Warning, 2=Critical, 3=Unknown', type='string', default=None)
-parser.add_option('-P', '--position', dest='position', help='Position. 0=No Alert, 1=email only, 2=paging, 3=paging with no acknowledgment required', type='int', default=None)
 parser.add_option('-T', '--tags', dest='tags', help='Tags. A comma separated list of "tags" or "cagetories" this alert is associated', type='string', default=None)
 parser.add_option('-z', '--server', dest='server', help='Domino Server address', type='string', default=None)
 parser.add_option('-p', '--port', dest='port', help='Domino Port', type='int', default=None)
@@ -83,7 +82,6 @@ if len(opts.status) > 1:
 		alert['status'] = 2
 	else:
 		alert['status'] = 3
-if opts.position != None: alert['position']=opts.position
 if opts.tags != None: alert['tags']=opts.tags
 if opts.server != None: alert['server']=opts.server
 if opts.port != None: alert['port']=opts.port
@@ -95,11 +93,10 @@ summary='''Sending a raven:
     Service: %s
     Teams: %s
     Status: %s
-    Position: %s
     Tags: %s
     Server: %s
     Port: %s
-    Message: %s''' % (alert['environment'], alert['colo'], alert['host'], alert['service'], alert['teams'], alert['status'], alert['position'], alert['tags'], alert['server'], alert['port'], alert['message'])
+    Message: %s''' % (alert['environment'], alert['colo'], alert['host'], alert['service'], alert['teams'], alert['status'], alert['tags'], alert['server'], alert['port'], alert['message'])
 
 logging.info(summary)
 

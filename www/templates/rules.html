@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>Domino</title>
+		<meta name="copyright" content="Copyright (c) 2012" />		
+		<script src="https://s3.amazonaws.com/domino-resources/nightly/js/jquery-1.7.2.min.js" type="text/javascript"></script>
+		<script src="https://s3.amazonaws.com/domino-resources/nightly/js/jquery-ui-1.8.20.teams.min.js" type="text/javascript"></script>
+		<script type="text/javascript" src="static/js/lib.js"></script>
+		<script type="text/javascript" src="static/js/rules.js"></script>
+		<link rel="stylesheet" type="text/css" href="static/css/base.css" media="screen, print, projection" />
+		<link rel="stylesheet" type="text/css" href="static/css/jquery-ui.css" media="screen, print, projection" />
+		<link href='http://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
+	</head>
+	<body>
+		<div id="wrap">
+
+			<div id="top"></div>
+			
+			<div id="main">
+                <div id="rule_edit" style="float:left;">
+                    <form>
+                        <fieldset>
+                            <legend>Edit/Save Rule</legend>
+                            <label>Environment</label>
+                            <input type="text" id='environment' placeholer='Any'>
+                            <label>Colo</label>
+                            <input type="text" id='colo' placeholer='Any'>
+                            <label>Host</label>
+                            <input type="text" id='host' placeholer='Any'>
+                            <label>Service</label>
+                            <input type="text" id='service' placeholer='Any'>
+                            <label>State</label>
+                            <input type="text" id='state' placeholer='Any'>
+                            <label>Tag</label>
+                            <input type="text" id='tag' placeholer='Any'>
+                            <label>Add Tag</label>
+                            <input type="text" id='addtag'>
+                            <label>Remove Tag</label>
+                            <input type="text" id='removetag'>
+                            <button type="submit" class="btn">Save</button>
+                        </fieldset>
+                    </form>
+                </div>
+				<div id="data">
+                    <table>
+                        <tr>
+                            <th>Environment</th>
+                            <th>Colo</th>
+                            <th>Host</th>
+                            <th>Service</th>
+                            <th>State</th>
+                            <th>Tag</th>
+                            <th><bold>Add Tag</bold></th>
+                            <th><bold>Remove Tag</bold></th>
+                        </tr>
+                        <div id='rules_rows'></div>
+                    </table>
+                </div>
+			</div>
+			
+			<div id="bottom"></div>
+			
+		</div>
+	</body>
+</html>

@@ -32,8 +32,7 @@ def load_conf(config_file = 'domino.conf'):
 		conf['mysql_passwd'] = ''
 	
 	# converting strings to integers
-	conf['paging_alert_interval']=int(conf['paging_alert_interval'])
-	conf['email_alert_interval']=int(conf['email_alert_interval'])
+	conf['alert_interval']=int(conf['alert_interval'])
 	conf['alert_escalation']=int(conf['alert_escalation'])
 	conf['api_port']=int(conf['api_port'])
 	conf['webui_port']=int(conf['webui_port'])
@@ -53,7 +52,8 @@ def strace(e):
 	newNotification = Notification.Notification()
 	newNotification.noteType = "error"
 	newNotification.alert = 0
-	newNotification.message = e.__str__()
+    # character escape any double quotes so mysql won't vomit
+	newNotification.message = e.__str__().replace('"', '\\"')
 	newNotification.tags = ''
 	newNotification.status = 2
 	newNotification.link = ""

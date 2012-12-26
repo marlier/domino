@@ -32,6 +32,11 @@ def index():
 def alerts():
 	return render_template('alerts.html')
 
+@app.route('/rule')
+@app.route('/rules')
+def rules():
+    return render_template('rules.html')
+
 @app.route('/team')
 @app.route('/teams')
 def teams():

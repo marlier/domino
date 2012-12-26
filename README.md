@@ -20,7 +20,7 @@ Denpencies
  * Simplejson (http://pypi.python.org/pypi/simplejson/)
 
 Important Notes
- * The server you run Domino on and the mysql server must be in the same timezone (for now)
+ * The server you run Domino on and the mysql server must be on UTC timezone
  * This software does use Twilio (www.twilio.com) to handle SMS and phone calls. If you want to use this, you must setup your own Twilio account.
  * Your Domino-comm.py service must be accessable by twilio's servers can make http calls to it
 

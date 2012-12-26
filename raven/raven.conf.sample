@@ -7,7 +7,6 @@ environment=production
 colo=
 host=
 status=3
-position=0
 server=localhost
 port=8009
 logdir=/var/log/domino
