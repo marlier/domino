@@ -184,7 +184,7 @@ class Alert():
         '''
         logging.debug("Loading alert: %s" % id)
         try:
-            self.__dict__.update(Mysql.query('''SELECT * FROM alerts_history WHERE id = %s LIMIT ''' % (id), "alerts")[0].__dict__)
+            self.__dict__.update(Mysql.query('''SELECT * FROM alerts_history WHERE id = %s LIMIT 1''' % (id), "alerts")[0].__dict__)
             if isinstance(self.status, str) and len(self.status) > 1:
                 if self.status.upper() == "OK": 
                     self.status = 0

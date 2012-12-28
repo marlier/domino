@@ -1,4 +1,5 @@
 var service_attrs;
+var id = 0;
 
 $(document).ready(function(){
     detail_attrs = window.location.href.slice(window.location.href.indexOf('?') + 1)
@@ -7,6 +8,25 @@ $(document).ready(function(){
     get_detail();
 //  get_detail_graph("#graph");
 //  get_detail_history("#history");
+
+    $("#addTagBtn").click(function() {
+        console.debug("adding tag");
+        tag = $("input#addatag").val();
+
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json',
+            url: "/api/alert/"+id+"/addtag/"+tag,
+            dataType: "json",
+            data: {},
+            success: function(data, textStatus, jqXHR){
+                print_tags(data.data[0].tags.split(','));
+            },    
+            error: function(jqXHR, textStatus, errorThrown){
+            }     
+        }); 
+    });
+
 });
 
 
@@ -15,6 +35,7 @@ function get_detail(){
     $.getJSON(url,function(json){
         if (process_header(json.status, json.status_message)) {
             a = json.data[0]
+            id = a.id;
             $("#general #service").text(a.service);
             $("#general #host").text(a.host);
             $("#general #colo").text(a.colo);
@@ -33,13 +54,7 @@ function get_detail(){
                 $("#status .widget-content").addClass("alert alert-info");
             };
 
-
-            tagBtns = $('<ul>');
-            tagBtns.addClass('nav nav-pills');
-            $.each(a.tags.split(','),function(i,t) {
-                tagBtns.append('<li class="grey active"><a href="#">'+t+'</a></li>');
-            });
-            $('#tags .widget-content').html(tagBtns);
+            print_tags(a.tags.split(','));
 
             var url = "/api/rule?environment="+a.environment+"&colo="+a.colo+"&host="+a.host+"&service="+a.service+"&status="+a.status+"&tag="+a.tags;
             console.debug(url);
@@ -66,6 +81,32 @@ function get_detail(){
                 };
             });
         };
+    });
+};
+
+function print_tags(tags) {
+    tagBtns = $('<ul>');
+    tagBtns.addClass('nav nav-pills');
+    $.each(tags,function(i,t) {
+        tagBtns.append('<li class="grey active"><a class="remove_tag" tag="'+t+'" id="'+a.id+'" href="#"><i class="icon-white icon-remove"></i> '+t+'</a></li>');
+    });
+    $('#tags .widget-content').html(tagBtns);
+
+    $(".remove_tag").click(function() {
+        id = $(this).attr('id');
+        tag = $(this).attr('tag');
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json',
+            url: "/api/alert/"+id+"/removetag/"+tag,
+            dataType: "json",
+            data: {},
+            success: function(data, textStatus, jqXHR){
+                print_tags(data.data[0].tags.split(','));
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+            }
+        });
     });
 };
 

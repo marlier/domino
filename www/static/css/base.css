@@ -53,3 +53,14 @@ div.select2-drop {
 #status .widget-content {
 	min-height: 115px;
 }
+
+#addatag {
+	margin-bottom: 0px;
+	margin-top: 4px;
+}
+
+#addTagBtn {
+	margin-top: 6px;
+	margin-left: 3px;
+	margin-right: 3px;
+}

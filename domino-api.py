@@ -37,9 +37,35 @@ def healthcheck():
 def alert_instance(id=0):
     return process_request("Alert", id)
 
+@app.route('/api/alert/<int:id>/addtag/<tag>', methods=['POST', 'OPTIONS'])
+def addTag(id=0,tag=None):
+    data = {}
+    apicall = Api.Api(**data)
+    apicall.id = id
+    apicall.tag = tag
+    print apicall.__dict__
+    apicall.addaTag()
+    resp = make_response(apicall.fulljson)
+    resp.headers['Access-Control-Allow-Credentials'] = 'true'
+    resp.headers['Access-Control-Allow-Origin'] = '*' 
+    return resp 
+
+@app.route('/api/alert/<int:id>/removetag/<tag>', methods=['POST', 'OPTIONS'])
+def removeTag(id=0,tag=None):
+    data = {}
+    apicall = Api.Api(**data)
+    apicall.id = id
+    apicall.tag = tag 
+    print apicall.__dict__
+    apicall.removeaTag()
+    resp = make_response(apicall.fulljson)
+    resp.headers['Access-Control-Allow-Credentials'] = 'true'
+    resp.headers['Access-Control-Allow-Origin'] = '*' 
+    return resp
+
 @app.route('/api/alert/<int:id>/ack', methods=['POST', 'OPTIONS'])
 def ack_alert(id=0):
-    apicall = Api.Api(**data)
+    apicall = Api.Api()
     apicall.id = id
     apicall.ack(id)
     resp = make_response(apicall.fulljson)
@@ -124,6 +150,8 @@ def process_request(objType, id=0):
             apicall.setRule(data)
         elif objType == "Team":
             apicall.setTeam(data)
+        elif objType == "addTag":
+            apicall.addTag()
     elif request.method == 'DELETE':
         if objType == "Alert":
             apicall.delAlert()

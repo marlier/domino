@@ -128,6 +128,48 @@ class Api():
             Util.strace(e)
             return
 
+    def addaTag(self):
+        ''' 
+        Add tag to an alert
+        '''
+        try:
+            alert = Alert.Alert(self.id)
+            tags = alert.tags.split(',')
+            if self.tag not in tags:
+                tags.append(self.tag)
+            alert.tags = ",".join(tags)
+            alert.save()
+            alert.status = alert.status_wordform()
+            alert.summary = alert.summarize()
+            objects = self.processGetResults([alert])
+            self.populate(200, "OK", objects)
+            return
+        except Exception, e:
+            self.populate(1690,e.__str__())
+            Util.strace(e)
+            return
+
+    def removeaTag(self):
+        ''' 
+        Remove tag to an alert
+        '''
+        try:
+            alert = Alert.Alert(self.id)
+            tags = alert.tags.split(',')
+            if self.tag in tags:
+                tags.remove(self.tag)
+            alert.tags = ",".join(tags)
+            alert.save()
+            alert.status = alert.status_wordform()
+            alert.summary = alert.summarize()
+            objects = self.processGetResults([alert])
+            self.populate(200, "OK", objects)
+            return
+        except Exception, e:
+            self.populate(1691,e.__str__())
+            Util.strace(e)
+            return
+
     def getAlert(self):
         if self.id==0 or self.id == None:
             objects = Alert.all_alerts(self.since)
