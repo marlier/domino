@@ -360,12 +360,6 @@ class Alert():
             self.acktime = self.acktime.isoformat()
         if hasattr(self, 'lastAlertSent') and type(self.lastAlertSent) is datetime.datetime:
             self.lastAlertSent = self.lastAlertSent.isoformat()
-        if hasattr(self, 'teams'):
-            clean_teams = []
-            for t in self.teams:
-                if hasattr(t, "scrub"):
-                    clean_teams.append(t.scrub())
-            self.teams = clean_teams
         return self.__dict__
         
     def print_alert(self, SMS=False):

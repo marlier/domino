@@ -13,28 +13,16 @@ function query(div,sidebar_div,team,count){
 	var url = base_url+table+"?limit="+count+"&search="+search_terms.join(",");
 	console.debug(url);
 	$.getJSON(url,function(json){
-		if (process_header(json.status, json.status_message)) {
-			if (table == "users" || table == "user") {
-				print_users(json.data,div,sidebar_div);
-			} else if (table == "teams" || table == "team") {
-				print_teams(json.data,div,sidebar_div)
-			} else if (table == "alerts" || table == "alert") {
-				print_alerts(json.data,div,sidebar_div);
-                print_search_terms();
-			};
-			return json.data;
+		if (table == "users" || table == "user") {
+			print_users(json,div,sidebar_div);
+		} else if (table == "teams" || table == "team") {
+			print_teams(json,div,sidebar_div)
+		} else if (table == "alerts" || table == "alert") {
+			print_alerts(json,div,sidebar_div);
+            print_search_terms();
 		};
+		return json;
 	});
-};
-
-function process_header(status, status_message) {
-	if ( status % 100 == 0 ) {
-		return new Boolean(1);
-	} else {
-		console.log(status, status_message);
-		alert("Error Num: " + status + "\nError Message: " + status_message);
-		return new Boolean(0);
-	};
 };
 
 function validate_email(email) {

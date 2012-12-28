@@ -46,8 +46,7 @@ def addTag(id=0,tag=None):
     print apicall.__dict__
     apicall.addaTag()
     resp = make_response(apicall.fulljson)
-    resp.headers['Access-Control-Allow-Credentials'] = 'true'
-    resp.headers['Access-Control-Allow-Origin'] = '*' 
+    resp.status = "%s %s" % (apicall.status, apicall.status_message)
     return resp 
 
 @app.route('/api/alert/<int:id>/removetag/<tag>', methods=['POST', 'OPTIONS'])
@@ -59,8 +58,7 @@ def removeTag(id=0,tag=None):
     print apicall.__dict__
     apicall.removeaTag()
     resp = make_response(apicall.fulljson)
-    resp.headers['Access-Control-Allow-Credentials'] = 'true'
-    resp.headers['Access-Control-Allow-Origin'] = '*' 
+    resp.status = "%s %s" % (apicall.status, apicall.status_message)
     return resp
 
 @app.route('/api/alert/<int:id>/ack', methods=['POST', 'OPTIONS'])
@@ -69,8 +67,7 @@ def ack_alert(id=0):
     apicall.id = id
     apicall.ack(id)
     resp = make_response(apicall.fulljson)
-    resp.headers['Access-Control-Allow-Credentials'] = 'true'
-    resp.headers['Access-Control-Allow-Origin'] = '*'
+    resp.status = "%s %s" % (apicall.status, apicall.status_message)
     return resp
 
 @app.route('/api/user', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
@@ -161,20 +158,14 @@ def process_request(objType, id=0):
             apicall.delRule()
         elif objType == "Team":
             apicall.delTeam()
-    elif request.method == 'OPTIONS':
-        resp = make_response()
-        resp.headers['Access-Control-Allow-Credentials'] = 'true'
-        resp.headers['Access-Control-Allow-Origin'] = '*'
-        resp.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
-        resp.headers['Access-Control-Max-Age'] = 1000
-        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-        return resp
     if 'format' in data and data['format'] == "xml" and objType == "Notification":
         resp = make_response(apicall.feed)
     else:
-        resp = make_response(apicall.fulljson)
-    resp.headers['Access-Control-Allow-Credentials'] = 'true'
-    resp.headers['Access-Control-Allow-Origin'] = '*'
+        if hasattr(apicall, 'fulljson'):
+            resp = make_response(apicall.fulljson)
+            resp.status = "%s %s" % (apicall.status, apicall.status_message)
+        else:
+            resp = make_response(404)
     return resp
 
 ##### web ui ######

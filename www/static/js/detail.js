@@ -20,7 +20,7 @@ $(document).ready(function(){
             dataType: "json",
             data: {},
             success: function(data, textStatus, jqXHR){
-                print_tags(data.data[0].tags.split(','));
+                print_tags(data[0].tags.split(','));
             },    
             error: function(jqXHR, textStatus, errorThrown){
             }     
@@ -33,54 +33,50 @@ $(document).ready(function(){
 function get_detail(){
     var url = "/api/alert?search="+detail_attrs.join(",");
     $.getJSON(url,function(json){
-        if (process_header(json.status, json.status_message)) {
-            a = json.data[0]
-            id = a.id;
-            $("#general #service").text(a.service);
-            $("#general #host").text(a.host);
-            $("#general #colo").text(a.colo);
-            $("#general #environment").text(a.environment);
-            
-            $("#status #date").text(a.createDate);
-            $("#status #status").text(a.status);
-            $("#status #message").text(a.message);
-            if ( a.status == "OK" ) {
-                $("#status .widget-content").addClass("alert alert-success");
-            } else if ( a.status == "Warning" ) {
-                $("#status .widget-content").addClass("alert alert-warning");
-            } else if ( a.status == "Critical" ) {
-                $("#status .widget-content").addClass("alert alert-error");
-            } else {
-                $("#status .widget-content").addClass("alert alert-info");
-            };
-
-            print_tags(a.tags.split(','));
-
-            var url = "/api/rule?environment="+a.environment+"&colo="+a.colo+"&host="+a.host+"&service="+a.service+"&status="+a.status+"&tag="+a.tags;
-            console.debug(url);
-            $.getJSON(url,function(json) {
-                if (process_header(json.status, json.status_message)) {
-                    rules = json.data;
-                    $('#rules_rows .data-set').remove();
-                    $("#rules_total").text(rules.length);
-                    $("#rules_total").attr('title', rules.length + " rules displayed");
-                    $.each(rules,function(i,r) {
-                        console.debug(r);
-                        row = $('<tr>');
-                        row.addClass('data-set');
-                        row.append('<td class="alert-info">' + clean_value(r['environment']) + '</td>');
-                        row.append('<td class="alert-info">' + clean_value(r['colo']) + '</td>');
-                        row.append('<td class="alert-info">' + clean_value(r['host']) + '</td>');
-                        row.append('<td class="alert-info">' + clean_value(r['service']) + '</td>');
-                        row.append('<td class="alert-info">' + clean_value(r['state']) + '</td>');
-                        row.append('<td class="alert-info">' + clean_value(r['tag']) + '</td>');
-                        row.append('<td class="alert-success">' + clean_value(r['addTag']) + '</td>');
-                        row.append('<td class="alert-success">' + clean_value(r['removeTag']) + '</td>');
-                        $("#rules_rows").append(row);
-                    });
-                };
-            });
+        a = json[0]
+        id = a.id;
+        $("#general #service").text(a.service);
+        $("#general #host").text(a.host);
+        $("#general #colo").text(a.colo);
+        $("#general #environment").text(a.environment);
+    
+        $("#status #date").text(a.createDate);
+        $("#status #status").text(a.status);
+        $("#status #message").text(a.message);
+        if ( a.status == "OK" ) {
+            $("#status .widget-content").addClass("alert alert-success");
+        } else if ( a.status == "Warning" ) {
+            $("#status .widget-content").addClass("alert alert-warning");
+        } else if ( a.status == "Critical" ) {
+            $("#status .widget-content").addClass("alert alert-error");
+        } else {
+            $("#status .widget-content").addClass("alert alert-info");
         };
+
+        print_tags(a.tags.split(','));
+
+        var url = "/api/rule?environment="+a.environment+"&colo="+a.colo+"&host="+a.host+"&service="+a.service+"&status="+a.status+"&tag="+a.tags;
+        console.debug(url);
+        $.getJSON(url,function(json) {
+            rules = json;
+            $('#rules_rows .data-set').remove();
+            $("#rules_total").text(rules.length);
+            $("#rules_total").attr('title', rules.length + " rules displayed");
+            $.each(rules,function(i,r) {
+                console.debug(r);
+                row = $('<tr>');
+                row.addClass('data-set');
+                row.append('<td class="alert-info">' + clean_value(r['environment']) + '</td>');
+                row.append('<td class="alert-info">' + clean_value(r['colo']) + '</td>');
+                row.append('<td class="alert-info">' + clean_value(r['host']) + '</td>');
+                row.append('<td class="alert-info">' + clean_value(r['service']) + '</td>');
+                row.append('<td class="alert-info">' + clean_value(r['state']) + '</td>');
+                row.append('<td class="alert-info">' + clean_value(r['tag']) + '</td>');
+                row.append('<td class="alert-success">' + clean_value(r['addTag']) + '</td>');
+                row.append('<td class="alert-success">' + clean_value(r['removeTag']) + '</td>');
+                $("#rules_rows").append(row);
+            });
+        });
     });
 };
 
@@ -102,7 +98,7 @@ function print_tags(tags) {
             dataType: "json",
             data: {},
             success: function(data, textStatus, jqXHR){
-                print_tags(data.data[0].tags.split(','));
+                print_tags(data[0].tags.split(','));
             },
             error: function(jqXHR, textStatus, errorThrown){
             }
@@ -121,10 +117,8 @@ function clean_value(val) {
 function get_detail_history(div) {
     var url = base_url+"history?since=30&search="+detail_attrs.join(",");
     $.getJSON(url,function(json){
-        if (process_header(json.status, json.status_message)) {
-            print_alerts(json.data,div);
-            return json.data;
-        };
+        print_alerts(json,div);
+        return json;
     });
 };
 

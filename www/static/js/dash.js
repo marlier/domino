@@ -8,30 +8,24 @@ $(document).ready(function(){
 function chronological(div, direction) {
 	var url = "/api/alert?search=status:-OK&limit=10&sort=" + direction;
 	$.getJSON(url,function(json){
-		if (process_header(json.status, json.status_message)) {
-				print_alert_list(json.data,div);
-		};
-		return json.data;
+		print_alert_list(json,div);i
+		return json;
 	});
 };
 
 function frequent(div) {
     console.debug('Getting frequent data');
 	$.getJSON("/api/analytics?name=frequent&since=7&limit=10",function(json){
-		if (process_header(json.status, json.status_message)) {
-				print_frequent_alert_list(json.data,div);
-		};
-		return json.data;
+		print_frequent_alert_list(json,div);
+		return json;
 	});
 };
 
 function status(div) {
 	var url = base_url+"metric?metric=status";
 	$.getJSON(url,function(json){
-		if (process_header(json.status, json.status_message)) {
-				print_frequent_alert_list(json.data,div);
-		};
-		return json.data;
+		print_frequent_alert_list(json,div);
+		return json;
 	});
 };
 

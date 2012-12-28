@@ -22,14 +22,12 @@ function print_users(users,user_div,sidebar_div) {
 
         var url = "/api/user/" + id; 
         $.getJSON(url,function(json){
-            if (process_header(json.status, json.status_message)) {
-                user=json.data[0];
-                console.debug(user);
-                $("#teamDetail #name").val(user.name);
-                $("#teamDetail #email").val(user.email);
-                $("#teamDetail #phone").val(user.phone);
-                $("#saveBtn").html('<a onclick="saveUser();" id="saveBtn" class="btn btn-mini"><i class="icon-pencil"></i> Save</a></div>')
-            };
+            user=json[0];
+            console.debug(user);
+            $("#teamDetail #name").val(user.name);
+            $("#teamDetail #email").val(user.email);
+            $("#teamDetail #phone").val(user.phone);
+            $("#saveBtn").html('<a onclick="saveUser();" id="saveBtn" class="btn btn-mini"><i class="icon-pencil"></i> Save</a></div>')
         });        
     });
 
