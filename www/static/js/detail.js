@@ -53,10 +53,12 @@ function get_detail(){
             $("#status .widget-content").addClass("alert alert-info");
         };
 
+        console.debug(a);
+
         print_tags(a.tags.split(','));
+        print_ackBtn(a);
 
         var url = "/api/rule?environment="+a.environment+"&colo="+a.colo+"&host="+a.host+"&service="+a.service+"&status="+a.status+"&tag="+a.tags;
-        console.debug(url);
         $.getJSON(url,function(json) {
             rules = json;
             $('#rules_rows .data-set').remove();
@@ -78,6 +80,34 @@ function get_detail(){
             });
         });
     });
+};
+
+function print_ackBtn(a) {
+    acktime = new Date(a.acktime+"Z");
+    $(".ack-data-set").remove();
+    if (a.ack == 0) {
+        $("#status .widget-title").append('<div class="buttons ack-data-set"><a id="'+a.id+'" class="btn btn-mini active"><i class="icon-ok-sign"></i> Acknowledge</a></div>');
+    } else {
+        $("#status .widget-title").append('<div class="buttons ack-data-set"><a id="'+a.id+'" class="ack-data-set btn btn-mini"><i class="icon-ok-sign"></i> Acknowledge</a></div>');
+    };
+
+    $("a.ack-data-set").click(function() {
+        console.debug("acking...");
+
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json',
+            url: "/api/alert/"+id+"/ack",
+            dataType: "json",
+            data: {},
+            success: function(data, textStatus, jqXHR){
+                print_ackBtn(data[0]);
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+            }
+        });
+    });
+
 };
 
 function print_tags(tags) {

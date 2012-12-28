@@ -28,20 +28,6 @@ loglevel=DEBUG
 # the log directory to write log files
 logdir=/var/log/domino/
 
-[webui]
-# Listen to ip range
-# setting to 0.0.0.0 will allow connections from all IPs
-# if you want specify an IP for security reasons you can here
-# Or you can specify a subnet (ie 192.168.18.0)
-webui_listen_ip=0.0.0.0
-
-# port number to listen for api calls
-webui_port=8010
-
-# server address
-# used to make http calls
-# must start with http(s)://
-webui_address=
 
 [api]
 # Listen to ip range
@@ -96,17 +82,6 @@ call_failover=2
 # call timeout
 # this is the amount of seconds that phone call times out while waiting for user input
 call_timeout=30
-
-# the number of alerts to send before sending an email to everyone on the team
-# comment out if you never want to alert the team
-# set to 0 if you want to always sent a team alert (via email)
-team_failover=6
-
-# alert freshness is the amount of time (in seconds) to consider an alert fresh
-# New alerts are compared to the current "fresh" alerts to deem an alert as new
-# alert or a duplicate of an alert that has already been received
-alert_freshness=900
-
 
 
 [mysql]

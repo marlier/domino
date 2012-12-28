@@ -113,7 +113,7 @@ class Api():
             self.populate(1013, "Oncall_count is not a integer")
             return
 
-    def ack(self):
+    def ackAlert(self):
         '''
         Ack an alert
         '''
@@ -121,7 +121,10 @@ class Api():
             alert = Alert.Alert(self.id)
             alert.ack = 0
             alert.save()
-            self.populate(200, "OK")
+            alert.status = alert.status_wordform()
+            alert.summary = alert.summarize()
+            objects = self.processGetResults([alert])
+            self.populate(200, "OK", objects)
             return
         except Exception, e:
             self.populate(1689,e.__str__())

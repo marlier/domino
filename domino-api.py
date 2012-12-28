@@ -43,7 +43,6 @@ def addTag(id=0,tag=None):
     apicall = Api.Api(**data)
     apicall.id = id
     apicall.tag = tag
-    print apicall.__dict__
     apicall.addaTag()
     resp = make_response(apicall.fulljson)
     resp.status = "%s %s" % (apicall.status, apicall.status_message)
@@ -55,7 +54,6 @@ def removeTag(id=0,tag=None):
     apicall = Api.Api(**data)
     apicall.id = id
     apicall.tag = tag 
-    print apicall.__dict__
     apicall.removeaTag()
     resp = make_response(apicall.fulljson)
     resp.status = "%s %s" % (apicall.status, apicall.status_message)
@@ -65,7 +63,7 @@ def removeTag(id=0,tag=None):
 def ack_alert(id=0):
     apicall = Api.Api()
     apicall.id = id
-    apicall.ack(id)
+    apicall.ackAlert()
     resp = make_response(apicall.fulljson)
     resp.status = "%s %s" % (apicall.status, apicall.status_message)
     return resp
