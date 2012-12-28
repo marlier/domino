@@ -1,4 +1,4 @@
-var base_url='{{ api_address }}:{{ api_port }}/api/';
+var base_url='http://127.0.0.1:8009/api/';
 var search_terms = new Array();
 
 $(document).ready(function(){
@@ -20,45 +20,11 @@ function query(div,sidebar_div,team,count){
 				print_teams(json.data,div,sidebar_div)
 			} else if (table == "alerts" || table == "alert") {
 				print_alerts(json.data,div,sidebar_div);
+                print_search_terms();
 			};
-			print_search_terms();
 			return json.data;
 		};
 	});
-};
-
-function add_search_terms(term) {
-	console.debug("adding search term:" + term);
-	term = term.split('+');
-	console.debug(term);
-	search_terms.push(term);
-	search_terms = $.unique(search_terms);
-	print_search_terms();
-	query("#data","#sidebar_data");
-};
-
-function del_search_terms(term) {
-	console.debug("deleting search term:" + term);
-	search_terms = jQuery.grep(search_terms, function(value) {
-    	return value != term;
-	});
-	print_search_terms();
-	query("#data","#sidebar_data");
-};
-
-function print_search_terms() {
-	console.debug("printing search terms");
-	$('#search_terms').html('');
-	var output = '';
-	output = output + '<div class="search_terms_data">';
-	output = output + '<ul>';
-	$.each(search_terms,function(i,s) {
-		console.debug(s);
-		output = output + '<li><span onclick="del_search_terms(\'' + s + '\')">' + s + '</span></li>';
-	});
-	output = output + '</ul>';
-	//console.debug(output);
-	$('#search_terms').html(output);
 };
 
 function process_header(status, status_message) {
@@ -110,3 +76,4 @@ var unique = function(origArr) {
     }
    return newArr;
 };
+

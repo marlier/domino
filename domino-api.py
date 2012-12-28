@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # This runs as a service. It listens for API requests
 
-from flask import Flask, request, json, make_response
+from flask import Flask, request, json, make_response, render_template, url_for
 import os, sys
 import urllib
 import logging
@@ -19,7 +19,10 @@ import util_layer as Util
 conf = Util.load_conf()
 Util.init_logging("api")
 
-app = Flask(__name__)
+tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'www/templates')
+static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'www/static')
+
+app = Flask(__name__, template_folder=tmpl_dir, static_folder=static_dir)
 
 @app.route('/api/healthcheck')
 def healthcheck():
@@ -145,6 +148,51 @@ def process_request(objType, id=0):
     resp.headers['Access-Control-Allow-Credentials'] = 'true'
     resp.headers['Access-Control-Allow-Origin'] = '*'
     return resp
+
+##### web ui ######
+@app.route('/')
+@app.route('/index.html')
+@app.route('/dash')
+@app.route('/dashboard')
+@app.route('/dashboards')
+def index():
+    return render_template('index.html')
+
+@app.route('/alert')
+@app.route('/alerts')
+def alerts():
+    return render_template('alerts.html')
+
+@app.route('/rule')
+@app.route('/rules')
+def rules():
+    return render_template('rules.html')
+
+@app.route('/team')
+@app.route('/teams')
+def teams():
+    return render_template('teams.html')
+
+@app.route('/user')
+@app.route('/users')
+def users():
+    return render_template('users.html')
+
+@app.route('/detail')
+@app.route('/details')
+def detail():
+    return render_template('detail.html')
+
+with app.test_request_context():
+    url_for('static', filename="dash.js")
+    url_for('static', filename="alerts.js")
+    url_for('static', filename="detail.js")
+    url_for('static', filename="teams.js")
+    url_for('static', filename="users.js")
+    url_for('static', filename="disclosureTriangle.png")
+    url_for('static', filename="base.css")
+    url_for('static', filename="jquery-ui.css")
+    url_for('static', filename="colorbox.css")
 
 if __name__ == "__main__":
     app.run(port=conf['api_port'], host=conf['api_listen_ip'], debug=conf['server_debug'])

@@ -133,7 +133,7 @@ class Team:
 		logging.debug("Loading team: %s" % id)
 		
 		try:
-			self.__dict__.update(Mysql.query('''SELECT * FROM teams WHERE id = %s LIMIT 1''' % (id), "users")[0].__dict__)
+			self.__dict__.update(Mysql.query('''SELECT * FROM teams WHERE id = %s LIMIT 1''' % (id), "teams")[0].__dict__)
 		except Exception, e:
 			Util.strace(e)
 			self.id = 0

@@ -13,22 +13,55 @@ function print_teams(teams,team_div,sidebar_div) {
 
 	team_list = new Array();
 
-	var output = '';
-	output = output + '<div class="teams">';
-	output = output + '<ul>';
-	output = output + '<li onclick="print_teamedit(0)">Create New Team</li>';
-	$.each(teams,function(i,t) {
-		team_list.push(t);
-		output = output + '<li class="name" onclick="print_teamedit(' + t.id + ')">' + t.name + '</li>';
-	});
-	output = output + '</ul>';
-	output = output + '</div>';
-	$(sidebar_div).html(output);
-	
-	var url = base_url+"user";
+    $(sidebar_div + ' .data-set').remove();
+    $.each(teams,function(i,t) {
+        team_list.push(t);
+        $(sidebar_div).append('<li class="data-set"><a class="team_name" href="#" id="'+t.id+'">'+t.name+'</a></li>');
+    });
+
+    $(".team_name").click(function() {
+        id = $(this).attr('id');
+       
+        var url = "/api/team/" + id;
+        $.getJSON(url,function(json){
+            if (process_header(json.status, json.status_message)) {
+                team=json.data[0];
+                console.debug(team);
+                $("#teamDetail #name").val(team.name);
+                $("#teamDetail #email").val(team.email);
+                $("#teamDetail #phone").val(team.phone);
+                $("#members").html('');
+                $.each(user_list,function(i,u) {
+                    console.debug(u.name);
+                    $.each(team.members,function(z,m) {
+                        console.debug(m);
+                        if ( u.name == m.name ) {
+                            $("select#members").append('<option selected>'+u.name+'</option>');
+                        } else {
+                            $("select#members").append('<option>'+u.name+'</option>');
+                        };
+                    });
+                });
+                $('select').select2();
+                if ( team.catchall == 0 ) {
+                    $('#teamDetail #catchall').prop('checked', true);
+                };
+                $("#teamDetail #oncall_count").val(team.oncall_count);
+                $("#saveBtn").html('<a onclick="saveTeam();" id="saveBtn" class="btn btn-mini"><i class="icon-pencil"></i> Save</a></div>')
+            };  
+        });
+ 
+    });
+
+	var url = "/api/user";
 	$.getJSON(url,function(json){
 		if (process_header(json.status, json.status_message)) {
+            user_list = new Array();
 			user_list=json.data;
+            $.each(user_list,function(i,u) {
+                $("select#members").append('<option>'+u.name+'</option>');
+            });
+            $('select').select2();
 		};
 	});
 	
@@ -274,7 +307,7 @@ function save_team(id) {
 function delete_team(id) {
 	var r=confirm("Are you sure you want to delete this team?");
 	if (r==true) {
-  		//delete a user
+  		//delete a team
 		console.debug("deleting team");
 		var url = base_url+"team/" + id;
 		$.ajax({

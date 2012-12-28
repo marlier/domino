@@ -1,12 +1,12 @@
 $(document).ready(function(){
-	chronological("#new", "new");
-	chronological("#old", "old");
-	frequent("#frequent");
-	graph("#graph", 7, "DAY") 
+	chronological("#new_data", "newest");
+	chronological("#old_data", "oldest");
+	frequent("#frequent_data");
+//	graph("#graph", 7, "DAY") 
 });
 
 function chronological(div, direction) {
-	var url = base_url+"alert?limit=10&sort=" + direction;
+	var url = "/api/alert?search=status:-OK&limit=10&sort=" + direction;
 	$.getJSON(url,function(json){
 		if (process_header(json.status, json.status_message)) {
 				print_alert_list(json.data,div);
@@ -16,8 +16,8 @@ function chronological(div, direction) {
 };
 
 function frequent(div) {
-	var url = base_url+"analytics?name=frequent&limit=10";
-	$.getJSON(url,function(json){
+    console.debug('Getting frequent data');
+	$.getJSON("/api/analytics?name=frequent&since=7&limit=10",function(json){
 		if (process_header(json.status, json.status_message)) {
 				print_frequent_alert_list(json.data,div);
 		};
@@ -36,31 +36,39 @@ function status(div) {
 };
 
 function print_frequent_alert_list(alerts,div) {
-	var output = '';
-	output = output + '<div id="dash_list">';
+    console.debug('Print frequent alerts');
+	$(div + " .data-set").remove();
 	$.each(alerts,function(i,a) {
-		output = output + '<div>';
-		output = output + '<ul>';
-		output = output + '<li>' + a.count + '</li><li>' + a.environment + '</li><li>'+ a.colo +'</li><li>'+ a.host +'</li><li>'+ a.service +'</li>';
-		output = output + '</ul>';
-		output = output + '</div>';
+        o = $('<tr class="data-set">');
+		o.append('<td>' + a.count + '</td>');
+        o.append('<td>' + a.environment + '</td>');
+        o.append('<td>' + a.colo + '</td>');
+        o.append('<td>' + a.host + '</td>');
+        o.append('<td>' + a.service + '</td>');
+        $(div).append(o);
 	});
-	output = output + '</div>';
-	$(div).html(output);
 };
 
 function print_alert_list(alerts,div) {
-	var output = '';
-	output = output + '<div id="dash_list">';
+    $(div + " .data-set").remove();
 	$.each(alerts,function(i,a) {
-		output = output + '<div>';
-		output = output + '<ul>';
-		output = output + '<li>' + new Date(a.createDate+"Z").toDateString() + '</li><li>' + a.environment + '</li><li>'+ a.colo +'</li><li>'+ a.host +'</li><li>'+ a.service +'</li>';
-		output = output + '</ul>';
-		output = output + '</div>';
+        o = $('<tr class="data-set">');
+        if ( a.status == "OK" ) {
+            o.addClass("success")
+        } else if ( a.status == "Warning" ) {
+            o.addClass("warning")
+        } else if ( a.status == "Critical" ) {
+            o.addClass("error")
+        } else { 
+            o.addClass("info")
+        };
+        o.append('<td>' + new Date(a.createDate+"Z").toDateString() + '</td>')
+        o.append('<td>' + a.environment + '</td>');
+        o.append('<td>' + a.colo + '</td>');
+        o.append('<td>' + a.host + '</td>');
+        o.append('<td>' + a.service + '</td>');
+        $(div).append(o);
 	});
-	output = output + '</div>';
-	$(div).html(output);
 };
 
 function get_graph_data(div) {

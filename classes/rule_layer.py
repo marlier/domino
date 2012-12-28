@@ -20,19 +20,38 @@ def applyRules(alert):
         tags = alert.tags.split(',')
         if rule['addTag'] != 'NULL':
             for tag in rule['addTag'].split(','):
-                tags.append(tag)
+                if tag not in tags: tags.append(tag)
         if rule['removeTag'] != 'NULL':
             for tag in rule['removeTag'].split(','):
-                if tag in tags:
-                    tags.remove(tag)
+                if tag in tags: tags.remove(tag)
     alert.tags = ",".join(tags)
     return alert.tags
 
-def get_rules():
+def get_rules(environment, colo, host, service, status, tag):
     '''
     return a list of rule objections
     '''
-    return Mysql.query('''SELECT * FROM inbound_rules''', "inbound_rules")
+    rules = []
+    all_rules = Mysql.query('''select * from inbound_rules''', 'inbound_rules')
+    for rule in all_rules:
+        if compare_rule_vals(rule.environment, environment) is False: continue
+        if compare_rule_vals(rule.colo ,colo) is False: continue
+        if compare_rule_vals(rule.host ,host) is False: continue
+        if compare_rule_vals(rule.service ,service) is False: continue
+        if compare_rule_vals(rule.status ,status) is False: continue
+        if rule.tag is not None:
+            if tag is not None:
+                if tag.lower() not in rule.tag.lower().split(','): continue
+        rules.append(rule);
+    return rules
+
+def compare_rule_vals(rule_val, my_val):
+    if rule_val is not None:
+        if my_val is not None:
+            if rule_val.lower() != my_val.lower(): return False
+        else:
+            return False
+    return True
 
 class Rule:
     def __init__(self, id=0):
@@ -61,7 +80,7 @@ class Rule:
         '''
         logging.debug("Loading rule: %s" % id)
         try:
-            self.__dict__.update(Mysql.query('''SELECT * FROM inbound_rules WHERE id = %s LIMIT ''' % (id), 'inbound_rules'))
+            self.__dict__.update(Mysql.query('''SELECT * FROM inbound_rules WHERE id = %s LIMIT 1''' % (id), 'inbound_rules')[0].__dict__)
             if isinstance(self.status, str) and len(self.status) > 1:
                 if self.status.upper() == "OK":
                     self.status = 0

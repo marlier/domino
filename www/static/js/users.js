@@ -6,118 +6,73 @@ $(document).ready(function(){
 	query("#data","#sidebar_data");
 });
 
-$(document).bind('cbox_closed', function(){
-    query("#data","#sidebar_data");
-});
-
 function print_users(users,user_div,sidebar_div) {
 	console.debug("Printing users");
 	var output = '';
 	user_list = new Array();
+
+    $(sidebar_div + ' .data-set').remove();
+    $.each(users,function(i,u) {
+        user_list.push(u);
+        $(sidebar_div).append('<li class="data-set"><a class="user_name" href="#" id="'+u.id+'">'+u.name+'</a></li>');
+    }); 
 	
-	output = output + '<div class="users">';
-	output = output + '<ul id="user_card">';
-	$.each(users,function(i,u) {
-		//teams.push(u.team.split(","));
-		user_list.push(u);
-		output = output + '<div class="user_item">';
-		output = output + '<span id="user_edit_button" onclick="print_useredit(' + u.id + ')">edit</span>';
-		output = output + '<span id="user_delete_button" onclick="delete_user(' + u.id + ')">delete</span>';
-		output = output + '<li id="user_card">';
-		output = output + '<ul class="user_attributes">';
-		output = output + '<li class="name">' + u.name + '</li></br>';
-		output = output + '<li>Email: ' + u.email + '</li></br>';
-		output = output + '<li>Phone: ' + u.phone + '</li></br>';
-		var teams = new Array();
-		$.each(u.teams,function(i,t) {
-			teams.push(t.name)
-		});
-		output = output + '<li>Team(s): ' + teams.join(',') + '</li></br>';
-		output = output + '</ul>';
-		output = output + '</li>';
-		output = output + '</div>';
-		
-	});
-	output = output + '</ul>';
-	output = output + '</div>';
-	$(user_div).html(output);
-	
-	//teams = $.unique(teams).sort();
-	
-	var output = '';
-	output = output + '<ul>';
-	output = output + '<li onclick="print_useredit(0)">Create New User</li>';
-	//output = output + '<li><div id="teams_toggle"><img src="images/disclosureTriangle.png" alt="Teams"/> Teams</div></li>';
-	//output = output + '<ul id="teams_data" class="filter_data">';
-	//$.each($.unique(teams).sort(),function(i,x) {
-	//	output = output + '<li onclick="add_search_terms(\'team:' + x + '\')">' + x + '</li>'
-	//});
-	output = output + '</ul>';
-	output = output + '</ul>';
-	$(sidebar_div).html(output);
-	
-	//$('ul#teams_data').hide();
-	
-	//$('#teams_toggle').click(function(){
-    // 	$('ul#teams_data').toggle('medium');
-	//});
-	
+    $(".user_name").click(function() {
+        id = $(this).attr('id');
+
+        var url = "/api/user/" + id; 
+        $.getJSON(url,function(json){
+            if (process_header(json.status, json.status_message)) {
+                user=json.data[0];
+                console.debug(user);
+                $("#teamDetail #name").val(user.name);
+                $("#teamDetail #email").val(user.email);
+                $("#teamDetail #phone").val(user.phone);
+                $("#saveBtn").html('<a onclick="saveUser();" id="saveBtn" class="btn btn-mini"><i class="icon-pencil"></i> Save</a></div>')
+            };
+        });        
+    });
+
 };
 
-function print_useredit(i) {
-	if (i > 0) {
-		$.each(user_list, function(x,u) {
-			if ( i === u.id ) {
-				user = u
-			}
-		});
-		var output = '';
-		output = output + '<div id="user_edit">';
-		output = output + 'Name: <input id="user_name" value="' + user.name + '"></input><br />';
-		output = output + 'Email: <input id="user_email" value="' + user.email + '"></input><br />';
-		output = output + 'Phone: <input id="user_phone" value="' + user.phone + '"></input>(ex +12223334444)<br />';
-		output = output + '</br>';
-		output = output + '<button type="button" id="save_user" onclick="save_user(' + user.id + ')">Save</button>';
-		output = output + '</div>';
-		$.colorbox({html:output, title:user.name, height:"200px", width:"300px"});
-	} else {
-		var output = '';
-		output = output + '<div id="user_edit">';
-		output = output + 'Name: <input id="user_name"></input><br />';
-		output = output + 'Email: <input id="user_email"></input><br />';
-		output = output + 'Phone: <input id="user_phone"></input>(ex +12223334444)<br />';
-		output = output + '</br>';
-		output = output + '<button type="button" id="save_user" onclick="save_user(0)">Save</button>';
-		output = output + '</div>';
-		$.colorbox({html:output, title:"New User", height:"200px", width:"300px"});
-	};
-	
-	
+function delUser(id) {
+    var r=confirm("Are you sure you want to delete this user?");
+    if (r==true) {
+        //delete a user
+        console.debug("deleting user");
+        var url = "/api/user/" + id; 
+        $.ajax({
+            url: url,
+            type: "DELETE"
+        }).done(function(json){
+            query("#data","#sidebar_data");
+        }); 
+    };  
 };
 
-function save_user(id) {
-	if ( validate_email($("input#user_email").val()) == false ) { 
+function saveUser(id) {
+	if ( validate_email($("input#email").val()) == false ) { 
 		alert("Invalid email address")
 		return
 	}
 	
-	if ( validate_phone($("input#user_phone").val()) == false ) {
+	if ( validate_phone($("input#phone").val()) == false ) {
 		alert("Invalid phone number (ex +12223334444)")
 		return
 	}
 	
-	if ( validate_name($("input#user_name").val()) == false ) {
+	if ( validate_name($("input#name").val()) == false ) {
 		alert("You must enter a name")
 		return
 	}
 	
 	var jsonData = JSON.stringify({
-		"name": $("input#user_name").val(),
-		"email": $("input#user_email").val(),
-		"phone": $("input#user_phone").val()
+		"name": $("input#name").val(),
+		"email": $("input#email").val(),
+		"phone": $("input#phone").val()
 	});
 	
-	var url = base_url+"user/" + id
+	var url = "/api/user/" + id
 	
 	$.ajax({
         type: 'POST',
@@ -126,38 +81,10 @@ function save_user(id) {
         dataType: "json",
         data: jsonData,
         success: function(data, textStatus, jqXHR){
-			alert("Validation Code: "+data.status_message);
-			$.colorbox.close();
+            query("#data","#sidebar_data");
         },
         error: function(jqXHR, textStatus, errorThrown){
-            alert('Update user error: ' + textStatus);
         }
     });
 };
 
-function formToJSON() {
-    return JSON.stringify({
-        "id": $('#id').val(),
-        "name": $('#name').val(),
-        "grapes": $('#grapes').val(),
-        "country": $('#country').val(),
-        "region": $('#region').val(),
-        "year": $('#year').val(),
-        "description": $('#description').val()
-        });
-}
-
-function delete_user(id) {
-	var r=confirm("Are you sure you want to delete this user?");
-	if (r==true) {
-  		//delete a user
-		console.debug("deleting user");
-		var url = base_url+"user/" + id;
-		$.ajax({
-			url: url,
-			type: "DELETE"
-		}).done(function(json){
-			query("#data","#sidebar_data");
-		});
-	};
-};

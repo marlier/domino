@@ -22,6 +22,7 @@ def frequent_alerts(since=7):
     _db = Mysql.Database()
     _db._cursor.execute( '''SELECT DISTINCT environment,colo,host,service, COUNT(*) AS count FROM alerts_history WHERE createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s DAY) AND DATE_SUB(CURDATE(),INTERVAL -1 DAY) GROUP BY environment,colo,host,service  ORDER BY count DESC;''' % (since))
     alerts = _db._cursor.fetchall()
+    print "alerts", alerts
     _db.close()
     for alert in alerts:
         for key in alert:

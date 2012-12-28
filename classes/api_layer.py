@@ -173,7 +173,13 @@ class Api():
 
     def getRule(self):
         if self.id==0 or self.id == None:
-            objects = Rule.get_rules()
+            if self.environment == '': self.environment = None
+            if self.colo == '': self.colo = None
+            if self.host == '': self.host = None
+            if self.service == '': self.service = None
+            if self.status == '': self.status = None
+            if self.tag == '': self.tag = None
+            objects = Rule.get_rules(self.environment, self.colo, self.host, self.service, self.status, self.tag)
         else:
             objects = [Rule.Rule(self.id)]
         objects = self.processGetResults(objects)
@@ -195,6 +201,7 @@ class Api():
             self.populate(200, "OK", ['frequent'])
         elif self.name == "frequent":
             objects = Alert.frequent_alerts(self.since)
+            print "freq", objects
             objects = self.processGetResults(objects)
             self.populate(200,"OK",objects)
         else:
@@ -202,15 +209,30 @@ class Api():
 
     def processGetResults(self, objects):
         objects = self.filter(objects)
-        #objects = self.sort(objects)
+        objects = self.sortit(objects)
         objects = self.pagination(objects)
         dict_objects = []
         for o in objects:
             if hasattr(o, "scrub"):
                 dict_objects.append(o.scrub())
+            elif isinstance(o, dict):
+                dict_objects.append(o)
             else:
                 dict_objects.append(o.__dict__)
         return dict_objects
+
+    def sortit(self,objects):
+        if self.sort != None and len(self.sort) > 0:
+            if self.sort.lower() == "oldest":
+                objects = objects[::-1]
+                objects.sort(key = lambda x: x.createDate)
+        return objects
+
+    def pagination(self,objects):
+        objects = objects[self.offset:]
+        if self.limit > 0:
+            objects = objects[:self.limit]
+        return objects
 
     def setAlert(self,data):
         if self.id == None or self.id == 0:
@@ -317,13 +339,14 @@ class Api():
             rule = Rule.Rule(self.id)
         else:
             rule = Rule.Rule()
-        rule.environment = self.environment
-        rule.colo = self.colo
-        rule.host = self.host
-        rule.service = self.service
-        rule.tag = self.tag
-        rule.addTag = self.addTag
-        rule.removeTag = self.removeTag
+        if self.environment != '': rule.environment = self.environment
+        if self.colo != '': rule.colo = self.colo
+        if self.host != '': rule.host = self.host
+        if self.service != '': rule.service = self.service
+        if self.status != '': rule.service = self.status
+        if self.tag != '': rule.tag = self.tag
+        if self.addTag != '': rule.addTag = self.addTag
+        if self.removeTag != '': rule.removeTag = self.removeTag
         if rule.save():
             self.populate(200, "OK")
         else:
@@ -411,18 +434,6 @@ class Api():
             Util.strace(e)
             return
 
-    def sort(self,objects):
-        if self.sort != None and len(self.sort) > 0:
-            if self.sort.lower() == "oldest":
-                objects = objects[::-1]
-        return objects
-
-    def pagination(self,objects):
-        objects = objects[self.offset:]
-        if self.limit > 0:
-            objects = objects[:self.limit]
-        return objects
-    
     def filter(self,objects):
         '''
         Filter objects 
@@ -438,13 +449,20 @@ class Api():
                     key = c[:c.index(":")].strip()
                     keyval = o.__dict__[key]
                     comp_val = c[c.index(":"):][1:].strip()
-                    
+                    print key, keyval, comp_val
                     if isinstance(keyval, str):
                         vals = keyval.lower().split(',')
-                        if comp_val.lower() in vals:
-                            all_search_criteria_met.append(True)
+                        if comp_val.startswith("-"):
+                            comp_val = comp_val[1:].strip()
+                            if comp_val.lower() in vals:
+                                all_search_criteria_met.append(False)
+                            else:
+                                all_search_criteria_met.append(True)
                         else:
-                            all_search_criteria_met.append(False)
+                            if comp_val.lower() in vals:
+                                all_search_criteria_met.append(True)
+                            else:
+                                all_search_criteria_met.append(False)
                     elif isinstance(keyval, list):
                         found_c = False
                         for x in keyval:

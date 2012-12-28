@@ -4,57 +4,62 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title>Domino</title>
 		<meta name="copyright" content="Copyright (c) 2012" />		
-		<script src="https://s3.amazonaws.com/domino-resources/nightly/js/jquery-1.7.2.min.js" type="text/javascript"></script>
-		<script src="https://s3.amazonaws.com/domino-resources/nightly/js/jquery-ui-1.8.20.teams.min.js" type="text/javascript"></script>
-		<script type="text/javascript" src="static/js/lib.js"></script>
-		<script type="text/javascript" src="static/js/rules.js"></script>
-		<link rel="stylesheet" type="text/css" href="static/css/base.css" media="screen, print, projection" />
-		<link rel="stylesheet" type="text/css" href="static/css/jquery-ui.css" media="screen, print, projection" />
-		<link href='http://fonts.googleapis.com/css?family=Poiret+One' rel='stylesheet' type='text/css'>
+        <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="/static/css/bootstrap-responsive.min.css" />
+        <script src="/static/js/jquery.min.js" type="text/javascript"></script>
+        <script src="/static/js/jquery.ui.custom.js" type="text/javascript"></script>
+        <script src="/static/js/bootstrap.min.js" type="text/javascript"></script>
+        <script src="/static/js/lib.js" type="text/javascript"></script>
+        <script src="/static/js/rules.js" type="text/javascript"></script>
+        <link rel="stylesheet" type="text/css" href="/static/css/unicorn.main.css" />
+        <link rel="stylesheet" type="text/css" href="/static/css/unicorn.grey.css" class="skin-color" />
+        <link rel="stylesheet" type="text/css" href="/static/css/base.css" />
 	</head>
 	<body>
 		<div id="wrap">
 
 			<div id="top"></div>
 			
-			<div id="main">
-                <div id="rule_edit" style="float:left;">
-                    <form>
-                        <fieldset>
-                            <legend>Edit/Save Rule</legend>
-                            <label>Environment</label>
-                            <input type="text" id='environment' placeholer='Any'>
-                            <label>Colo</label>
-                            <input type="text" id='colo' placeholer='Any'>
-                            <label>Host</label>
-                            <input type="text" id='host' placeholer='Any'>
-                            <label>Service</label>
-                            <input type="text" id='service' placeholer='Any'>
-                            <label>State</label>
-                            <input type="text" id='state' placeholer='Any'>
-                            <label>Tag</label>
-                            <input type="text" id='tag' placeholer='Any'>
-                            <label>Add Tag</label>
-                            <input type="text" id='addtag'>
-                            <label>Remove Tag</label>
-                            <input type="text" id='removetag'>
-                            <button type="submit" class="btn">Save</button>
-                        </fieldset>
-                    </form>
-                </div>
-				<div id="data">
-                    <table>
+            <div id="sidebar">
+                <a href="#" class="visible-phone"><i class="icon icon-list-alt"></i> Rules</a>
+                <ul id="sidebar_data">
+                   <li><a href="/rules"><i class="active icon icon-list-alt"></i> <span>Rules</span></a></li>
+                </ul>
+            </div>
+
+			<div id="content">
+				<div id="data widget-box">
+                    <div class="widget-title">
+                        <span class="icon"><i class="icon-list-alt"></i></span>
+                        <h5>Rules</h5>
+                        <span id="rules_total" class="label label-info tip-left"></span>
+                        <div class="buttons"><a onclick="saveRule();" id="saveBtn" class="btn btn-mini"><i class="icon-pencil"></i> Save</a></div>
+                    </div>
+                    <table id="rules_rows" class="table table-bordered">
                         <tr>
                             <th>Environment</th>
                             <th>Colo</th>
                             <th>Host</th>
                             <th>Service</th>
-                            <th>State</th>
+                            <th>Status</th>
                             <th>Tag</th>
-                            <th><bold>Add Tag</bold></th>
-                            <th><bold>Remove Tag</bold></th>
+                            <th>Add Tag</th>
+                            <th>Remove Tag</th>
                         </tr>
-                        <div id='rules_rows'></div>
+                        <tr>
+                            <td id="attrTitle" class="alert-info" colspan="6">Attributes</td>
+                            <td id="actionTitle" class="alert-success" colspan="2">Actions</td>
+                        </tr>
+                        <tr>
+                            <td class="alert-info"><input type="text" class="input-small info" id='environment' placeholder='Environment'>
+                            <td class="alert-info"><input type="text" class="input-small" id='colo' placeholder='Colo'></td>
+                            <td class="alert-info"><input type="text" class="input-small" id='host' placeholder='Host'></td>
+                            <td class="alert-info"><input type="text" class="input-small" id='service' placeholder='Service'></td>
+                            <td class="alert-info"><input type="text" class="input-small" id='status' placeholder='Status'></td>
+                            <td class="alert-info"><input type="text" class="input-small" id='tag' placeholder='Tag'></td>
+                            <td class="alert-success"><input type="text" class="input-small" id='addtag' placeholder='Add Tag'></td>
+                            <td class="alert-success"><input type="text" class="input-small" id='removetag' placeholder='Remove Tag'></td>
+                        </tr>
                     </table>
                 </div>
 			</div>

@@ -52,9 +52,9 @@ def users():
 def detail():
 	return render_template('detail.html')
 
-@app.route('/static/js/lib.js')
-def libjs(api_address=conf['api_address'], api_port=conf['api_port']):
-	return render_template('lib.js', api_address=api_address, api_port=api_port)
+#@app.route('/static/js/lib.js')
+#def libjs(api_address=conf['api_address'], api_port=conf['api_port']):
+#	return render_template('lib.js', api_address=api_address, api_port=api_port)
 
 
 with app.test_request_context():
