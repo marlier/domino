@@ -35,11 +35,8 @@ def load_conf(config_file = 'domino.conf'):
 	conf['alert_interval']=int(conf['alert_interval'])
 	conf['alert_escalation']=int(conf['alert_escalation'])
 	conf['api_port']=int(conf['api_port'])
-	conf['webui_port']=int(conf['webui_port'])
 	conf['port']=int(conf['port'])
-	conf['team_failover']=int(conf['team_failover'])
 	conf['call_failover']=int(conf['call_failover'])
-	conf['alert_freshness']=int(conf['alert_freshness'])
 	conf['mysql_port']=int(conf['mysql_port'])
 	conf['email_port']=int(conf['email_port'])
 	return conf

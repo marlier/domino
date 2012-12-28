@@ -45,7 +45,7 @@ class Email:
 		self.message = '''%s
 		
 %s:%s/detail?host=%s&environment=%s&colo=%s&service=%s
-		''' % (self.alert.message, conf['webui_address'], conf['webui_port'], urllib.quote_plus(self.alert.host), urllib.quote_plus(self.alert.environment), urllib.quote_plus(self.alert.colo), urllib.quote_plus(self.alert.service))
+		''' % (self.alert.message, conf['api_address'], conf['api_port'], urllib.quote_plus(self.alert.host), urllib.quote_plus(self.alert.environment), urllib.quote_plus(self.alert.colo), urllib.quote_plus(self.alert.service))
 		message = MIMEText(self.message)
 		message['Subject'] = self.subject
 		message['From'] = self.username

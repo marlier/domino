@@ -247,7 +247,7 @@ class Alert():
             newNotification.message = self.message
             newNotification.tags = self.tags
             newNotification.status = self.status
-            newNotification.link = "%s:%s/detail?host=%s&environment=%s&colo=%s&service=%s" % (conf['webui_address'], conf['webui_port'], urllib.quote_plus(self.host), urllib.quote_plus(self.environment), urllib.quote_plus(self.colo), urllib.quote_plus(self.service))
+            newNotification.link = "%s:%s/detail?host=%s&environment=%s&colo=%s&service=%s" % (conf['api_address'], conf['api_port'], urllib.quote_plus(self.host), urllib.quote_plus(self.environment), urllib.quote_plus(self.colo), urllib.quote_plus(self.service))
             newNotification.save()
             team_names = Team.get_team_names()
             self.teams = []
