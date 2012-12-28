@@ -32,7 +32,6 @@ $(document).click(function(e) {
 function print_alerts(alerts,alert_div,sidebar_div) {
 	console.debug("Printing alerts");
 	var output = '';
-	var teams = new Array();
 	var environments = new Array();
 	var colos = new Array();
 	var hosts = new Array();
@@ -46,7 +45,6 @@ function print_alerts(alerts,alert_div,sidebar_div) {
 	$("#alert_total").text(alerts.length);
     $("#alert_total").attr('title', alerts.length + " alerts displayed");
 	$.each(alerts,function(i,a) {
-		teams.push(a.teams[0].name);
 		environments.push(a.environment);
 		colos.push(a.colo);
 		hosts.push(a.host);
@@ -88,7 +86,6 @@ function print_alerts(alerts,alert_div,sidebar_div) {
         $(alert_div).append(o);
 	});
 
-	teams = unique(teams);
 	environments = unique(environments);
 	colos = unique(colos);
 	hosts = unique(hosts);
@@ -99,7 +96,6 @@ function print_alerts(alerts,alert_div,sidebar_div) {
     // print sidebar
     $(sidebar_div + " .data-set").remove();
 
-    build_sidebar_item(sidebar_div,teams,'icon-user','Teams', 'team');
     build_sidebar_item(sidebar_div,environments,'icon-globe','Environments', 'environment');
     build_sidebar_item(sidebar_div,colos,'icon-tasks','Colos', 'colo');
     build_sidebar_item(sidebar_div,hosts,'icon-hdd','Hosts', 'host');

@@ -318,7 +318,7 @@ class Api():
                 newalert.tags = Rule.applyRules(newalert)
                 # save alert
                 if newalert.save() == True:
-                    if newalert.send_page() == True and newalert.send_email() == True:
+                    if newalert.send_alert() == True:
                         self.populate(200,"OK")
                     else:
                         self.populate(1202, "Failed to send new alert")

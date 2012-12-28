@@ -197,11 +197,8 @@ def check_alerts():
                 # don't alert, just update lastAlertSent timestamp
                 a.lastAlertSent = datetime.datetime.utcnow()
                 a.save()
-            elif a.hasTag('page'):
-                a.send_page()
-                a.send_email()
             else:
-                a.send_email()
+                a.send_alert()
         time.sleep(5)
 
 if __name__ == "__main__":

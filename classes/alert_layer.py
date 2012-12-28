@@ -133,10 +133,8 @@ def active(team=None):
         all_alerts = Mysql.query('''SELECT * FROM alerts WHERE ack != 0 ORDER BY id DESC''', "alerts")
         team_alerts = []
         for a in all_alerts:
-            for t in a.teams:
-                if t.id == team:
-                    team_alerts.append(a)
-                    break
+            if team in a.tags.split(','):
+                team_alerts.append(a)
         return team_alerts
 
 def get_current_alert(environment,colo,host,service):
@@ -166,7 +164,6 @@ class Alert():
             self.colo = ''
             self.enironment = ''
             self.status = 3
-            self.teams = '' #Team.get_default_teams()
             self.ack = 1
             self.ackby = 0
             self.remote_ip_address = '0.0.0.0'
@@ -205,12 +202,12 @@ class Alert():
         logging.debug("Saving alert: %s" % self.id)
         try:
             _db = Mysql.Database()
-            _db._cursor.execute('''REPLACE INTO alerts (id,message,teams,ack,ackby,acktime,lastAlertSent,tries,host,service,environment,colo,status,tags,remote_ip_address) VALUES (%s,"%s","%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s",%s,%s,"%s")''', (self.id, self.message, Team.flatten_teams(self.teams), self.ack, self.ackby, self.acktime, self.lastAlertSent, self.tries, self.host, self.service, self.environment, self.colo, self.status, self.tags, self.remote_ip_address))
+            _db._cursor.execute('''REPLACE INTO alerts (id,message,ack,ackby,acktime,lastAlertSent,tries,host,service,environment,colo,status,tags,remote_ip_address) VALUES (%s,"%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s",%s,%s,"%s")''', (self.id, self.message, self.ack, self.ackby, self.acktime, self.lastAlertSent, self.tries, self.host, self.service, self.environment, self.colo, self.status, self.tags, self.remote_ip_address))
             if self.id == 0:
                 _db._cursor.execute('''SELECT id FROM alerts ORDER BY id DESC LIMIT 1''')
                 tmp = _db._cursor.fetchone()
                 self.id = tmp['id']
-            _db._cursor.execute('''REPLACE INTO alerts_history (id,message,teams,ack,ackby,acktime,lastAlertSent,tries,host,service,environment,colo,status,tags,remote_ip_address) VALUES (%s,"%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s",%s,%s,"%s","%s")''', (self.id,self.message,Team.flatten_teams(self.teams),self.ack,self.ackby,self.acktime, self.lastAlertSent, self.tries,self.host,self.service, self.environment, self.colo, self.status, self.tags, self.remote_ip_address))
+            _db._cursor.execute('''REPLACE INTO alerts_history (id,message,ack,ackby,acktime,lastAlertSent,tries,host,service,environment,colo,status,tags,remote_ip_address) VALUES (%s,"%s",%s,%s,%s,%s,%s,"%s","%s","%s",%s,%s,"%s","%s")''', (self.id,self.message,self.ack,self.ackby,self.acktime, self.lastAlertSent, self.tries,self.host,self.service, self.environment, self.colo, self.status, self.tags, self.remote_ip_address))
             _db.save()
             _db.close()
             return True
@@ -232,97 +229,67 @@ class Alert():
         except Exception, e:
             Util.strace(e)
             return False
-    
-    def send_page(self):
-        '''
-        This method sends pages to people who need to get one via sms or phone.
-        '''
-        logging.debug("Sending Page Alert: %s" % self.id)
         
+    def send_alert(self):
+        '''
+        This method sends pages/emails to teams/people for an alert that is due for an email.
+        '''
+        logging.debug("Sending Alert: %s" % self.id)
         try:
-            self.tries += 1
             self.lastAlertSent = datetime.datetime.utcnow()
             self.save()
             newNotification = Notification.Notification()
-            newNotification.noteType = "page"
+            if "page" in self.tags.split(','):
+                newNotification.noteType = "page"
+            else:
+                newNotification.noteType = "email"
             newNotification.alert = self.id
             newNotification.message = self.message
             newNotification.tags = self.tags
             newNotification.status = self.status
             newNotification.link = "%s:%s/detail?host=%s&environment=%s&colo=%s&service=%s" % (conf['webui_address'], conf['webui_port'], urllib.quote_plus(self.host), urllib.quote_plus(self.environment), urllib.quote_plus(self.colo), urllib.quote_plus(self.service))
             newNotification.save()
+            team_names = Team.get_team_names()
+            self.teams = []
+            for name in team_names:
+                if name in self.tags.split(','): self.teams.append(name)
             if len(self.teams) == 0:
                 self.teams = Team.get_default_teams()
             else:
                 teams = []
                 for t in self.teams:
-                    if hasattr(t, 'members'):
-                        teams.append(t)
-                    else:
-                        teams.append(Team.Team(t.id))
+                    teams.append(Team.get_team_by_name(t))
                 self.teams = teams
             if len(self.teams) == 0:
                 logging.error("Failed to find any 'catchall' teams. This alert (%i) will not be sent" % (self.id))
                 return False
-            
-            for team in self.teams:
-                if len(team.on_call()) > 0:
-                    # send page
-                    # based on the number of alert attempts, gather a lits of users to alert.
-                    if "alert_escalation" in conf and conf['alert_escalation'] > 0:
-                        escalate = float(conf['alert_escalation'])
-                        num = int(math.ceil(self.tries/escalate))
-                        if num == 0: num = 1
-                        alert_users = team.on_call()[:num]
-                    else:
-                        alert_users = team.oncall[0]
-                    # loop through users to alert
-                    for i,au in enumerate(alert_users):
-                        if "call_failover" in conf and conf['call_failover'] >= 0:
-                            if conf['call_failover'] == 0:
-                                Twilio.make_call(au, team, alert=self)
-                            else:
-                                # check to see if enough tries have been made to this user to switch to calls instead of SMS
-                                if int(math.ceil(self.tries/float(i+1))) > conf['call_failover']:
-                                    Twilio.make_call(user=au, team=team, alert=self)
-                                else:
-                                    Twilio.send_sms(au, team, self, "%s\n%s" % (self.subjectize(), self.summarize()))
+            if "page" in self.tags.split(','):
+                for team in self.teams:
+                    if len(team.on_call()) > 0:
+                        # send page
+                        # based on the number of alert attempts, gather a lits of users to alert.
+                        if "alert_escalation" in conf and conf['alert_escalation'] > 0:
+                            escalate = float(conf['alert_escalation'])
+                            num = int(math.ceil(self.tries/escalate))
+                            if num == 0: num = 1
+                            alert_users = team.on_call()[:num]
                         else:
-                            Twilio.send_sms(au, team, self, "%s\n%s" % (self.subjectize(), self.summarize()))
-            return True
-        except Exception, e:
-            Util.strace(e)
-            return False
-        
-    def send_email(self):
-        '''
-        This method sends emails to teams/people for an alert that is due for an email.
-        '''
-        logging.debug("Sending Email Alert: %s" % self.id)
-        try:
-            self.lastAlertSent = datetime.datetime.utcnow()
-            self.save()
-            newNotification = Notification.Notification()
-            newNotification.noteType = "email"
-            newNotification.alert = self.id
-            newNotification.message = self.message
-            newNotification.tags = self.tags
-            newNotification.status = self.status
-            newNotification.link = "%s:%s/detail?host=%s&environment=%s&colo=%s&service=%s" % (conf['webui_address'], conf['webui_port'], urllib.quote_plus(self.host), urllib.quote_plus(self.environment), urllib.quote_plus(self.colo), urllib.quote_plus(self.service))
-            newNotification.save()
-            if len(self.teams) == 0:
-                self.teams = Team.get_default_teams()
-            else:
-                teams = []
-                for t in self.teams:
-                    if hasattr(t, 'members'):
-                        teams.append(t)
-                    else:
-                        teams.append(Team.Team(t.id))
-                self.teams = teams
-            if len(self.teams) == 0:
-                logging.error("Failed to find any 'catchall' teams. This alert (%i) will not be sent" % (self.id))
-                return False
+                            alert_users = team.oncall[0]
+                        # loop through users to alert
+                        for i,au in enumerate(alert_users):
+                            if "call_failover" in conf and conf['call_failover'] >= 0:
+                                if conf['call_failover'] == 0:
+                                    Twilio.make_call(au, team, alert=self)
+                                else:
+                                    # check to see if enough tries have been made to this user to switch to calls instead of SMS
+                                    if int(math.ceil(self.tries/float(i+1))) > conf['call_failover']:
+                                        Twilio.make_call(user=au, team=team, alert=self)
+                                    else:
+                                        Twilio.send_sms(au, team, self, "%s\n%s" % (self.subjectize(), self.summarize()))
+                            else:
+                                Twilio.send_sms(au, team, self, "%s\n%s" % (self.subjectize(), self.summarize()))
+                return True
+
             #send email
             e = Email.Email(self.teams, self)
             if e.send_alert_email() == False:
@@ -407,8 +374,8 @@ class Alert():
         the SMS param is to make the output SMS friendly or not
         '''
         if SMS == True:
-            output = "ack:%s\ntries:%s\nteams:%s\nsummary:%s\n" % (self.ack, self.tries, self.teams, self.summarize())
+            output = "ack:%s\ntries:%s\ntags:%s\nsummary:%s\n" % (self.ack, self.tries, self.tags, self.summarize())
         else:
-            output = "id:%i\nack:%s\nacktime:%s\ntries:%s\nteams:%s\nmessage:%s\n" % (self.id, self.ack, self.acktime, self.tries, self.teams, self.message)
+            output = "id:%i\nack:%s\nacktime:%s\ntries:%s\ntags:%s\nmessage:%s\n" % (self.id, self.ack, self.acktime, self.tries, self.tags, self.message)
         logging.debug("Printing alert: %s" % self.id)
         return output

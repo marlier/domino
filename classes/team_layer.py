@@ -9,14 +9,24 @@ import util_layer as Util
 
 conf = Util.load_conf()
 
-def all_teams(since=None):
+def all_teams(id=None):
 	'''
 	Get all teams from the db.
 	'''
-	if since == None or since == 0:
+	if id == None or id == 0:
 		return Mysql.query('''SELECT * FROM teams ORDER BY id DESC''', "teams")
 	else:
-		return Mysql.query('''SELECT * FROM teams WHERE id > %s ORDER BY id DESC''' % (since), "teams")
+		return Mysql.query('''SELECT * FROM teams WHERE id > %s ORDER BY id DESC''' % (id), "teams")
+
+def get_team_names():
+    '''
+    Return an array of all team names
+    '''
+    names = []
+    teams = Mysql.query('''SELECT * FROM teams ORDER BY id DESC''', "teams")
+    for team in teams:
+        names.append(team.name)
+    return names
 
 def get_teams(teams_raw):
 	'''
