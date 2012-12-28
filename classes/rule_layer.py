@@ -10,18 +10,13 @@ def applyRules(alert):
     '''
     Get all the rules that can be applied to the specified alert and apply them
     '''
-    # generate regex to find all tags
-    tags_regexp = []
-    for tag in alert.tags.split(','):
-        regexp.append('(^%s$|^%s,|,%s$|,%s,)' % (tag,tag,tag,tag))
-    tags_regexp = '|'.join(tags_regexp)
-    rules = Mysql.query('''select addTag, removeTag from inbound_rules where (tag REGEXP '%s' or tag is NULL) and (host is NULL or host = '%s') and (service is NULL or service = '%s') and (environment is NULL or environment = '%s') and (colo is NULL or colo = '%s') and (status is NULL or status = %s);''' % (tags_regexp, alert.host, alert.service, alert.environment, alert.colo, alert.status), "inbound_rules")
+    rules = get_rules(alert.environment, alert.colo, alert.host, alert.service, alert.status, alert.tag)
     for rule in rules:
         tags = alert.tags.split(',')
-        if rule['addTag'] != 'NULL':
+        if rule['addTag'] != 'NULL' and rule['addTag'] is not None:
             for tag in rule['addTag'].split(','):
                 if tag not in tags: tags.append(tag)
-        if rule['removeTag'] != 'NULL':
+        if rule['removeTag'] != 'NULL' and rule['removeTag'] is not None:
             for tag in rule['removeTag'].split(','):
                 if tag in tags: tags.remove(tag)
     alert.tags = ",".join(tags)
