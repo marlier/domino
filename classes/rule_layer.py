@@ -15,7 +15,7 @@ def applyRules(alert):
         tags = alert.tags.split(',')
         if rule['addTag'] != 'NULL' and rule['addTag'] is not None:
             for tag in rule['addTag'].split(','):
-                if tag not in tags: tags.append(tag)
+                if tag not in tags: tags.append(tag.strip())
         if rule['removeTag'] != 'NULL' and rule['removeTag'] is not None:
             for tag in rule['removeTag'].split(','):
                 if tag in tags: tags.remove(tag)

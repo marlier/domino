@@ -139,7 +139,7 @@ class Api():
             alert = Alert.Alert(self.id)
             tags = alert.tags.split(',')
             if self.tag not in tags:
-                tags.append(self.tag)
+                tags.append(self.tag.strip())
             alert.tags = ",".join(tags)
             alert.save()
             alert.status = alert.status_wordform()
