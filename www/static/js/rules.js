@@ -16,9 +16,7 @@ function getRules() {
     tag = $(div+' #tag').val();
     var url = "/api/rule?environment="+environment+"&colo="+colo+"&host="+host+"&service="+service+"&status="+status+"&tag="+tag
     $.getJSON(url,function(json){
-        if (process_header(json.status, json.status_message)) {
-            print_rules(json.data, div);
-        };  
+        print_rules(json, div);
     });
 };
 

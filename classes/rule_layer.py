@@ -33,24 +33,37 @@ def get_rules(environment, colo, host, service, status, tag):
     '''
     rules = []
     all_rules = Mysql.query('''select * from inbound_rules''', 'inbound_rules')
+    if None == environment == colo == host == service == status == tag:
+        return all_rules
     for rule in all_rules:
+        print rule.__dict__
         if compare_rule_vals(rule.environment, environment) is False: continue
+        print 'passed env'
         if compare_rule_vals(rule.colo ,colo) is False: continue
+        print 'passed colo'
         if compare_rule_vals(rule.host ,host) is False: continue
+        print 'passed host'
         if compare_rule_vals(rule.service ,service) is False: continue
+        print 'passed service'
         if compare_rule_vals(rule.status ,status) is False: continue
+        print 'passed status'
         if rule.tag is not None:
             if tag is not None:
                 if tag.lower() not in rule.tag.lower().split(','): continue
+        print 'passed tags'
         rules.append(rule);
     return rules
 
 def compare_rule_vals(rule_val, my_val):
-    if rule_val is not None:
-        if my_val is not None:
-            if rule_val.lower() != my_val.lower(): return False
-        else:
+    print rule_val, my_val
+    if rule_val is None: return True
+    if my_val is not None:
+        if rule_val.lower() != my_val.lower():
             return False
+        else:
+            return True
+    else:
+        return False
     return True
 
 class Rule:
