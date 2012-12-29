@@ -7,6 +7,7 @@ $(document).ready(function(){
 });
 
 function getRules() {
+    showLoading();
     var div = "#rules_rows";
     environment = $(div+' #environment').val();
     colo = $(div+' #colo').val();
@@ -17,10 +18,12 @@ function getRules() {
     var url = "/api/rule?environment="+environment+"&colo="+colo+"&host="+host+"&service="+service+"&status="+status+"&tag="+tag
     $.getJSON(url,function(json){
         print_rules(json, div);
+        hideLoading();
     });
 };
 
 function print_rules(rules, rules_div) {
+    showLoading();
     console.debug("Printing rules to "+rules_div);
     rules_list = new Array();
     $(rules_div + ' .data-set').remove();
@@ -38,7 +41,7 @@ function print_rules(rules, rules_div) {
         row.append('<td class="alert-info">' + clean_value(r['tag']) + '</td>');
         row.append('<td class="alert-success">' + clean_value(r['addTag']) + '</td>');
         row.append('<td class="alert-success">' + clean_value(r['removeTag']) + '</td>');
-        row.append('<td><div class="btn-group"><a href="#" id="'+r['id']+'" class="editBtn btn btn-info btn-small"><i class="icon-white icon-pencil"></i> Edit</a><a href="#" id="'+r['id']+'" class="delBtn btn btn-danger btn-small"><i class="icon-white icon-remove-sign"></i> Delete</a></div></td>');
+        row.append('<td><div class="btn-group"><a href="#" id="'+r['id']+'" title="Edit" class="tip-top editBtn btn btn-info btn-small"><i class="icon-white icon-pencil"></i></a><a href="#" id="'+r['id']+'" title="Delete" class="tip-top delBtn btn btn-danger btn-small"><i class="icon-white icon-remove-sign"></i></a></div></td>');
         $(rules_div).append(row);
     });
     
@@ -75,22 +78,26 @@ function print_rules(rules, rules_div) {
         delRule($(this).attr('id'));
         getRules();
     });
+    hideLoading();
 };
 
 function delRule(id) {
     var r=confirm("Are you sure you want to delete this rule?");
     if (r==true) {
+        showLoading();
         //delete a rule
         $.ajax({
             url: "/api/rule/" + id,
             type: "DELETE"
         }).done(function(json){
+            hideLoading();
             getRules();
         }); 
     };
 };
 
 function saveRule() {
+    showLoading();
     var div = "#rules_rows";
 
     $('input').blur();
@@ -115,9 +122,11 @@ function saveRule() {
         dataType: "json",
         data: jsonData,
         success: function(data, textStatus, jqXHR){
+            hideLoading();
             getRules();
         },      
         error: function(jqXHR, textStatus, errorThrown){
+            hideLoading();
         }       
     });    
 };

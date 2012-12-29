@@ -6,31 +6,38 @@ $(document).ready(function(){
 });
 
 function chronological(div, direction) {
+    showLoading("chron");
 	var url = "/api/alert?search=status:-OK&limit=10&sort=" + direction;
 	$.getJSON(url,function(json){
-		print_alert_list(json,div);i
+		print_alert_list(json,div);
+        hideLoading("chron");
 		return json;
 	});
 };
 
 function frequent(div) {
     console.debug('Getting frequent data');
+    showLoading("freq");
 	$.getJSON("/api/analytics?name=frequent&since=7&limit=10",function(json){
 		print_frequent_alert_list(json,div);
+        hideLoading("freq");
 		return json;
 	});
 };
 
 function status(div) {
 	var url = base_url+"metric?metric=status";
+    showLoading("status");
 	$.getJSON(url,function(json){
 		print_frequent_alert_list(json,div);
+        hideLoading("status");
 		return json;
 	});
 };
 
 function print_frequent_alert_list(alerts,div) {
     console.debug('Print frequent alerts');
+    showLoading("print freq");
 	$(div + " .data-set").remove();
 	$.each(alerts,function(i,a) {
         o = $('<tr class="data-set">');
@@ -41,9 +48,11 @@ function print_frequent_alert_list(alerts,div) {
         o.append('<td>' + a.service + '</td>');
         $(div).append(o);
 	});
+    hideLoading("print freq");
 };
 
 function print_alert_list(alerts,div) {
+    showLoading("print alert list");
     $(div + " .data-set").remove();
 	$.each(alerts,function(i,a) {
         o = $('<tr class="data-set">');
@@ -63,6 +72,7 @@ function print_alert_list(alerts,div) {
         o.append('<td>' + a.service + '</td>');
         $(div).append(o);
 	});
+    hideLoading("print alert list");
 };
 
 function get_graph_data(div) {

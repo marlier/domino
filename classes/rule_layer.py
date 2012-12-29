@@ -10,16 +10,17 @@ def applyRules(alert):
     '''
     Get all the rules that can be applied to the specified alert and apply them
     '''
-    rules = get_rules(alert.environment, alert.colo, alert.host, alert.service, alert.status, alert.tag)
-    for rule in rules:
-        tags = alert.tags.split(',')
-        if rule['addTag'] != 'NULL' and rule['addTag'] is not None:
-            for tag in rule['addTag'].split(','):
-                if tag not in tags: tags.append(tag.strip())
-        if rule['removeTag'] != 'NULL' and rule['removeTag'] is not None:
-            for tag in rule['removeTag'].split(','):
-                if tag in tags: tags.remove(tag)
-    alert.tags = ",".join(tags)
+    rules = get_rules(alert.environment, alert.colo, alert.host, alert.service, alert.status, alert.tags)
+    if len(rules) > 0:
+        for rule in rules:
+            tags = alert.tags.split(',')
+            if rule['addTag'] != 'NULL' and rule['addTag'] is not None:
+                for tag in rule['addTag'].split(','):
+                    if tag not in tags: tags.append(tag.strip())
+            if rule['removeTag'] != 'NULL' and rule['removeTag'] is not None:
+                for tag in rule['removeTag'].split(','):
+                    if tag in tags: tags.remove(tag)
+        alert.tags = ",".join(tags)
     return alert.tags
 
 def get_rules(environment, colo, host, service, status, tag):

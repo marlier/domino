@@ -19,6 +19,17 @@
 		<div id="wrap">
 
 			<div id="top"></div>
+
+            <div id="loadingModal" class="modal hide">
+                <div class="modal-header">
+                    <h3>Loading... Please Wait</h3>
+                </div>
+                <div class="modale-body">
+                    <div class="progress progress-striped active">
+                        <div style="width: 100%;" class="bar"></div>
+                    </div>
+                </div>
+            </div>
 			
 			<div id="sidebar">
                 <a href="#" class="visible-phone"><i class="icon icon-bell"></i> Alerts</a>
@@ -29,6 +40,42 @@
 			</div>
 			
 			<div id="content">
+                <div id="statebar" class="widget-box">
+                    <div class="widget-title">
+                        <span class="icon"><i class="icon-search"></i></span>
+                        <h5>State Bar</h5>
+                    </div>
+                    <div class="widget-content center"> 
+                        <div class="progress">
+                            <div id="ok" class="bar bar-success"></div>
+                            <div id="warning" class="bar bar-warning"></div>
+                            <div id="critical" class="bar bar-danger"></div>
+                            <div id="unknown" class="bar bar-info"></div>
+                        </div>
+                        <ul class="stats-plain">
+                            <li>
+                                <h4 id="ok"></h4>
+                                <span>OK Status</span>
+                            </li>
+                            <li>
+                                <h4 id="warning"></h4>
+                                <span>Warning Status</span>
+                            </li>
+                            <li>
+                                <h4 id="critical"></h4>
+                                <span>Critical Status</span>
+                            </li>
+                            <li>
+                                <h4 id="unknown"></h4>
+                                <span>Unknown Status</span>
+                            </li>
+                            <li>
+                                <h4 id="total"></h4>
+                                <span>Total</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
 				<div id="search_terms_header" class="widget-box">
                     <div class="widget-title">
                         <span class="icon"><i class="icon-search"></i></span>

@@ -4,7 +4,7 @@ var id = 0;
 $(document).ready(function(){
     detail_attrs = window.location.href.slice(window.location.href.indexOf('?') + 1)
     detail_attrs = detail_attrs.replace(/=/gi, ":").split('&');
-    
+
     get_detail();
 //  get_detail_graph("#graph");
 //  get_detail_history("#history");
@@ -31,6 +31,7 @@ $(document).ready(function(){
 
 
 function get_detail(){
+    showLoading("get detail");
     var url = "/api/alert?search="+detail_attrs.join(",");
     $.getJSON(url,function(json){
         a = json[0]
@@ -78,11 +79,13 @@ function get_detail(){
                 row.append('<td class="alert-success">' + clean_value(r['removeTag']) + '</td>');
                 $("#rules_rows").append(row);
             });
+            hideLoading("get detail");
         });
     });
 };
 
 function print_ackBtn(a) {
+    showLoading();
     acktime = new Date(a.acktime+"Z");
     $(".ack-data-set").remove();
     if (a.ack == 0) {
@@ -107,10 +110,11 @@ function print_ackBtn(a) {
             }
         });
     });
-
+    hideLoading();
 };
 
 function print_tags(tags) {
+    showLoading();
     tagBtns = $('<ul>');
     tagBtns.addClass('nav nav-pills');
     $.each(tags,function(i,t) {
@@ -134,6 +138,7 @@ function print_tags(tags) {
             }
         });
     });
+    hideLoading();
 };
 
 function clean_value(val) {
@@ -145,9 +150,11 @@ function clean_value(val) {
 }
 
 function get_detail_history(div) {
+    showLoading();
     var url = base_url+"history?since=30&search="+detail_attrs.join(",");
     $.getJSON(url,function(json){
         print_alerts(json,div);
+        hideLoading();
         return json;
     });
 };

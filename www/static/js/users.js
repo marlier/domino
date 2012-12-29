@@ -7,6 +7,7 @@ $(document).ready(function(){
 });
 
 function print_users(users,user_div,sidebar_div) {
+    showLoading('print users');
 	console.debug("Printing users");
 	var output = '';
 	user_list = new Array();
@@ -16,7 +17,7 @@ function print_users(users,user_div,sidebar_div) {
         user_list.push(u);
         $(sidebar_div).append('<li class="data-set"><a class="user_name" href="#" id="'+u.id+'">'+u.name+'</a></li>');
     }); 
-	
+    hideLoading('print users');	
     $(".user_name").click(function() {
         id = $(this).attr('id');
 
@@ -36,6 +37,7 @@ function print_users(users,user_div,sidebar_div) {
 function delUser(id) {
     var r=confirm("Are you sure you want to delete this user?");
     if (r==true) {
+        showLoading();
         //delete a user
         console.debug("deleting user");
         var url = "/api/user/" + id; 
@@ -43,6 +45,7 @@ function delUser(id) {
             url: url,
             type: "DELETE"
         }).done(function(json){
+            hideLoading();
             query("#data","#sidebar_data");
         }); 
     };  
@@ -71,7 +74,7 @@ function saveUser(id) {
 	});
 	
 	var url = "/api/user/" + id
-	
+	showLoading();
 	$.ajax({
         type: 'POST',
         contentType: 'application/json',
@@ -79,9 +82,11 @@ function saveUser(id) {
         dataType: "json",
         data: jsonData,
         success: function(data, textStatus, jqXHR){
+            hideLoading();
             query("#data","#sidebar_data");
         },
         error: function(jqXHR, textStatus, errorThrown){
+            hideLoading();
         }
     });
 };

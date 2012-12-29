@@ -11,11 +11,10 @@ version="Raven 0.04"
 # Parse the command line
 parser = OptionParser()
 parser.add_option('-m', '--message', dest='message', help='The message of the alert', type='string', default=None)
-parser.add_option('-t', '--teams', dest='teams', help='The teams you want to send the message to (comma separated)', type='string', default=None)
 parser.add_option('-H', '--host', dest='host', help='Hostname', type='string', default=None)
 parser.add_option('-v', '--service', dest='service', help='Service name', type='string', default=None)
 parser.add_option('-e', '--environment', dest='environment', help='Environment (ie Production, QA, Staging)', type='string', default=None)
-parser.add_option('-d', '--colo', dest='colo', help='Colo or datacenter name', type='string', default=None)
+parser.add_option('-C', '--colo', dest='colo', help='Colo or datacenter name', type='string', default=None)
 parser.add_option('-s', '--status', dest='status', help='Alert status. 0=OK, 1=Warning, 2=Critical, 3=Unknown', type='string', default=None)
 parser.add_option('-T', '--tags', dest='tags', help='Tags. A comma separated list of "tags" or "cagetories" this alert is associated', type='string', default=None)
 parser.add_option('-z', '--server', dest='server', help='Domino Server address', type='string', default=None)
@@ -67,7 +66,6 @@ else:
 if alert['message'] == None:
 	print "Error: No message passed. This can be done via stdin or --message (-m)"
 	sys.exit(1)
-if opts.teams != None: alert['teams']=opts.team
 if opts.host != None: alert['host']=opts.host
 if opts.service != None: alert['service']=opts.service
 if opts.environment != None: alert['environment']=opts.environment
@@ -91,12 +89,11 @@ summary='''Sending a raven:
     Colo: %s
     Host: %s
     Service: %s
-    Teams: %s
     Status: %s
     Tags: %s
     Server: %s
     Port: %s
-    Message: %s''' % (alert['environment'], alert['colo'], alert['host'], alert['service'], alert['teams'], alert['status'], alert['tags'], alert['server'], alert['port'], alert['message'])
+    Message: %s''' % (alert['environment'], alert['colo'], alert['host'], alert['service'], alert['status'], alert['tags'], alert['server'], alert['port'], alert['message'])
 
 logging.info(summary)
 
@@ -115,9 +112,9 @@ except urllib2.URLError, e:
 
 ret = json.loads(rawreturn)
 
-if ret['status'] % 100 == 0:
-	print "Successfully sent message: %s" % (ret['status_message'])
+if response.getcode() % 100 == 0:
+	print "Successfully sent message: %s" % (response.getcode())
 	sys.exit(0)
 else:
-	print "Failed to send message: %s" % (ret['status_message'])
+	print "Failed to send message: %s" % (response.getcode())
 	sys.exit(1)

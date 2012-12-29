@@ -238,6 +238,7 @@ class Alert():
         try:
             self.lastAlertSent = datetime.datetime.utcnow()
             self.save()
+            if "silent" in self.tags.split(','): return True
             newNotification = Notification.Notification()
             if "page" in self.tags.split(','):
                 newNotification.noteType = "page"

@@ -1,6 +1,9 @@
 var table = "alert";
 
 $(document).ready(function(){
+
+    console.debug('starting query')
+    $("#loadingDiv").show();
 	query("#alerts_data","#sidebar_data");
 	
 	$("#search_input").keyup(function(event){
@@ -30,8 +33,8 @@ $(document).click(function(e) {
 });
 
 function print_alerts(alerts,alert_div,sidebar_div) {
+    showLoading();
 	console.debug("Printing alerts");
-	var output = '';
 	var environments = new Array();
 	var colos = new Array();
 	var hosts = new Array();
@@ -39,60 +42,84 @@ function print_alerts(alerts,alert_div,sidebar_div) {
 	var statuses = new Array();
 	var tags = new Array();
 
+    var ok = 0;
+    var warning = 0;
+    var critical = 0;
+    var unknown = 0;
+
     //remove any old alerts before trying to update the table
     $(alert_div + " .data-set").remove();
     console.debug($(alert_div).html());
 	$("#alert_total").text(alerts.length);
     $("#alert_total").attr('title', alerts.length + " alerts displayed");
 	$.each(alerts,function(i,a) {
-		environments.push(a.environment);
-		colos.push(a.colo);
-		hosts.push(a.host);
-		services.push(a.service);
-		statuses.push(a.status);
-		tags=tags.concat(a.tags.split(','));
-        o = $('<li>');
-        o.addClass('data-set');
-        btns = $('<div>');
-        btns.addClass("btn-group");
-        btns.append('<a href="#" term="environment" tag="'+a.environment+'" class="btn btn-large btn-info addSearch">'+a.environment+'</a>');
-        btns.append('<a href="#" term="colo" tag="'+a.colo+'" class="btn btn-large btn-info addSearch">'+a.colo+'</a>');
-        btns.append('<a href="#" term="host" tag="'+a.host+'" class="btn btn-large btn-info addSearch">'+a.host+'</a>');
-        btns.append('<a href="#" term="service" tag="'+a.service+'" class="btn btn-large btn-info addSearch">'+a.service+'</a>');
-        if (a.status == "OK") {
-            btns.append('<a href="#" term="status" tag="'+a.status+'" class="btn btn-large btn-success addSearch">'+a.status+'</a>');
-        } else if ( a.status == "Warning" ) {
-            btns.append('<a href="#" term="status" tag="'+a.status+'" class="btn btn-large btn-warning addSearch">'+a.status+'</a>');
-        } else if ( a.status == "Critical" ) {
-            btns.append('<a href="#" term="status" tag="'+a.status+'" class="btn btn-large btn-danger addSearch">'+a.status+'</a>');
-        } else {
-            btns.append('<a href="#" term="status" tag="'+a.status+'" class="btn btn-large addSearch">'+a.status+'</a>');
+        if( $.inArray(a.environment, environments) == -1 ){
+            environments.push(a.environment);
         };
-        tagBtns = $('<ul>');
-        tagBtns.addClass('nav nav-pills');
+        if( $.inArray(a.colo, colos) == -1 ){
+            colos.push(a.colo);
+        };
+        if( $.inArray(a.host, hosts) == -1 ){
+            hosts.push(a.host);
+        };
+        if( $.inArray(a.service, services) == -1 ){
+            services.push(a.service);
+        };
+        if( $.inArray(a.status, statuses) == -1 ){
+            statuses.push(a.status);
+        };
         $.each(a.tags.split(','),function(i,t) {
-            tagBtns.append('<li class="grey active"><a href="#" class="addSearch" term="tags" tag="'+t+'" >'+t+'</a></li>');
+            if( $.inArray(t, tags) == -1 ){
+                tags.push(t);
+            };
         });
-        body = $('<p>');
-        body.text(a.summary);
-		d = new Date(a.createDate+"Z");		
-		//console.info(a.createDate);
-		output = output + '<div class="alert_date">' + new Date(a.createDate+"Z").toString() + '</div>';
-		output = output + '</div>';
-        o.append(btns);
-        o.append('<a href="/detail?host='+a.host+'&environment='+a.environment+'&colo='+a.colo+'&service='+a.service+'" class="btn btn-large btn-primary pull-right"><i class="icon-white icon-share"></i> Go</a>');
-        o.append(body);
-        o.append(tagBtns);
-        $(alert_div).append(o);
+        if (a.status == "OK") {
+            ++ok;
+            class_name = "-success";
+        } else if ( a.status == "Warning" ) {
+            ++warning;
+            class_name = "-warning";
+        } else if ( a.status == "Critical" ) {
+            ++critical;
+            class_name = "-danger";
+        } else {
+            ++unknown;
+            class_name = ""
+        };
+
+        if (i <= 100) {
+            o = $('<li>');
+            o.addClass('data-set');
+            btns = $('<div>');
+            btns.addClass("btn-group");
+            btns.append('<a href="#" term="environment" tag="'+a.environment+'" class="btn btn-large btn-info addSearch">'+a.environment+'</a>');
+            btns.append('<a href="#" term="colo" tag="'+a.colo+'" class="btn btn-large btn-info addSearch">'+a.colo+'</a>');
+            btns.append('<a href="#" term="host" tag="'+a.host+'" class="btn btn-large btn-info addSearch">'+a.host+'</a>');
+            btns.append('<a href="#" term="service" tag="'+a.service+'" class="btn btn-large btn-info addSearch">'+a.service+'</a>');
+            btns.append('<a href="#" term="status" tag="'+a.status+'" class="btn btn-large btn'+class_name+' addSearch">'+a.status+'</a>');
+            tagBtns = $('<ul>');
+            tagBtns.addClass('nav nav-pills');
+            $.each(a.tags.split(','),function(i,t) {
+                tagBtns.append('<li class="grey active"><a href="#" class="addSearch" term="tags" tag="'+t+'" >'+t+'</a></li>');
+            });
+            body = $('<p style="margin-bottom: 0px;">');
+            body.addClass('well well-small');
+            body.text(a.summary);
+	    	d = new Date(a.createDate+"Z");
+            relDate = getRelTime(a.createDate+"Z");
+            d = $('<div>');
+            d.html('<i class="icon icon-time"></i> '+relDate);
+            o.append(btns);
+            o.append('<a href="/detail?host='+a.host+'&environment='+a.environment+'&colo='+a.colo+'&service='+a.service+'" class="btn btn-large btn-primary pull-right"><i class="icon-white icon-share"></i> Go</a>');
+            o.append(d);
+            o.append(body);
+            o.append(tagBtns);
+            $(alert_div).append(o);
+        };
 	});
 
-	environments = unique(environments);
-	colos = unique(colos);
-	hosts = unique(hosts);
-	services = unique(services);
-	statuses = unique(statuses);
-	tags = unique(tags);
-	
+    console.debug('done printing alerts');
+
     // print sidebar
     $(sidebar_div + " .data-set").remove();
 
@@ -116,6 +143,21 @@ function print_alerts(alerts,alert_div,sidebar_div) {
     // load unicorn.js now that we've finished building our sidebar
     $.getScript("/static/js/unicorn.js", function(data, textStatus, jqxhr) {});
     
+    total = ok + warning + critical + unknown
+
+    $("#statebar .progress #ok").css('width', ((ok / total) * 100)+"%");
+    $("#statebar .progress #warning").css('width', ((warning / total) * 100)+"%");
+    $("#statebar .progress #critical").css('width', ((critical / total) * 100)+"%");
+    $("#statebar .progress #unknown").css('width', ((unknown / total) * 100)+"%");
+
+    $("#statebar .stats-plain #ok").text(ok);
+    $("#statebar .stats-plain #warning").text(warning);
+    $("#statebar .stats-plain #critical").text(critical);
+    $("#statebar .stats-plain #unknown").text(unknown);    
+    $("#statebar .stats-plain #total").text(total);
+
+    console.debug("done printing sidebar");
+    hideLoading();
 };
 
 function build_sidebar_item(div,objs,icon,title,search_term) {
@@ -149,6 +191,7 @@ function del_search_terms(term) {
 };
 
 function print_search_terms() {
+    showLoading();
     console.debug("printing search terms");
     $('#search_terms').html('');
     o = $("<ul>");
@@ -158,4 +201,6 @@ function print_search_terms() {
         o.append('<li><a href="#" class="btn" onclick="del_search_terms(\'' + s + '\')">' + s + '</a></li>');
     }); 
     $('#search_terms').append(o);
+    console.debug('done adding search terms');
+    hideLoading();
 };
