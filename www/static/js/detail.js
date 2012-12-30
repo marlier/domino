@@ -6,8 +6,8 @@ $(document).ready(function(){
     detail_attrs = detail_attrs.replace(/=/gi, ":").split('&');
 
     get_detail();
-//  get_detail_graph("#graph");
-//  get_detail_history("#history");
+
+    get_detail_history("#history_table");
 
     $("#addTagBtn").click(function() {
         console.debug("adding tag");
@@ -41,7 +41,9 @@ function get_detail(){
         $("#general #colo").text(a.colo);
         $("#general #environment").text(a.environment);
     
-        $("#status #date").text(a.createDate);
+        d = new Date (0);
+        d.setUTCSeconds(a.createDate);
+        $("#status #date").text(d.toTimeString() + " (" + getRelTime(d) + ")");
         $("#status #status").text(a.status);
         $("#status #message").text(a.message);
         if ( a.status == "OK" ) {
@@ -53,8 +55,6 @@ function get_detail(){
         } else {
             $("#status .widget-content").addClass("alert alert-info");
         };
-
-        console.debug(a);
 
         print_tags(a.tags.split(','));
         print_ackBtn(a);
@@ -81,12 +81,14 @@ function get_detail(){
             });
             hideLoading("get detail");
         });
+        graph("#history_graph", a);
     });
 };
 
 function print_ackBtn(a) {
     showLoading();
-    acktime = new Date(a.acktime+"Z");
+    acktime = new Date (0);
+    acktime.setUTCSeconds(a.createDate);
     $(".ack-data-set").remove();
     if (a.ack == 0) {
         $("#status .widget-title").append('<div class="buttons ack-data-set"><a id="'+a.id+'" class="btn btn-mini active"><i class="icon-ok-sign"></i> Acknowledge</a></div>');
@@ -151,141 +153,72 @@ function clean_value(val) {
 
 function get_detail_history(div) {
     showLoading();
-    var url = base_url+"history?since=30&search="+detail_attrs.join(",");
+    var url = "/api/history?since=30&search="+detail_attrs.join(",");
+    console.debug(url);
     $.getJSON(url,function(json){
-        print_alerts(json,div);
+        $(".data-set").remove();
+        $.each(json, function(i,a) {
+            console.debug(a);
+            row = $('<tr>');
+            if ( a.status == "OK" ) {
+                bgcolor = "alert-success";
+            } else if ( a.status == "Warning" ) {
+                bgcolor = "alert-warning";
+            } else if ( a.status == "Critical") {
+                bgcolor = "alert-danger";
+            } else {
+                bgcolor = "alert-info";
+            };
+            row.addClass('data-set alert '+bgcolor);
+            d = new Date (0);
+            d.setUTCSeconds(a.createDate);
+            dateString = d.toTimeString();
+            row.append("<td class='span2'>"+dateString+"</td>");
+            row.append("<td class='span1'>"+a.status+"</td>");
+            row.append("<td>"+a.message+"</td>");
+            $(div).append(row);
+        });
         hideLoading();
         return json;
     });
 };
 
-function get_detail_graph(div) {
-    var url = base_url+"graph?segment=30&unit=DAY&terms="+detail_attrs.join("%2B");
+function graph(div, a) {
+    showLoading("graph");
+    var url = "/api/graph?segment=30&unit=DAY&search=environment:"+a.environment+"+colo:"+a.colo+"+host:"+a.host+"+service:"+a.service;
+    console.debug(url);
     $.getJSON(url,function(json){
-        if (process_header(json.status, json.status_message)) {
-            var datapoints = new Array();
-            var labelpoints = new Array();
-            var minValue = "nil";
-            var maxValue = "nil";
-            $.each(json.data[0].datapoints, function(i,d) {
-                datapoints.push(d.count);
-                labelpoints.push(new Date(d.date).getDate());
-                if ((minValue > d.min) || (minValue == "nil")) {
-                    minValue = d.min
-                };
-                if ((maxValue > d.max) || (maxValue == "nil")) {
-                    maxValue = d.max
-                };
-            });
-            console.debug(json.data[0]);
-            if (json.data[0].terms == 0) {
-                json.data[0].terms = "All";
+        var datasets = []; 
+        $.each(json, function(i,dataset) {
+            var mydata = new Array();
+            $.each(dataset.datapoints, function(i,d) {
+                myDate = new Date(0);
+                myDate.setUTCSeconds(d.date);
+                mydata.push([myDate,d.count]);
+            }); 
+            if (dataset.search == 0) {
+                dataset.search = "All";
             } else {
-                json.data[0].terms = json.data[0].search.join();
-            };
-            $(div).gchart('destroy');
-            $(div).gchart({
-                type: 'line',
-                title: '30 Day Chart', 
-                titleColor: 'black', 
-                height: 400, 
-                width: 900,
-                minValue: minValue,
-                maxValue: maxValue,
-                series: [$.gchart.series('', datapoints, 'blue', json.data[0].min, json.data[0].max)], 
-                axes: [$.gchart.axis('bottom', labelpoints, 'black'), $.gchart.axis('left', json.data[0].min, json.data[0].max, 'black', 'left')], 
-                legend: 'right' 
-            });
-            $( "#tabs" ).tabs();
-            return json.data;
-        };
-    })
+                dataset.search = dataset.search.join(' + ');
+            };  
+            tmp = {label: dataset.search, data: mydata, lines: {show: true}, points: {show: true}}
+            datasets.push(tmp);
+        });
+        $.plot(
+            $(div),
+            datasets,  
+            {   
+                xaxis: {
+                    mode: "time",
+                    timeformat: "%b %d %h:%M:%S"
+                },  
+                legend: {
+                    show: true,
+                    position: "nw"
+                }   
+            }   
+            );  
+            hideLoading('graph');
+        return json;
+    }); 
 }
-
-function graph(div, segment, unit) {
-    search = $("#graph_filter").val();
-    console.debug($('select option:selected').text() );
-    timeperiod = $("input[name='timeperiod']:checked").val();
-    var url = base_url+"graph?segment=" + segment + "&unit=" + unit + "&search=" + search;
-    $.getJSON(url,function(json){
-        if (process_header(json.status, json.status_message)) {
-                var datapoints = new Array();
-                var labelpoints = new Array();
-                var minValue = "nil";
-                var maxValue = "nil";
-                $.each(json.data[0].data, function(i,d) {
-                    datapoints.push(d.count);
-                    labelpoints.push(new Date(d.date).getDate());
-                    if ((minValue > d.min) || (minValue == "nil")) {
-                        minValue = d.min
-                    };
-                    if ((maxValue > d.max) || (maxValue == "nil")) {
-                        maxValue = d.max
-                    };
-                });
-                if (json.data[0].terms == 0) {
-                    json.data[0].terms = "All";
-                } else {
-                    json.data[0].terms = json.data[0].terms.join();
-                };
-                $(div).gchart('destroy');
-                $(div).gchart({
-                    type: 'line',
-                    title: 'Custom Chart', 
-                    titleColor: 'black', 
-                    height: 400, 
-                    width: 700,
-                    minValue: minValue,
-                    maxValue: maxValue,
-                    series: [$.gchart.series(json.data[0].terms, datapoints, 'blue', json.data[0].min, json.data[0].max)], 
-                    axes: [$.gchart.axis('bottom', labelpoints, 'black'), $.gchart.axis('left', json.data[0].min, json.data[0].max, 'black', 'left')], 
-                    legend: 'right' 
-                });
-        };
-        return json.data;
-    });
-}
-
-function print_current(data, div) {
-    $(div).html('');
-    var output = '';
-    console.debug(data);
-    output = output + 'Status: '+data.status + '<br />';
-    output = output + 'Host: '+data.host + '<br />';
-    output = output + 'Service: '+data.service + '<br />';
-    output = output + 'Colo: '+data.colo + '<br />';
-    output = output + 'Environment: '+data.environment + '<br />';
-    output = output + 'Team: '+data.teams[0].name + '<br /></br>';
-    
-    output = output + 'Date: '+new Date(data.createDate+'Z').toDateString()  + '<br />';
-    output = output + 'Message:\
-    '+data.message + '<br />';
-
-    $(div).html(output);    
-};
-
-function print_alerts(data, div) {
-    $(div).html('');
-    var output = '';
-    
-    $.each(data,function(i,a) {
-        output = output + '<div class="alert_detail">';
-        output = output + '<ul>';
-        output = output + '<li>' + a.teams[0].name + '</li>';
-        output = output + '<li>' + a.status + '</li>';
-        output = output + '</ul>';
-        output = output + '<div class="alert_detail_msg" id="'+ a.status +'">' + a.summary;
-        output = output + '<div class="alert_detail_date">' + new Date(a.createDate+'Z').toDateString() + '</div>';
-        output = output + '</div>';
-    });
-    $(div).html(output);
-};
-
-function process_header(status, status_message) {
-    if ( status % 100 == 0 ) {
-        return new Boolean(1);
-    } else {
-        console.log(status, status_message);
-        return new Boolean(0);
-    };
-};

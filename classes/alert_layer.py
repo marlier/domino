@@ -54,15 +54,26 @@ def graph_data(amount=7, units="HOUR", terms = None):
     '''
     terms_query = ''
     if terms != None:
-        terms = terms.split("+")
         for t in terms:
             if ":" in t:
-                terms_query = "%s %s='%s' and" % (terms_query, t.split(":")[0].strip(), t.split(":")[1].strip())
+                key = t.split(":")[0].strip()
+                value = t.split(":")[1].strip()
+                if key == "status":
+                    if value.lower() == "ok":
+                        value = 0
+                    elif value.lower() == "warning":
+                        value = 1
+                    elif value.lower() == "critical":
+                        value = 2
+                    elif value.lower() == "unknown":
+                        value = 3
+                terms_query = "%s %s='%s' and" % (terms_query, key, value)
     _db = Mysql.Database()
-    #print ('''select COUNT(id) as count,createDate from alerts_history WHERE %s createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s %s) AND DATE_SUB(CURDATE(),INTERVAL -1 %s) group by %s(createDate);''' % (terms_query, amount, units, units, units))
-    _db._cursor.execute( '''select COUNT(id) as count,createDate from alerts_history WHERE %s createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s %s) AND DATE_SUB(CURDATE(),INTERVAL -1 %s) group by %s(createDate);''' % (terms_query, amount, units, units, units))
+    print '''select COUNT(id) as count,createDate from alerts_history WHERE %s createDate >= DATE_SUB(NOW(),INTERVAL %s %s) group by %s(createDate);''' % (terms_query, amount, units, units) 
+    _db._cursor.execute( '''select COUNT(id) as count,createDate from alerts_history WHERE %s createDate >= DATE_SUB(NOW(),INTERVAL %s %s) group by %s(createDate);''' % (terms_query, amount, units, units))
     raw_alerts = _db._cursor.fetchall()
     _db.close()
+    print (raw_alerts)
     d = []
     alerts = []
     # convert to dictionary
@@ -83,7 +94,6 @@ def graph_data(amount=7, units="HOUR", terms = None):
         date_set = set(d[0]+timedelta(minutes=x) for x in range(amount))
     elif units.lower() == "hour":
         d.insert(0,now - datetime.timedelta(hours=amount))
-        logging.error(d[0])
         date_set = set(d[0]+timedelta(hours=x) for x in range(amount))
     elif units.lower() == "day":
         d.insert(0,now - datetime.timedelta(days=amount))
@@ -95,24 +105,25 @@ def graph_data(amount=7, units="HOUR", terms = None):
     min = alerts[0]['count']
     max = alerts[-1]['count']
     alerts = sorted(alerts, key=lambda k: k['date'])
-    # putting dates in isoformat
+    # putting dates in epoch format
     for a in alerts:
-        a['date'] = a['date'].isoformat()
+        a['date'] = a['date'].strftime('%s')
     #ensuring that the right amount of data continues
-    graph_data = alerts[-(amount - 1):]
+    print len(alerts), alerts
+    graph_data = alerts[-(amount):]
+    print len(graph_data), graph_data
     logging.debug(graph_data)
     
     return {'unit':units, 'segment':amount, 'search':terms, 'datapoints':graph_data, 'min':min, 'max':max}
 
-def all_alert_history(since=None,mylimit=25):
+def all_alert_history(since=None):
     '''
     Get all alerts.
     '''
-    if mylimit == 0: mylimit = 1
     if since == None:
-        return Mysql.query('''SELECT * FROM alerts_history ORDER BY id DESC LIMIT %s''' % (mylimit), "alerts")
+        return Mysql.query('''SELECT * FROM alerts_history ORDER BY id DESC''', "alerts")
     else:
-        return Mysql.query('''SELECT * FROM alerts_history WHERE createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s DAY) AND DATE_SUB(CURDATE(),INTERVAL -1 DAY) ORDER BY id DESC LIMIT %s''' % (int(since), mylimit), "alerts")
+        return Mysql.query('''SELECT * FROM alerts_history WHERE createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s DAY) AND DATE_SUB(CURDATE(),INTERVAL -1 DAY) ORDER BY id DESC''' % (int(since)), "alerts")
 
 def all_alerts(since=None):
     '''
@@ -148,6 +159,54 @@ def check_alerts():
     This returns a list of alerts that needs a notification sent out.
     '''
     return Mysql.query('''SELECT * FROM alerts WHERE ack != 0 AND (NOW() - lastAlertSent) > %s ORDER BY id DESC''' % (conf['alert_interval']), "alerts")
+
+def get_alerts_with_filter(filt):
+    '''
+    This returns a list of alerts that meet the filter supplied
+    '''
+    print "search filter: ", filt
+    if len(filt) > 0:
+        query = "SELECT * FROM alerts WHERE "
+        search_terms = []
+        for ft in filt:
+            key = ft.split(':')[0].strip()
+            value = ft.split(':')[1].strip()
+            print key, value
+            if value[0] == '-':
+                negative = True
+                value = value[1:]
+            else:
+                negative = False
+            if key == "tags":
+                if negative:
+                    search_terms.append("tags REGEXP '((?!%s)|(?!^%s,)|(?!,%s,)|(?!,%s$))'" % (value,value,value,value))
+                else:
+                    search_terms.append("tags REGEXP '(%s|^%s,|,%s,|,%s$)'" % (value,value,value,value))
+            elif key == "message":
+                if negative:
+                    search_terms.append("message NOT LIKE '%s'" % (value))
+                else:
+                    search_terms.append("message LIKE '%s'" % (value))
+            else:
+                if key == "status":
+                    if value.lower() == "ok":
+                        value = 0
+                    elif value.lower() == "warning":
+                        value = 1
+                    elif value.lower() == "critical":
+                        value = 2
+                    elif value.lower() == "unknown":
+                        value = 3
+                if negative:
+                    search_terms.append("%s != '%s'" % (key, value))
+                else:
+                    search_terms.append("%s = '%s'" % (key, value))
+                
+        query = "%s %s" % (query, ' and '.join(search_terms))
+        print query
+        return Mysql.query(query,'alerts')
+    else:
+        return all_alerts()
     
 class Alert():
     def __init__(self, id=0):
@@ -202,12 +261,12 @@ class Alert():
         logging.debug("Saving alert: %s" % self.id)
         try:
             _db = Mysql.Database()
-            _db._cursor.execute('''REPLACE INTO alerts (id,message,ack,ackby,acktime,lastAlertSent,tries,host,service,environment,colo,status,tags,remote_ip_address) VALUES (%s,"%s",%s,%s,%s,%s,%s,%s,"%s","%s","%s",%s,%s,"%s")''', (self.id, self.message, self.ack, self.ackby, self.acktime, self.lastAlertSent, self.tries, self.host, self.service, self.environment, self.colo, self.status, self.tags, self.remote_ip_address))
+            _db._cursor.execute('''REPLACE INTO alerts (id,message,ack,ackby,acktime,lastAlertSent,tries,host,service,environment,colo,status,tags,remote_ip_address) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (self.id, self.message, self.ack, self.ackby, self.acktime, self.lastAlertSent, self.tries, self.host, self.service, self.environment, self.colo, self.status, self.tags, self.remote_ip_address))
             if self.id == 0:
                 _db._cursor.execute('''SELECT id FROM alerts ORDER BY id DESC LIMIT 1''')
                 tmp = _db._cursor.fetchone()
                 self.id = tmp['id']
-            _db._cursor.execute('''REPLACE INTO alerts_history (id,message,ack,ackby,acktime,lastAlertSent,tries,host,service,environment,colo,status,tags,remote_ip_address) VALUES (%s,"%s",%s,%s,%s,%s,%s,"%s","%s","%s",%s,%s,"%s","%s")''', (self.id,self.message,self.ack,self.ackby,self.acktime, self.lastAlertSent, self.tries,self.host,self.service, self.environment, self.colo, self.status, self.tags, self.remote_ip_address))
+            _db._cursor.execute('''REPLACE INTO alerts_history (id,message,ack,ackby,acktime,lastAlertSent,tries,host,service,environment,colo,status,tags,remote_ip_address) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (self.id,self.message,self.ack,self.ackby,self.acktime, self.lastAlertSent, self.tries,self.host,self.service, self.environment, self.colo, self.status, self.tags, self.remote_ip_address))
             _db.save()
             _db.close()
             return True
@@ -356,11 +415,11 @@ class Alert():
         if hasattr(self, 'db'):
             del self.db
         if hasattr(self, 'createDate') and type(self.createDate) is datetime.datetime:
-            self.createDate = self.createDate.isoformat()
+            self.createDate = self.createDate.strftime('%s')
         if hasattr(self, 'acktime') and type(self.acktime) is datetime.datetime:
-            self.acktime = self.acktime.isoformat()
+            self.acktime = self.acktime.strftime('%s')
         if hasattr(self, 'lastAlertSent') and type(self.lastAlertSent) is datetime.datetime:
-            self.lastAlertSent = self.lastAlertSent.isoformat()
+            self.lastAlertSent = self.lastAlertSent.strftime('%s')
         return self.__dict__
         
     def print_alert(self, SMS=False):

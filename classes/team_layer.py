@@ -179,7 +179,7 @@ class Team:
 		if hasattr(self, 'db'):
 			del self.db
 		if hasattr(self, 'createDate') and type(self.createDate) is datetime.datetime:
-			self.createDate = self.createDate.isoformat()
+			self.createDate = self.createDate.strftime('%s')
 		if hasattr(self, 'members'):
 			clean_members = []
 			if isinstance(self.members, list):

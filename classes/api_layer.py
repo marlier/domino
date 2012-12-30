@@ -174,18 +174,38 @@ class Api():
             return
 
     def getAlert(self):
+        # make search terms into array
+        if self.search != '' and self.search != None:
+            s = []
+            for x in self.search.split(','):
+                if ":" not in x:
+                    s[-1] = "%s %s" %(s[-1], x)
+                else:
+                    s.append(x)
+            self.search = s
+        else:
+            self.search = []
         if self.id==0 or self.id == None:
-            objects = Alert.all_alerts(self.since)
+            objects = Alert.get_alerts_with_filter(self.search)
         else:
             objects = [Alert.Alert(self.id)]
         for o in objects:
             o.status = o.status_wordform()
             o.summary = o.summarize()
-        objects = self.processGetResults(objects)
-        self.populate(200,"OK",objects)
+        objects = self.sortit(objects)
+        objects = self.pagination(objects)
+        dict_objects = []
+        for o in objects:
+            if hasattr(o, "scrub"):
+                dict_objects.append(o.scrub())
+            elif isinstance(o, dict):
+                dict_objects.append(o)
+            else:
+                dict_objects.append(o.__dict__)
+        self.populate(200,"OK",dict_objects)
 
     def getHistory(self):
-        objects = Alert.all_alert_history(self.since,(self.offset + self.limit))
+        objects = Alert.all_alert_history(self.since)
         for o in objects:
             o.status = o.status_wordform()
             o.summary = o.summarize()
@@ -235,7 +255,14 @@ class Api():
             self.search = self.search.split(",")
             objects = []
             for t in self.search:
-                objects.append(Alert.graph_data(self.segment,self.unit,t))
+                # make search terms into array
+                s = []
+                for x in t.split():
+                    if ":" not in x:
+                        s[-1] = "%s %s" %(s[-1], x)
+                    else:
+                        s.append(x)
+                objects.append(Alert.graph_data(self.segment,self.unit,s))
             return self.populate(200,"OK",objects)
         else:
             self.populate(1802,"Invalid API metic call: units parameter must be SECOND, MINUTE, HOUR, or DAY") 
@@ -246,7 +273,6 @@ class Api():
             self.populate(200, "OK", ['frequent'])
         elif self.name == "frequent":
             objects = Alert.frequent_alerts(self.since)
-            print "freq", objects
             objects = self.processGetResults(objects)
             self.populate(200,"OK",objects)
         else:
@@ -494,7 +520,6 @@ class Api():
                     key = c[:c.index(":")].strip()
                     keyval = o.__dict__[key]
                     comp_val = c[c.index(":"):][1:].strip()
-                    print key, keyval, comp_val
                     if isinstance(keyval, str):
                         vals = keyval.lower().split(',')
                         if comp_val.startswith("-"):

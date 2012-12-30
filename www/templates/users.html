@@ -33,35 +33,41 @@
             </div>
      
             <div id="content">
-                <div id="data widget-box span6">
-                    <div class="widget-title">
-                        <span class="icon"><i class="icon-align-justify"></i></span>
-                        <h5>User Detail</h5>
-                        <span id="users_total" class="label label-info tip-left"></span>
-                        <div id="saveBtn" class="buttons"><a id="createBtn" class="btn btn-mini"><i class="icon-certificate"></i> Create</a></div>
+                <div class="container-fluid">
+                    <div class="row-fluid">
+                        <div class="span8">
+                            <div id="data widget-box">
+                                <div class="widget-title">
+                                    <span class="icon"><i class="icon-align-justify"></i></span>
+                                    <h5>User Detail</h5>
+                                    <span id="users_total" class="label label-info tip-left"></span>
+                                    <div id="saveBtn" class="buttons"><a id="createBtn" class="btn btn-mini"><i class="icon-certificate"></i> Create</a></div>
+                                </div>
+                            <div id="teamDetail" class="widget-content">
+                                <form class="form-horizontal">
+                                    <div class="control-group">
+                                        <label class="control-label">Name</label>
+                                        <div class="controls">
+                                            <input type="text" id="name" class="input-large" />
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label">Email</label>
+                                        <div class="controls">
+                                            <input type="text" id="email" class="input-large" placeholder="teamname@company.com" />
+                                        </div>
+                                    </div>
+                                    <div class="control-group">
+                                        <label class="control-label">Phone Number</label>
+                                        <div class="controls">
+                                            <input type="text" id="phone" class="input-large" placeholder="+13145558275" />
+                                        </div>
+                                    </div>
+                                </form>     
+                            </div>
+                        </div>
                     </div>
-<div id="teamDetail" class="widget-content nopadding">
-                        <form action="#" method="get" class="form-horizontal">
-                            <div class="control-group">
-                                <label class="control-label">Name</label>
-                                <div class="controls">
-                                    <input type="text" id="name" />
-                                </div>
-                            </div>
-                            <div class="control-group">
-                                <label class="control-label">Email</label>
-                                <div class="controls">
-                                    <input type="text" id="email" placeholder="teamname@company.com" />
-                                </div>
-                            </div>
-                            <div class="control-group">
-                                <label class="control-label">Phone Number</label>
-                                <div class="controls">
-                                    <input type="text" id="phone" placeholder="+13145558275" />
-                                </div>
-                            </div>
-                        </form>     
-                    </div>
+                </div>
 			</div>
 			
 			<div id="bottom"></div>

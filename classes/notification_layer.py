@@ -68,7 +68,7 @@ class Notification:
 		This scrubs the notification from objects in the user object. This is mainly used to make the notification convertable to json format.
 		'''
 		if hasattr(self, 'createDate') and type(self.createDate) is datetime.datetime:
-			self.createDate = self.createDate.isoformat()
+			self.createDate = self.createDate.strftime('%s')
 		return self.__dict__
 		
 			

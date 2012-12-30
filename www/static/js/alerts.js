@@ -4,7 +4,7 @@ $(document).ready(function(){
 
     console.debug('starting query')
     $("#loadingDiv").show();
-	query("#alerts_data","#sidebar_data");
+	get_alerts("#alerts_data","#sidebar_data");
 	
 	$("#search_input").keyup(function(event){
     	if(event.keyCode == 13){
@@ -22,6 +22,11 @@ $(document).ready(function(){
         alt = false
     });
 
+    $('#alerts select').change(function(e) {
+        search_terms = []
+        get_alerts("#alerts_data","#sidebar_data");
+    });
+
 });
 
 $(document).click(function(e) {
@@ -31,6 +36,31 @@ $(document).click(function(e) {
         var alt = false
     };
 });
+
+function get_alerts(div,sidebar_div) {
+    showLoading("getting alerts");
+    preset = $('#alerts #presets').val();
+    sort = $('#alerts #sort').val();
+    if ( preset == "Problems" ) {
+        search_terms.push("status:-ok");
+    } else if ( preset == "Silenced" ) {
+        search_terms.push("tags:silent");
+    } else if ( preset == "Paging" ) {
+        search_terms.push("tags:page");
+    } else if ( preset == "Everything" ) {
+        search_terms = []
+    };
+    search_terms = $.unique(search_terms);
+    var url = "/api/alert?limit=0&sort="+sort+"&search="+search_terms.join(",");
+    console.debug(url);
+    $.getJSON(url,function(json){
+        console.debug('done getting json');
+        print_alerts(json,div,sidebar_div);
+        print_search_terms();
+        hideLoading("getting alerts");
+        return json;
+    }); 
+};
 
 function print_alerts(alerts,alert_div,sidebar_div) {
     showLoading();
@@ -46,6 +76,8 @@ function print_alerts(alerts,alert_div,sidebar_div) {
     var warning = 0;
     var critical = 0;
     var unknown = 0;
+
+    var print_limit = $('#limit').val();
 
     //remove any old alerts before trying to update the table
     $(alert_div + " .data-set").remove();
@@ -87,7 +119,7 @@ function print_alerts(alerts,alert_div,sidebar_div) {
             class_name = ""
         };
 
-        if (i <= 100) {
+        if ( print_limit == "All" || i <= print_limit) {
             o = $('<li>');
             o.addClass('data-set');
             btns = $('<div>');
@@ -105,8 +137,9 @@ function print_alerts(alerts,alert_div,sidebar_div) {
             body = $('<p style="margin-bottom: 0px;">');
             body.addClass('well well-small');
             body.text(a.summary);
-	    	d = new Date(a.createDate+"Z");
-            relDate = getRelTime(a.createDate+"Z");
+            d = new Date(0);
+            d.setUTCSeconds(a.createDate);
+            relDate = getRelTime(d);
             d = $('<div>');
             d.html('<i class="icon icon-time"></i> '+relDate);
             o.append(btns);
@@ -197,7 +230,7 @@ function print_search_terms() {
     o = $("<ul>");
     $("#filter_total").text(search_terms.length);
     $("#filter_total").attr('title', search_terms.length + " filters applied");
-    $.each(search_terms,function(i,s) {
+    $.each(search_terms.reverse(),function(i,s) {
         o.append('<li><a href="#" class="btn" onclick="del_search_terms(\'' + s + '\')">' + s + '</a></li>');
     }); 
     $('#search_terms').append(o);

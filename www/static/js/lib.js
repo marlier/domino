@@ -5,6 +5,7 @@ var search_terms = new Array();
 var loading_gc = 0;
 
 $(document).ready(function(){
+    console.debug('foo lib');
     // build loading div
     div = $('<div>');
     div.attr('id', 'loading');
@@ -60,11 +61,11 @@ function hideLoading(log) {
 
 function getRelTime(thedate) {
     now = new Date();
-    d = new Date(thedate);
+    d = thedate;
     one_min = 60; 
     one_hour = 60*60;
     one_day = 60*60*24;
-    date_diff = Math.floor(now.getTime() / 1000) - Math.floor(d.getTime() / 1000)
+    date_diff = Math.floor(now.getTime() / 1000) - Math.floor(d / 1000)
     if ( date_diff < 60 ) {
         ts = Math.ceil(date_diff) + " seconds ago";
     } else if ( date_diff / one_min <= 60 ) {         

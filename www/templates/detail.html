@@ -13,6 +13,7 @@
         <link rel="stylesheet" type="text/css" href="/static/css/base.css" />
         <script src="/static/js/jquery.min.js" type="text/javascript"></script>
         <script src="/static/js/jquery.ui.custom.js" type="text/javascript"></script>
+        <script src="/static/js/jquery.flot.min.js" type="text/javascript"></script>
         <script src="/static/js/bootstrap.min.js" type="text/javascript"></script>
         <script src="/static/js/jquery.uniform.js"></script>
         <script src="/static/js/select2.min.js"></script>
@@ -32,8 +33,9 @@
                     <li class="active"><a href="#general"><i class="icon icon-info-sign"></i> <span>General Info</span></a></li>
                     <li><a href="#status"><i class="icon icon-bell"></i> <span>Alert Info</span></a></li>
                     <li><a href="#tags"><i class="icon icon-tags"></i> <span>Tags</span></a></li>
+                    <li><a href="#graph"><i class="icon icon-signal"></i> <span>Graph</span></a></li>
                     <li><a href="#rules"><i class="icon icon-list-alt"></i> <span>Rules</span></a></li>
-                    <li><a href="#history"><i class="icon icon-signal"></i> <span>History</span></a></li>
+                    <li><a href="#history"><i class="icon icon-book"></i> <span>History</span></a></li>
                     
                 </ul>
             </div>			
@@ -97,12 +99,13 @@
                             </div>
                         </div>
                         <div class="span8">
-                            <div id="history" class="widget-box">
+                            <div id="graph" class="widget-box">
                                 <div class="widget-title">
                                     <span class="icon"><i class="icon-signal"></i></span>
-                                    <h5>History (30 days)</h5>
+                                    <h5>Historical Graph (30 days)</h5>
                                 </div>
-                                <div class="widget-content">
+                                <div class="widget-content" style="height:300px;">
+                                    <div id="history_graph" style="height:300px;"></div>
                                 </div>
                             </div>
                         </div>
@@ -129,6 +132,23 @@
                                             <td id="attrTitle" class="alert-info" colspan="6">Attributes</td>
                                             <td id="actionTitle" class="alert-success" colspan="2">Actions</td>
                                         </tr>   
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="span11">
+                            <div id="history" class="widget-box">
+                                <div class="widget-title">
+                                    <span class="icon"><i class="icon-signal"></i></span>
+                                    <h5>History (30 days)</h5>
+                                </div>
+                                <div class="widget-content">
+                                    <table id="history_table" class="table table-bordered">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                            <th>Message</th>
+                                        </tr>
                                     </table>
                                 </div>
                             </div>

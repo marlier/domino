@@ -54,9 +54,18 @@ div.select2-drop {
 	min-height: 115px;
 }
 
-#addatag {
+#addatag, 
+#alerts #limit, 
+#alerts #sort,
+#alerts #presets {
 	margin-bottom: 0px;
-	margin-top: 4px;
+	margin-top: 0px;
+}
+
+#alerts #limit, 
+#alerts #sort,
+#alerts #presets {
+	margin-right: 15px;
 }
 
 #addTagBtn {

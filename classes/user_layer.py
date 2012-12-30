@@ -93,7 +93,7 @@ class User:
 		if hasattr(self, 'db'):
 			del self.db
 		if hasattr(self, 'createDate') and type(self.createDate) is datetime.datetime:
-			self.createDate = self.createDate.isoformat()
+			self.createDate = self.createDate.strftime('%s')
 		if hasattr(self, 'teams'):
 			clean_teams = []
 			for t in self.teams:

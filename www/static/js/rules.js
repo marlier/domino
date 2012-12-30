@@ -126,6 +126,7 @@ function saveRule() {
             getRules();
         },      
         error: function(jqXHR, textStatus, errorThrown){
+            console.debug(textStatus);
             hideLoading();
         }       
     });    

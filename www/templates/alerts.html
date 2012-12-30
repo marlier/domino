@@ -84,11 +84,34 @@
                     </div>
     				<div id="search_terms"></div>
                 </div>
-                <div class="widget-box">
+                <div class="widget-box" id="alerts">
                     <div class="widget-title">
                         <span class="icon"><i class="icon-bell"></i></span>
                         <h5>Alerts</h5>
-                        <span id="alert_total" class="label label-info tip-left"></span></div>
+                        <form class="form-inline pull-right" id="alert_form">
+                            <label class="help-inline control-label">Presets</label>
+                            <select id="presets" class="input-medium">
+                                <option>Everything</option>
+                                <option selected>Problems</option>
+                                <option>Silenced</option>
+                                <option>Paging</option>
+                            </select>
+                            <label class="help-inline control-label">Sort</label>
+                            <select id="sort" class="input-small">
+                                <option selected>newest</option>
+                                <option>oldest</option>
+                            </select>
+                            <label class="help-inline control-label">Show</label>
+                            <select id="limit" class="input-small">
+                                <option>25</option>
+                                <option>50</option>
+                                <option selected>100</option>
+                                <option>1000</option>
+                                <option>5000</option>
+                                <option>All</option>
+                            </select>
+                        </form>
+                    </div>
                     </div>
                     <div class="widget-content">
                         <ul class="recent-comments">
