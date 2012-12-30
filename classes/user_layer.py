@@ -26,6 +26,16 @@ def get_users(user_ids):
 		users.append(User(t))
 	return users
 
+def get_team_names():
+    ''' 
+    Return an array of all team names
+    '''
+    names = []
+    users = Mysql.query('''SELECT * FROM users ORDER BY id DESC''', "users")
+    for user in users:
+        names.append(user.name)
+    return names
+
 def flatten_users(users):
 	'''
 	Flatten a list of user objects in a comma separated user id list
@@ -37,6 +47,12 @@ def flatten_users(users):
 		return ','.join( map( str, tmp ) )
 	else:
 		return None
+
+def get_user_by_name(name):
+    ''' 
+    Return a user object by giving the name of that user
+    '''
+    return Mysql.query('''SELECT * FROM users WHERE name = "%s"''' % (name), "users")
 
 def get_user_by_phone(phone):
 	'''

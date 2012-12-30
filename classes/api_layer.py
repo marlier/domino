@@ -414,7 +414,7 @@ class Api():
         if self.colo != '': rule.colo = self.colo
         if self.host != '': rule.host = self.host
         if self.service != '': rule.service = self.service
-        if self.status != '': rule.service = self.status
+        if self.status != '': rule.status = self.status
         if self.tag != '': rule.tag = self.tag
         if self.addTag != '': rule.addTag = self.addTag
         if self.removeTag != '': rule.removeTag = self.removeTag

@@ -12,7 +12,7 @@ import util_layer as Util
 conf = Util.load_conf()
 
 class Email:
-	def __init__(self, teams=None, alert=None):
+	def __init__(self, teams=None, users=None alert=None):
 		'''
 		Initiation of email class.
 		'''
@@ -25,6 +25,7 @@ class Email:
 		self.to = None
 		self.cc = None
 		self.teams = teams
+        self.users = users
 		self.alert = alert
 	
 	def send_alert_email(self):
@@ -40,6 +41,10 @@ class Email:
 			else:
 				for u in team.members:
 					self.cc.append(u.email)
+
+        for user in self.users:
+            if "@" in user.email:
+                self.to.append(user.email)
 					
 		self.subject = self.alert.subjectize()
 		self.message = '''%s

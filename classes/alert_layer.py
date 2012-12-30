@@ -22,7 +22,6 @@ def frequent_alerts(since=7):
     _db = Mysql.Database()
     _db._cursor.execute( '''SELECT DISTINCT environment,colo,host,service, COUNT(*) AS count FROM alerts_history WHERE createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s DAY) AND DATE_SUB(CURDATE(),INTERVAL -1 DAY) GROUP BY environment,colo,host,service  ORDER BY count DESC;''' % (since))
     alerts = _db._cursor.fetchall()
-    print "alerts", alerts
     _db.close()
     for alert in alerts:
         for key in alert:
@@ -69,11 +68,9 @@ def graph_data(amount=7, units="HOUR", terms = None):
                         value = 3
                 terms_query = "%s %s='%s' and" % (terms_query, key, value)
     _db = Mysql.Database()
-    print '''select COUNT(id) as count,createDate from alerts_history WHERE %s createDate >= DATE_SUB(NOW(),INTERVAL %s %s) group by %s(createDate);''' % (terms_query, amount, units, units) 
     _db._cursor.execute( '''select COUNT(id) as count,createDate from alerts_history WHERE %s createDate >= DATE_SUB(NOW(),INTERVAL %s %s) group by %s(createDate);''' % (terms_query, amount, units, units))
     raw_alerts = _db._cursor.fetchall()
     _db.close()
-    print (raw_alerts)
     d = []
     alerts = []
     # convert to dictionary
@@ -109,9 +106,7 @@ def graph_data(amount=7, units="HOUR", terms = None):
     for a in alerts:
         a['date'] = a['date'].strftime('%s')
     #ensuring that the right amount of data continues
-    print len(alerts), alerts
     graph_data = alerts[-(amount):]
-    print len(graph_data), graph_data
     logging.debug(graph_data)
     
     return {'unit':units, 'segment':amount, 'search':terms, 'datapoints':graph_data, 'min':min, 'max':max}
@@ -164,14 +159,12 @@ def get_alerts_with_filter(filt):
     '''
     This returns a list of alerts that meet the filter supplied
     '''
-    print "search filter: ", filt
     if len(filt) > 0:
         query = "SELECT * FROM alerts WHERE "
         search_terms = []
         for ft in filt:
             key = ft.split(':')[0].strip()
             value = ft.split(':')[1].strip()
-            print key, value
             if value[0] == '-':
                 negative = True
                 value = value[1:]
@@ -203,7 +196,6 @@ def get_alerts_with_filter(filt):
                     search_terms.append("%s = '%s'" % (key, value))
                 
         query = "%s %s" % (query, ' and '.join(search_terms))
-        print query
         return Mysql.query(query,'alerts')
     else:
         return all_alerts()
@@ -309,10 +301,17 @@ class Alert():
             newNotification.status = self.status
             newNotification.link = "%s:%s/detail?host=%s&environment=%s&colo=%s&service=%s" % (conf['api_address'], conf['api_port'], urllib.quote_plus(self.host), urllib.quote_plus(self.environment), urllib.quote_plus(self.colo), urllib.quote_plus(self.service))
             newNotification.save()
+
+            # get a list of teams/users to send alerts to
             team_names = Team.get_team_names()
             self.teams = []
+            user_names = User.get_user_names()
+            self.users = []
+            tags = self.tags.lower().split(',')
             for name in team_names:
-                if name in self.tags.split(','): self.teams.append(name)
+                if name.lower() in tags: self.teams.append(name)
+            for name in user_names:
+                if name.lower() in tags: self.users.append(name)
             if len(self.teams) == 0:
                 self.teams = Team.get_default_teams()
             else:
@@ -320,9 +319,16 @@ class Alert():
                 for t in self.teams:
                     teams.append(Team.get_team_by_name(t))
                 self.teams = teams
-            if len(self.teams) == 0:
+            if len(self.users) > 0:
+                users = []
+                for u in self.users:
+                    users.append(User.get_user_by_name(u))
+                self.users = users
+            if len(self.teams) == 0 and len(self.users) == 0:
                 logging.error("Failed to find any 'catchall' teams. This alert (%i) will not be sent" % (self.id))
                 return False
+
+
             if "page" in self.tags.split(','):
                 for team in self.teams:
                     if len(team.on_call()) > 0:
@@ -348,10 +354,9 @@ class Alert():
                                         Twilio.send_sms(au, team, self, "%s\n%s" % (self.subjectize(), self.summarize()))
                             else:
                                 Twilio.send_sms(au, team, self, "%s\n%s" % (self.subjectize(), self.summarize()))
-                return True
 
             #send email
-            e = Email.Email(self.teams, self)
+            e = Email.Email(self.teams, self.users, self)
             if e.send_alert_email() == False:
                 logging.error("Failed to send email for alert (%i)." % (self.id))
                 # action if the email fails
