@@ -247,6 +247,8 @@ class Api():
             objects = Rule.get_rules(self.environment, self.colo, self.host, self.service, self.status, self.tag)
         else:
             objects = [Rule.Rule(self.id)]
+        for o in objects:
+            o.status = o.status_wordform() 
         objects = self.processGetResults(objects)
         self.populate(200,"OK",objects)
 
@@ -414,12 +416,16 @@ class Api():
         if self.colo != '': rule.colo = self.colo
         if self.host != '': rule.host = self.host
         if self.service != '': rule.service = self.service
-        if self.status != '': rule.status = self.status
+        if self.status != '' or self.status is None:
+            if self.status is None:
+                rule.status = None
+            else:
+                rule.status = Alert.to_int_status(self.status)
         if self.tag != '': rule.tag = self.tag
         if self.addTag != '': rule.addTag = self.addTag
         if self.removeTag != '': rule.removeTag = self.removeTag
         if rule.save():
-            self.populate(200, "OK")
+            self.populate(200, "OK", [rule.__dict__])
         else:
             self.populate(1910, "Failed to save rule")
             

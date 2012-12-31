@@ -5,6 +5,7 @@ import datetime
 
 import mysql_layer as Mysql
 import util_layer as Util
+import alert_layer as Alert
 
 def applyRules(alert):
     '''
@@ -31,6 +32,8 @@ def get_rules(environment, colo, host, service, status, tag):
     all_rules = Mysql.query('''select * from inbound_rules''', 'inbound_rules')
     if None == environment == colo == host == service == status == tag:
         return all_rules
+    if status is not None:
+        status = Alert.to_int_status(status)
     for rule in all_rules:
         if compare_rule_vals(rule.environment, environment) is False: continue
         if compare_rule_vals(rule.colo ,colo) is False: continue
@@ -46,10 +49,16 @@ def get_rules(environment, colo, host, service, status, tag):
 def compare_rule_vals(rule_val, my_val):
     if rule_val is None: return True
     if my_val is not None:
-        if rule_val.lower() != my_val.lower():
-            return False
+        if isinstance(rule_val, int) or isinstance(rule_val, long) or isinstance(rule_val, float):
+            if rule_val != my_val:
+                return False
+            else:
+                return True
         else:
-            return True
+            if rule_val.lower() != my_val.lower():
+                return False
+            else:
+                return True
     else:
         return False
     return True
@@ -123,6 +132,16 @@ class Rule:
         Print out contents of a rule. SMS variable makes it SMS friendly. 
         '''
         ## FIXME
+
+    def status_wordform(self):
+        if self.status == 0 or self.status == "0":
+            return "OK"
+        elif self.status == 1 or self.status == "1":
+            return "Warning"
+        elif self.status == 2 or self.status == "2":
+            return "Critical"
+        elif self.status == 3 or self.status == "3":
+            return "Unknown"
 
     def scrub(self):
         ''' 

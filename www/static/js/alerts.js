@@ -27,6 +27,16 @@ $(document).ready(function(){
         get_alerts("#alerts_data","#sidebar_data");
     });
 
+    $(".addSearch").live("click", function(e) {
+        term = $(this).attr('term');
+        if (alt == true) {
+            tag = "-" + $(this).attr('tag');
+        } else {
+            tag = $(this).attr('tag');
+        };  
+        add_search_terms(term+':'+tag);
+    });
+
 });
 
 $(document).click(function(e) {
@@ -162,16 +172,6 @@ function print_alerts(alerts,alert_div,sidebar_div) {
     build_sidebar_item(sidebar_div,services,'icon-th-list','Services', 'service');
     build_sidebar_item(sidebar_div,statuses,'icon-certificate','Statuses', 'status');
     build_sidebar_item(sidebar_div,tags,'icon-tags','Tags', 'tags');
-
-    $(".addSearch").click(function(e) {
-        term = $(this).attr('term');
-        if (alt == true) {
-            tag = "-" + $(this).attr('tag');
-        } else {
-            tag = $(this).attr('tag');
-        };
-        add_search_terms(term+':'+tag);
-    });
 
     // load unicorn.js now that we've finished building our sidebar
     $.getScript("/static/js/unicorn.js", function(data, textStatus, jqxhr) {});

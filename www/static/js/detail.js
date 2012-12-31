@@ -153,7 +153,7 @@ function clean_value(val) {
 
 function get_detail_history(div) {
     showLoading();
-    var url = "/api/history?since=30&search="+detail_attrs.join(",");
+    var url = "/api/history?since=90&search="+detail_attrs.join(",");
     console.debug(url);
     $.getJSON(url,function(json){
         $(".data-set").remove();

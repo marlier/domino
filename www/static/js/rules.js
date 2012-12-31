@@ -4,6 +4,10 @@ rules_list = new Array();
 
 $(document).ready(function(){
     getRules();
+    $("#saveBtn").click(function() {
+        console.debug('button clicked');
+        saveRule();
+    });
 });
 
 function getRules() {
@@ -37,7 +41,7 @@ function print_rules(rules, rules_div) {
         row.append('<td class="alert-info">' + clean_value(r['colo']) + '</td>');
         row.append('<td class="alert-info">' + clean_value(r['host']) + '</td>');
         row.append('<td class="alert-info">' + clean_value(r['service']) + '</td>');
-        row.append('<td class="alert-info">' + clean_value(r['state']) + '</td>');
+        row.append('<td class="alert-info">' + clean_value(r['status']) + '</td>');
         row.append('<td class="alert-info">' + clean_value(r['tag']) + '</td>');
         row.append('<td class="alert-success">' + clean_value(r['addTag']) + '</td>');
         row.append('<td class="alert-success">' + clean_value(r['removeTag']) + '</td>');
@@ -45,7 +49,7 @@ function print_rules(rules, rules_div) {
         $(rules_div).append(row);
     });
     
-    $("a#saveBtn").html('<i class="icon-certificate"></i> Save');
+    $("a#saveBtn").html('<i class="icon-white icon-certificate"></i> Save');
     id = 0;
     
     $(rules_div + ' input').change(function() {
@@ -54,7 +58,7 @@ function print_rules(rules, rules_div) {
 
     $(rules_div + ' .editBtn').click(function() {
         id = $(this).attr('id');
-        $("a#saveBtn").html('<i class="icon-pencil"></i> Overwrite');
+        $("a#saveBtn").html('<i class="icon-white icon-pencil"></i> Overwrite');
         var url = "/api/rule/" + id; 
         $.getJSON(url,function(json){
             if (process_header(json.status, json.status_message)) {
@@ -97,7 +101,8 @@ function delRule(id) {
 };
 
 function saveRule() {
-    showLoading();
+    console.debug('saving rule');
+    showLoading('saving rule');
     var div = "#rules_rows";
 
     $('input').blur();
@@ -113,8 +118,13 @@ function saveRule() {
         "removeTag": $(div+' #removetag').val()
     });
 
-    var url = "/api/rule/" + id
-        
+    if ( id > 0 ) {
+        var url = "/api/rule/" + id
+    } else {
+        var url = "/api/rule"
+    };
+    console.debug(url);
+    console.debug(jsonData);
     $.ajax({
         type: 'POST',
         contentType: 'application/json',

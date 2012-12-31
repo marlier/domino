@@ -60,6 +60,7 @@ function print_alert_list(alerts,div) {
         } else { 
             o.addClass("info")
         };
+        o.append('<td><a href="/detail?host='+a.host+'&environment='+a.environment+'&colo='+a.colo+'&service='+a.service+'" class="btn btn-primary btn-small"><i class="icon-white icon-share"></i> Go</a></td>');
         d = new Date(0);
         d.setUTCSeconds(a.createDate);
         o.append('<td>' + getRelTime(d) + '</td>')

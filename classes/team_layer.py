@@ -89,7 +89,7 @@ def find_user(id):
 
 def find_user_oncall(id):
 	'''
-	This function looks for a specific is on call in any team
+	This function looks for a specific user is on call in any team
 	'''
 	teams = []
 	all_teams = all_teams()

@@ -58,14 +58,7 @@ def graph_data(amount=7, units="HOUR", terms = None):
                 key = t.split(":")[0].strip()
                 value = t.split(":")[1].strip()
                 if key == "status":
-                    if value.lower() == "ok":
-                        value = 0
-                    elif value.lower() == "warning":
-                        value = 1
-                    elif value.lower() == "critical":
-                        value = 2
-                    elif value.lower() == "unknown":
-                        value = 3
+                    value = to_int_status(value)
                 terms_query = "%s %s='%s' and" % (terms_query, key, value)
     _db = Mysql.Database()
     _db._cursor.execute( '''select COUNT(id) as count,createDate from alerts_history WHERE %s createDate >= DATE_SUB(NOW(),INTERVAL %s %s) group by %s(createDate);''' % (terms_query, amount, units, units))
@@ -182,14 +175,7 @@ def get_alerts_with_filter(filt):
                     search_terms.append("message LIKE '%s'" % (value))
             else:
                 if key == "status":
-                    if value.lower() == "ok":
-                        value = 0
-                    elif value.lower() == "warning":
-                        value = 1
-                    elif value.lower() == "critical":
-                        value = 2
-                    elif value.lower() == "unknown":
-                        value = 3
+                    value = to_int_status(value)
                 if negative:
                     search_terms.append("%s != '%s'" % (key, value))
                 else:
@@ -199,7 +185,26 @@ def get_alerts_with_filter(filt):
         return Mysql.query(query,'alerts')
     else:
         return all_alerts()
-    
+
+def to_int_status(status):
+    '''
+    This converts a status (ie ok, warning, critical, or unknown) to its numerical value ( ie 0,1,2,3)
+    '''
+    if status is None: return 3
+    try:
+        i = int(status)
+        if i > 3: i = 3
+        return i
+    except:
+        pass
+    if status.upper() == "OK": 
+        return 0
+    elif status.upper() == "WARNING":
+        return 1
+    elif status.upper() == "CRITICAL":
+        return 2
+    return 3
+
 class Alert():
     def __init__(self, id=0):
         '''
@@ -233,15 +238,7 @@ class Alert():
         logging.debug("Loading alert: %s" % id)
         try:
             self.__dict__.update(Mysql.query('''SELECT * FROM alerts_history WHERE id = %s LIMIT 1''' % (id), "alerts")[0].__dict__)
-            if isinstance(self.status, str) and len(self.status) > 1:
-                if self.status.upper() == "OK": 
-                    self.status = 0
-                elif self.status.upper() == "WARNING":
-                    self.status = 1
-                elif self.status.upper() == "CRITICAL":
-                    self.status = 2
-                else:
-                    self.status = 3
+            self.status = to_int_status(self.status)
         except Exception, e:
             Util.strace(e)
             return False
