@@ -57,7 +57,8 @@ div.select2-drop {
 #addatag, 
 #alerts #limit, 
 #alerts #sort,
-#alerts #presets {
+#alerts #presets,
+#status #acktime {
 	margin-bottom: 0px;
 	margin-top: 0px;
 }
@@ -66,6 +67,10 @@ div.select2-drop {
 #alerts #sort,
 #alerts #presets {
 	margin-right: 15px;
+}
+
+#status #acktime {
+	margin-top: 2px;
 }
 
 #addTagBtn {

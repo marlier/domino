@@ -61,13 +61,16 @@ def removeTag(id=0,tag=None):
     return resp
 
 @app.route('/api/alert/<int:id>/ack', methods=['POST', 'OPTIONS'])
+@app.route('/api/alert/<int:id>/unack', methods=['POST', 'OPTIONS'])
 def ack_alert(id=0):
     apicall = Api.Api()
     apicall.id = id
-    apicall.ackAlert()
+    if request.url.endswith("unack"):
+        apicall.ackAlert(False)
+    else:
+        apicall.ackAlert(True)
     resp = make_response(apicall.fulljson)
     resp.status = "%s %s" % (apicall.status, apicall.status_message)
-    print resp.__dict__
     return resp
 
 @app.route('/api/user', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])

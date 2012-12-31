@@ -33,6 +33,7 @@ $(document).ready(function(){
 function get_detail(){
     showLoading("get detail");
     var url = "/api/alert?search="+detail_attrs.join(",");
+
     $.getJSON(url,function(json){
         a = json[0]
         id = a.id;
@@ -91,24 +92,29 @@ function print_ackBtn(a) {
     acktime.setUTCSeconds(a.createDate);
     $(".ack-data-set").remove();
     if (a.ack == 0) {
-        $("#status .widget-title").append('<div class="buttons ack-data-set"><a id="'+a.id+'" class="btn btn-mini active"><i class="icon-ok-sign"></i> Acknowledge</a></div>');
+        $("#status .widget-title").append('<div class="buttons ack-data-set"><a id="'+a.id+'" class="btn btn-mini active pull-right"><i class="icon-ok-sign"></i> Acknowledge</a><span id="acktime" class="label label-info tip-left">'+getRelTime(acktime)+'</span></div>');
+        ackAction = "unack";
     } else {
         $("#status .widget-title").append('<div class="buttons ack-data-set"><a id="'+a.id+'" class="ack-data-set btn btn-mini"><i class="icon-ok-sign"></i> Acknowledge</a></div>');
+        ackAction = "ack";
     };
 
-    $("a.ack-data-set").click(function() {
-        console.debug("acking...");
+    
 
+    $("div.ack-data-set a").click(function() {
+        console.debug("acking...");
+        console.debug("/api/alert/"+id+"/"+ackAction)
         $.ajax({
             type: 'POST',
             contentType: 'application/json',
-            url: "/api/alert/"+id+"/ack",
+            url: "/api/alert/"+id+"/"+ackAction,
             dataType: "json",
             data: {},
             success: function(data, textStatus, jqXHR){
                 print_ackBtn(data[0]);
             },
             error: function(jqXHR, textStatus, errorThrown){
+                console.debug(textStatus);
             }
         });
     });

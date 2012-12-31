@@ -263,15 +263,29 @@ class Alert():
             Util.strace(e)
             return False
     
-    def ack_alert(self,user):
+    def ack_alert(self,user_id):
         '''
         Acknowledge the alert.
         '''
         logging.debug("Acknowledging alert: %s" % self.id)
         try:
             self.ack = 0
-            self.ackby = user.id
+            self.ackby = user_id
             self.acktime = datetime.datetime.utcnow()
+            self.save()
+            return True
+        except Exception, e:
+            Util.strace(e)
+            return False
+
+    def unack_alert(self):
+        ''' 
+        Unacknowledge the alert.
+        '''
+        logging.debug("Unacknowledging alert: %s" % self.id)
+        try:
+            self.ack = 1
+            self.acktime = '0000-00-00 00:00:00'
             self.save()
             return True
         except Exception, e:
