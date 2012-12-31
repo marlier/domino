@@ -4,6 +4,50 @@ var user_list = new Array();
 
 $(document).ready(function(){
 	query("#data","#sidebar_data");
+
+    $("#register").click(function() {
+        console.debug('register phone');
+        var url = "/api/user/"+id+"/phone/register"
+        showLoading();
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json',
+            url: url,
+            dataType: "json",
+            data: {},
+            success: function(data, textStatus, jqXHR){
+                hideLoading();
+                alert("Your verification code is "+data['verification_code']);
+            },  
+            error: function(jqXHR, textStatus, errorThrown){
+                hideLoading();
+                alert("Failed to register your phone")
+            }   
+        });         
+    });
+
+    $("#test").click(function() {
+        console.debug('testing phone');
+
+        var url = "/api/user/"+id+"/phone/smstest"
+        showLoading();
+        $.ajax({
+            type: 'POST',
+            contentType: 'application/json',
+            url: url,
+            dataType: "json",
+            data: {},
+            success: function(data, textStatus, jqXHR){
+                hideLoading();
+                alert("Test SMS message sent, hopefully you'll get it in a second.");
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+                hideLoading();
+                alert("Failed to send test SMS message")
+            } 
+        });
+    });
+
 });
 
 function print_users(users,user_div,sidebar_div) {

@@ -26,9 +26,9 @@ def get_users(user_ids):
 		users.append(User(t))
 	return users
 
-def get_team_names():
+def get_user_names():
     ''' 
-    Return an array of all team names
+    Return an array of all user names
     '''
     names = []
     users = Mysql.query('''SELECT * FROM users ORDER BY id DESC''', "users")

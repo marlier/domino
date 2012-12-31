@@ -446,7 +446,7 @@ class Api():
                 self.populate(200,"OK")
             else:
                 self.populate(1902, "Failed to save team data")
-        elif self.id != 0:
+        else:
             try:
                 obj = Team.Team(self.id)
                 # save the original members of the team to see if its changed
@@ -510,6 +510,32 @@ class Api():
             self.populate(1502,e.__str__())
             Util.strace(e)
             return
+
+    def reg_phone(self):
+        user = User.User(self.id)
+        valid_code = Twilio.validate_phone(user)
+        print valid_code
+        if valid_code['success'] == False:
+            self.populate(404,valid_code['message'])
+        elif valid_code['success'] == True:
+            self.populate(200, "OK", {'verifcation_code': valid_code['message']})
+
+    def dereg_phone(self):
+        user = User.User(self.id)
+        if Twilio.invalidate_phone(user):
+            self.populate(200,"OK")
+        else:
+            self.populate(404, "failed")
+
+    def sms_test(self):
+        user = User.User(self.id)
+        auth = Twilio.auth()
+        try:
+            auth.sms.messages.create(to=user.phone, from_=conf['twilio_number'], body="This is a test SMS message from Domino. Looks like you got it. Yay!")
+            self.populate(200, "OK")
+        except Exception, e:
+            Util.strace(e)
+            self.populate(404, "Fail: %s" % (e.__str__))
 
     def filter(self,objects):
         '''

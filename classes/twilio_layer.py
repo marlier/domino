@@ -81,6 +81,20 @@ def validate_phone(user):
 			Util.strace(e)
 			return {"success":False, "message":e.__str__()}
 
+def invalidate_phone(user):
+    '''
+    This method deletes a phone number from twilio's servers
+    '''
+    logging.debug("Deleting phone number")
+    try:
+        response = auth().caller_ids.list(phone_number=user.phone)
+        if len(response) > 0:
+            response[0].delete()
+        return True
+    except Exception, e:
+        Util.strace(e)
+        return False
+
 def healthcheck():
 	logging.info("Performing twilio healthcheck.")
 	if auth():

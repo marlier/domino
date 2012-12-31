@@ -14,6 +14,7 @@ if (cmd_folder + "/classes") not in sys.path:
     sys.path.insert(-1, cmd_folder + "/classes")
 
 import api_layer as Api
+import twilio_layer as Twilio
 import util_layer as Util
 
 conf = Util.load_conf()
@@ -66,13 +67,28 @@ def ack_alert(id=0):
     apicall.ackAlert()
     resp = make_response(apicall.fulljson)
     resp.status = "%s %s" % (apicall.status, apicall.status_message)
+    print resp.__dict__
     return resp
 
 @app.route('/api/user', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
 @app.route('/api/user/<int:id>', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
 def user_instance(id=0):
     return process_request("User", id)
-    
+
+@app.route('/api/user/<int:id>/phone/<a>', methods=['POST', 'DELETE'])
+def register_phone(id=0,a=None):
+    apicall = Api.Api()
+    apicall.id = id
+    if a == "register":
+        apicall.reg_phone()
+    elif a == "deregister":    
+        apicall.dereg_phone()
+    elif a == "smstest":
+        apicall.sms_test()
+    resp = make_response(apicall.fulljson)
+    resp.status = "%s %s" % (apicall.status, apicall.status_message)
+    return resp
+
 @app.route('/api/team', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
 @app.route('/api/team/<int:id>', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
 def team_instance(id=0):
