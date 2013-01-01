@@ -78,3 +78,42 @@ div.select2-drop {
 	margin-left: 3px;
 	margin-right: 3px;
 }
+
+#sortable1, #sortable2 { 
+	list-style-type: none; 
+	margin: 0; 
+	padding: 0 0 2.5em; 
+	float: left; 
+	margin-right: 10px; 
+}
+
+#sortable1 li, #sortable2 li { 
+	margin: 0 5px 5px 5px; 
+	padding: 5px; 
+	font-size: 1.2em; 
+	width: 120px; 
+}
+
+.sortable {
+	width: 120px;
+}
+
+.sortable a {
+	color: white;
+}
+
+ul.sortable {
+	margin-left: 0px;
+}
+
+.sortable li {
+	list-style: none;
+	background-color: gray;
+	margin: 5px 5px 5px 5px;
+	padding: 3px;
+	color: white;
+}
+
+.sortable li.ui-oncall {
+	background-color: orangered;
+}

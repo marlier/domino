@@ -1,6 +1,10 @@
 var table = "alert";
 
 $(document).ready(function(){
+    attrs = window.location.href.slice(window.location.href.indexOf('?') + 1)
+    attrs = attrs.replace(/=/gi, ":").split('&');
+    console.debug(attrs);
+    
 
     console.debug('starting query')
     $("#loadingDiv").show();
@@ -22,10 +26,14 @@ $(document).ready(function(){
         alt = false
     });
 
-    $('#alerts select').change(function(e) {
+    $('#alerts #presets').change(function(e) {
         search_terms = []
         get_alerts("#alerts_data","#sidebar_data");
     });
+
+    $('#alerts #sort').change(function(e) {
+        get_alerts("#alerts_data","#sidebar_data");
+    }); 
 
     $(".addSearch").live("click", function(e) {
         term = $(this).attr('term');
@@ -198,7 +206,7 @@ function build_sidebar_item(div,objs,icon,title,search_term) {
     s.addClass('submenu data-set');
     s.append('<a href="#"><i class="icon '+icon+'"></i> <span>'+title+'</span> <span class="label">'+objs.length+'</span></a>');
     s_list = $('<ul>');
-    $.each(objs,function(i,x) {
+    $.each(objs.sort(),function(i,x) {
         s_list.append('<li><a href="#" class="addSearch" term="'+search_term.toLowerCase()+'" tag="'+x+'">' + x + '</a></li>')
     });
     s.append(s_list);
@@ -211,7 +219,7 @@ function add_search_terms(term) {
     search_terms.push(term);
     search_terms = $.unique(search_terms);
     print_search_terms();
-    query("#alerts_data","#sidebar_data");
+    get_alerts("#alerts_data","#sidebar_data");
 };
 
 function del_search_terms(term) {
@@ -220,7 +228,7 @@ function del_search_terms(term) {
         return value != term;
     }); 
     print_search_terms();
-    query("#alerts_data","#sidebar_data");
+    get_alerts("#alerts_data","#sidebar_data");
 };
 
 function print_search_terms() {

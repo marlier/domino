@@ -12,7 +12,9 @@ $(document).ready(function(){
 function chronological(div, direction) {
     showLoading("chron");
 	var url = "/api/alert?search=status:-OK&limit=10&sort=" + direction;
+    console.debug(url);
 	$.getJSON(url,function(json){
+        console.debug(json);
 		print_alert_list(json,div);
         hideLoading("chron");
 		return json;
@@ -63,6 +65,7 @@ function print_alert_list(alerts,div) {
         o.append('<td><a href="/detail?host='+a.host+'&environment='+a.environment+'&colo='+a.colo+'&service='+a.service+'" class="btn btn-primary btn-small"><i class="icon-white icon-share"></i> Go</a></td>');
         d = new Date(0);
         d.setUTCSeconds(a.createDate);
+        console.debug(a.id);
         o.append('<td>' + getRelTime(d) + '</td>')
         o.append('<td>' + a.environment + '</td>');
         o.append('<td>' + a.colo + '</td>');

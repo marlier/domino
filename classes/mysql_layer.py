@@ -29,10 +29,6 @@ def query(q_string,table=None):
             # if we're querying users or alerts, we want to get team data to include
             _db._cursor.execute('''SELECT * FROM teams''')
             teams = _db._cursor.fetchall()
-        elif table == "teams":
-            # if we're querying teams, we want o get user data to include
-            _db._cursor.execute('''SELECT * FROM users''')
-            users = _db._cursor.fetchall()
         for t in temp:
             # remove any quotes around strings that the db may have
             for key in t:
@@ -63,7 +59,7 @@ def query(q_string,table=None):
                 tmp = Team.Team()
                 members = []
                 # convert members from ids, to object instances
-                _db._cursor.execute('''SELECT * FROM users WHERE id IN (%s)''' % (t['members']))
+                _db._cursor.execute('''SELECT * FROM users WHERE id IN (%s) order by FIELD(id, %s);''' % (t['members'],t['members']))
                 y = _db._cursor.fetchall()
                 if y != None:
                     for x in y:

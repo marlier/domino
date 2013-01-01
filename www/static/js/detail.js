@@ -179,7 +179,7 @@ function get_detail_history(div) {
             d = new Date (0);
             d.setUTCSeconds(a.createDate);
             dateString = d.toTimeString();
-            row.append("<td class='span2'>"+dateString+"</td>");
+            row.append("<td class='span3'>"+dateString+"</td>");
             row.append("<td class='span1'>"+a.status+"</td>");
             row.append("<td>"+a.message+"</td>");
             $(div).append(row);

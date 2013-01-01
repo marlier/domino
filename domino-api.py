@@ -97,6 +97,17 @@ def register_phone(id=0,a=None):
 def team_instance(id=0):
     return process_request("Team", id)
 
+@app.route('/api/team/<int:id>/rotate', methods=['POST'])
+@app.route('/api/team/<int:id>/rotate/<count>', methods=['POST'])
+def rotate_oncall(id=0, count=1):
+    apicall = Api.Api()
+    apicall.id = id
+    apicall.count = count
+    apicall.rotateTeam()
+    resp = make_response(apicall.fulljson)
+    resp.status = "%s %s" % (apicall.status, apicall.status_message)
+    return resp
+
 @app.route('/api/rule', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
 @app.route('/api/rule/<int:id>', methods=['GET', 'POST', 'DELETE', 'OPTIONS'])
 def rule_instance(id=0):

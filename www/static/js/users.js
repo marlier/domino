@@ -48,6 +48,11 @@ $(document).ready(function(){
         });
     });
 
+    $("#createBtn").click(function() {
+        console.debug('creating/modifying user');
+        saveUser();
+    });
+
 });
 
 function print_users(users,user_div,sidebar_div) {
@@ -72,7 +77,7 @@ function print_users(users,user_div,sidebar_div) {
             $("#teamDetail #name").val(user.name);
             $("#teamDetail #email").val(user.email);
             $("#teamDetail #phone").val(user.phone);
-            $("#saveBtn").html('<a onclick="saveUser();" id="saveBtn" class="btn btn-mini"><i class="icon-pencil"></i> Save</a></div>')
+            $("#saveBtn").html('<a id="saveBtn" class="btn btn-mini"><i class="icon-pencil"></i> Save</a></div>')
         });        
     });
 
@@ -117,7 +122,11 @@ function saveUser(id) {
 		"phone": $("input#phone").val()
 	});
 	
-	var url = "/api/user/" + id
+    if (id > 0) {
+   	    var url = "/api/user/" + id
+    } else {
+        var url = "/api/user"
+    };
 	showLoading();
 	$.ajax({
         type: 'POST',

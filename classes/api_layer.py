@@ -190,14 +190,19 @@ class Api():
             self.search = s
         else:
             self.search = []
+
+        if self.sort == "oldest":
+            self.sort == "ASC"
+        else:
+            self.sort == "DESC"
+
         if self.id==0 or self.id == None:
-            objects = Alert.get_alerts_with_filter(self.search)
+            objects = Alert.get_alerts_with_filter(self.search, self.sort, self.limit)
         else:
             objects = [Alert.Alert(self.id)]
         for o in objects:
             o.status = o.status_wordform()
             o.summary = o.summarize()
-        objects = self.sortit(objects)
         objects = self.pagination(objects)
         dict_objects = []
         for o in objects:
@@ -280,8 +285,16 @@ class Api():
             self.populate(200, "OK", ['frequent'])
         elif self.name == "frequent":
             objects = Alert.frequent_alerts(self.since)
-            objects = self.processGetResults(objects)
-            self.populate(200,"OK",objects)
+            dict_objects = []
+            objects = self.pagination(objects)
+            for o in objects:
+                if hasattr(o, "scrub"):
+                    dict_objects.append(o.scrub())
+                elif isinstance(o, dict):
+                    dict_objects.append(o)
+                else:
+                    dict_objects.append(o.__dict__)
+            self.populate(200,"OK",dict_objects)
         else:
             self.populate(301, "Invalid analytics name")        
 
@@ -303,6 +316,8 @@ class Api():
         if self.sort != None and len(self.sort) > 0:
             if self.sort.lower() == "oldest":
                 objects = objects[::-1]
+                objects.sort(key = lambda x: x.createDate)
+            elif self.sort.lower() == "newest":
                 objects.sort(key = lambda x: x.createDate)
         return objects
 
@@ -455,19 +470,12 @@ class Api():
             try:
                 obj = Team.Team(self.id)
                 # save the original members of the team to see if its changed
-                orig_members = self.members[:self.oncall_count]
+                orig_members = User.get_users(self.members)
                 obj.__dict__.update(data)
                 obj.members = User.get_users(self.members)
                 if obj.save() == True:
                     # SMS the delta of whose on call
-                    oncall_list = []
-                    for i,o in enumerate(orig_members):
-                        oncall_list.append(o.id)
-                        if o.id != obj.members[i].id:
-                            Twilio.send_sms(o, self, None, "You're now on call for team %s in spot %d" % (self.name, (i+1)))
-                    for m in obj.members[:self.oncall_count]:
-                        if m.id not in oncall_list:
-                            Twilio.send_sms(m, self, None, "You're no longer on call for team %s" % (self.name))
+                    obj.notifyOncallChange(orig_members)
                     self.populate(200,"OK")
                 else:
                     self.populate(701,"Failed to save team.")
@@ -475,6 +483,20 @@ class Api():
                 self.populate(1602,e.__str__())
                 Util.strace(e)
                 return
+
+    def rotateTeam(self):
+        if self.id == None or self.id == 0:
+            self.populate(403, "Error: failed to give a valid team id")
+        else:
+            team = Team.Team(self.id)
+            orig_members = team.members
+            for i in range(self.count):
+                team.members.append(team.members.pop(0))
+            if team.save():
+                team.notifyOncallChange(orig_members)
+                self.populate(200, "OK")
+            else:
+                self.populate(403, "Failed to save team")
 
     def delAlert(self):
         try:
@@ -519,7 +541,6 @@ class Api():
     def reg_phone(self):
         user = User.User(self.id)
         valid_code = Twilio.validate_phone(user)
-        print valid_code
         if valid_code['success'] == False:
             self.populate(404,valid_code['message'])
         elif valid_code['success'] == True:
@@ -605,7 +626,7 @@ class Api():
                     else:
                         all_search_criteria_met.append(True)
             if False not in all_search_criteria_met:
-                filtered_objects.append(o)
+                filtered_objects.insert(0,o)
         return filtered_objects
         
     def populate(self,status=500, status_message="Internal application layer error", data=None):

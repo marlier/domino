@@ -148,7 +148,7 @@ def check_alerts():
     '''
     return Mysql.query('''SELECT * FROM alerts WHERE ack != 0 AND (NOW() - lastAlertSent) > %s ORDER BY id DESC''' % (conf['alert_interval']), "alerts")
 
-def get_alerts_with_filter(filt):
+def get_alerts_with_filter(filt,sort,limit):
     '''
     This returns a list of alerts that meet the filter supplied
     '''
@@ -181,7 +181,15 @@ def get_alerts_with_filter(filt):
                 else:
                     search_terms.append("%s = '%s'" % (key, value))
                 
-        query = "%s %s" % (query, ' and '.join(search_terms))
+        query += ' and '.join(search_terms)
+        if sort == "ASC" or sort == "oldest" or sort == "old":
+            query += " order by createDate ASC"
+        else:
+            query += " order by createDate DESC"
+
+        if limit is not None and limit > 0:
+            query += " limit %s" % limit
+        print query
         return Mysql.query(query,'alerts')
     else:
         return all_alerts()
@@ -218,7 +226,7 @@ class Alert():
             self.host = ''
             self.service = ''
             self.colo = ''
-            self.enironment = ''
+            self.environment = ''
             self.status = 3
             self.ack = 1
             self.ackby = 0

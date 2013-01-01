@@ -15,13 +15,14 @@ def applyRules(alert):
     if len(rules) > 0:
         for rule in rules:
             tags = alert.tags.split(',')
-            if rule['addTag'] != 'NULL' and rule['addTag'] is not None:
-                for tag in rule['addTag'].split(','):
-                    if tag not in tags: tags.append(tag.strip())
-            if rule['removeTag'] != 'NULL' and rule['removeTag'] is not None:
-                for tag in rule['removeTag'].split(','):
+            if rule.addTag is not None and rule.addTag != 'NULL':
+                for tag in rule.addTag.split(','):
+                    if tag not in tags: 
+                        tags.append(tag.strip())
+            if rule.removeTag != 'NULL' and rule.removeTag is not None:
+                for tag in rule.removeTag.split(','):
                     if tag in tags: tags.remove(tag)
-        alert.tags = ",".join(tags)
+            alert.tags = ",".join(tags)
     return alert.tags
 
 def get_rules(environment, colo, host, service, status, tag):
@@ -29,7 +30,7 @@ def get_rules(environment, colo, host, service, status, tag):
     return a list of rule objections
     '''
     rules = []
-    all_rules = Mysql.query('''select * from inbound_rules''', 'inbound_rules')
+    all_rules = Mysql.query('''SELECT * FROM inbound_rules ORDER BY createDate''', 'inbound_rules')
     if None == environment == colo == host == service == status == tag:
         return all_rules
     if status is not None:
@@ -43,7 +44,7 @@ def get_rules(environment, colo, host, service, status, tag):
         if rule.tag is not None:
             if tag is not None:
                 if tag.lower() not in rule.tag.lower().split(','): continue
-        rules.append(rule);
+        rules.insert(0,rule);
     return rules
 
 def compare_rule_vals(rule_val, my_val):
