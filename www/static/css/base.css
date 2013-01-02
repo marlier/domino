@@ -67,6 +67,7 @@ div.select2-drop {
 #alerts #sort,
 #alerts #presets {
 	margin-right: 15px;
+	margin-top: 4px;
 }
 
 #status #acktime {
