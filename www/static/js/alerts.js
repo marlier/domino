@@ -49,6 +49,10 @@ $(document).ready(function(){
         get_alerts("#alerts_data","#sidebar_data");
     }); 
 
+    $('#alerts #limit').change(function(e) {
+        get_alerts("#alerts_data","#sidebar_data");
+    });
+
     $(".addSearch").live("click", function(e) {
         term = $(this).attr('term');
         if (alt == true) {
