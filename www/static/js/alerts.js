@@ -26,8 +26,22 @@ $(document).ready(function(){
         alt = false
     });
 
+    search_terms = ["status:-ok"];
+
     $('#alerts #presets').change(function(e) {
+        console.debug('presets changed');
+        preset = $('#alerts #presets').val();
         search_terms = []
+        if ( preset == "Problems" ) { 
+            search_terms.push("status:-ok");
+        } else if ( preset == "Silenced" ) { 
+            search_terms.push("tags:silent");
+        } else if ( preset == "Paging" ) { 
+            search_terms.push("tags:page");
+        } else if ( preset == "Everything" ) { 
+            search_terms = []
+        }; 
+        console.debug(search_terms);
         get_alerts("#alerts_data","#sidebar_data");
     });
 
@@ -57,17 +71,7 @@ $(document).click(function(e) {
 
 function get_alerts(div,sidebar_div) {
     showLoading("getting alerts");
-    preset = $('#alerts #presets').val();
     sort = $('#alerts #sort').val();
-    if ( preset == "Problems" ) {
-        search_terms.push("status:-ok");
-    } else if ( preset == "Silenced" ) {
-        search_terms.push("tags:silent");
-    } else if ( preset == "Paging" ) {
-        search_terms.push("tags:page");
-    } else if ( preset == "Everything" ) {
-        search_terms = []
-    };
     search_terms = $.unique(search_terms);
 
     var limit = $('#limit').val();
