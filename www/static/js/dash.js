@@ -1,5 +1,4 @@
 $(document).ready(function(){
-    console.debug('foo dash');
 	chronological("#new_data", "newest");
 	chronological("#old_data", "oldest");
 	frequent("#frequent_data");
@@ -12,9 +11,7 @@ $(document).ready(function(){
 function chronological(div, direction) {
     showLoading("chron");
 	var url = "/api/alert?search=status:-OK&limit=10&sort=" + direction;
-    console.debug(url);
 	$.getJSON(url,function(json){
-        console.debug(json);
 		print_alert_list(json,div);
         hideLoading("chron");
 		return json;
@@ -22,7 +19,6 @@ function chronological(div, direction) {
 };
 
 function frequent(div) {
-    console.debug('Getting frequent data');
     showLoading("freq");
 	$.getJSON("/api/analytics?name=frequent&since=7&limit=10",function(json){
 		print_frequent_alert_list(json,div);
@@ -32,7 +28,6 @@ function frequent(div) {
 };
 
 function print_frequent_alert_list(alerts,div) {
-    console.debug('Print frequent alerts');
     showLoading("print freq");
 	$(div + " .data-set").remove();
 	$.each(alerts,function(i,a) {
@@ -65,7 +60,6 @@ function print_alert_list(alerts,div) {
         o.append('<td><a href="/detail?host='+a.host+'&environment='+a.environment+'&colo='+a.colo+'&service='+a.service+'" class="btn btn-primary btn-small"><i class="icon-white icon-share"></i> Go</a></td>');
         d = new Date(0);
         d.setUTCSeconds(a.createDate);
-        console.debug(a.id);
         o.append('<td>' + getRelTime(d) + '</td>')
         o.append('<td>' + a.environment + '</td>');
         o.append('<td>' + a.colo + '</td>');
@@ -83,6 +77,7 @@ function get_graph_data(div) {
 function graph(div, segment, unit) {
     showLoading("graph");
 	var url = "/api/graph?segment=" + segment + "&unit=" + unit + "&search=" + $("#graph_filter").val();
+    console.debug(url);
 	$.getJSON(url,function(json){
         var datasets = [];
         $.each(json, function(i,dataset) {
@@ -95,13 +90,11 @@ function graph(div, segment, unit) {
 	    	if (dataset.search == 0) {
 		    	dataset.search = "All";
     		} else {
-                console.debug(dataset);
 	    		dataset.search = dataset.search.join('+');
 		    };
             tmp = {label: dataset.search, data: mydata, lines: {show: true}, points: {show: true}}
             datasets.push(tmp);
         });
-        console.debug(datasets);
         $.plot(
             $(div),
             datasets,

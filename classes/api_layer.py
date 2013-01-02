@@ -242,18 +242,8 @@ class Api():
 
     def getGraph(self):
         if self.unit.upper() in ["SECOND", "MINUTE", "HOUR", "DAY"]:
-            self.search = self.search.split(",")
-            objects = []
-            for t in self.search:
-                # make search terms into array
-                s = []
-                for x in t.split():
-                    if ":" not in x:
-                        s[-1] = "%s %s" %(s[-1], x)
-                    else:
-                        s.append(x)
-                objects.append(Alert.graph_data(self.segment,self.unit,s))
-            return self.populate(200,"OK",objects)
+            data = Alert.graph_data(self.segment,self.unit,self.search)
+            return self.populate(200,"OK",[data])
         else:
             self.populate(1802,"Invalid API metic call: units parameter must be SECOND, MINUTE, HOUR, or DAY") 
 
@@ -549,7 +539,6 @@ class Api():
         Filter objects 
         '''
         if self.search == None or len(self.search) == 0: return objects
-        self.search = self.search.split(",")
         filtered_objects = []
         for o in objects:
             all_search_criteria_met = []
