@@ -19,10 +19,7 @@ def frequent_alerts(since=7):
     '''
     Get the most frequent alerts
     '''
-    _db = Mysql.Database()
-    _db._cursor.execute( '''SELECT DISTINCT environment,colo,host,service, COUNT(*) AS count FROM alerts_history WHERE createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s DAY) AND DATE_SUB(CURDATE(),INTERVAL -1 DAY) GROUP BY environment,colo,host,service  ORDER BY count DESC;''' % (since))
-    alerts = _db._cursor.fetchall()
-    _db.close()
+    alerts = Mysql.rawquery('''SELECT DISTINCT environment,colo,host,service, COUNT(*) AS count FROM alerts_history WHERE createDate BETWEEN DATE_SUB(CURDATE(),INTERVAL %s DAY) AND DATE_SUB(CURDATE(),INTERVAL -1 DAY) GROUP BY environment,colo,host,service  ORDER BY count DESC;''' % (since))
     for alert in alerts:
         for key in alert:
             if isinstance(alert[key], str):
@@ -148,12 +145,17 @@ def check_alerts():
     '''
     return Mysql.query('''SELECT * FROM alerts WHERE ack != 0 AND (NOW() - lastAlertSent) > %s ORDER BY id DESC''' % (conf['alert_interval']), "alerts")
 
-def get_alerts_with_filter(filt,sort,limit):
+def get_alerts_with_filter(filt,sort,limit, offset=0, table="alerts", count=False):
     '''
-    This returns a list of alerts that meet the filter supplied
+    This returns a list of alerts that meets the filter supplied
+    SECURITY RISK: MYSQL INJECTION
     '''
+    if count == True:
+        query = "SELECT COUNT(id) as count FROM %s " % table
+    else:
+        query = "SELECT * FROM %s " % table
     if len(filt) > 0:
-        query = "SELECT * FROM alerts WHERE "
+        query += " WHERE "
         search_terms = []
         for ft in filt:
             key = ft.split(':')[0].strip()
@@ -180,19 +182,20 @@ def get_alerts_with_filter(filt,sort,limit):
                     search_terms.append("%s != '%s'" % (key, value))
                 else:
                     search_terms.append("%s = '%s'" % (key, value))
-                
+        
         query += ' and '.join(search_terms)
-        if sort == "ASC" or sort == "oldest" or sort == "old":
-            query += " order by createDate ASC"
-        else:
-            query += " order by createDate DESC"
-
-        if limit is not None and limit > 0:
-            query += " limit %s" % limit
-        print query
-        return Mysql.query(query,'alerts')
+    if sort == "ASC" or sort == "oldest" or sort == "old":
+        query += " order by createDate ASC"
     else:
-        return all_alerts()
+        query += " order by createDate DESC"
+
+    if limit is not None and limit > 0:
+        query += " limit %s, %s" % (offset, limit)
+    print query
+    if count == True:
+        return Mysql.rawquery(query)
+    else:
+        return Mysql.query(query,'alerts')
 
 def to_int_status(status):
     '''

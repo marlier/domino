@@ -14,6 +14,20 @@ import notification_layer as Notification
 
 conf = Util.load_conf()
 
+def rawquery(q_string):
+    '''
+    raw mysql query, no converting of results to objects
+    '''
+    try:
+        _db = Database()
+        _db._cursor.execute( '''%s''' % (q_string))
+        result =  _db._cursor.fetchall()
+        _db.close()
+        return result
+    except Exception, e:
+        Util.strace(e)
+        return False
+
 def query(q_string,table=None):
     '''
     Query the db with the given string and return with an array of user objects.

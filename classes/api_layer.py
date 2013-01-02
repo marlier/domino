@@ -179,39 +179,17 @@ class Api():
             return
 
     def getAlert(self):
-        # make search terms into array
-        if self.search != '' and self.search != None:
-            s = []
-            for x in self.search.split(','):
-                if ":" not in x:
-                    s[-1] = "%s %s" %(s[-1], x)
-                else:
-                    s.append(x)
-            self.search = s
-        else:
-            self.search = []
-
-        if self.sort == "oldest":
-            self.sort == "ASC"
-        else:
-            self.sort == "DESC"
-
         if self.id==0 or self.id == None:
-            objects = Alert.get_alerts_with_filter(self.search, self.sort, self.limit)
+            objects = Alert.get_alerts_with_filter(self.search, self.sort, self.limit, self.offset)
         else:
             objects = [Alert.Alert(self.id)]
         for o in objects:
             o.status = o.status_wordform()
             o.summary = o.summarize()
-        objects = self.pagination(objects)
         dict_objects = []
         for o in objects:
             if hasattr(o, "scrub"):
                 dict_objects.append(o.scrub())
-            elif isinstance(o, dict):
-                dict_objects.append(o)
-            else:
-                dict_objects.append(o.__dict__)
         self.populate(200,"OK",dict_objects)
 
     def getHistory(self):
@@ -282,7 +260,7 @@ class Api():
     def getAnalytics(self):
         if self.name == None:
             # return list of analytics names that are supported
-            self.populate(200, "OK", ['frequent'])
+            self.populate(200, "OK", ['frequent', 'count'])
         elif self.name == "frequent":
             objects = Alert.frequent_alerts(self.since)
             dict_objects = []
@@ -295,6 +273,9 @@ class Api():
                 else:
                     dict_objects.append(o.__dict__)
             self.populate(200,"OK",dict_objects)
+        elif self.name == "count":
+            objects = Alert.get_alerts_with_filter(self.search, self.sort, self.limit, self.offset, "alerts", True)
+            self.populate(200, "OK",objects)
         else:
             self.populate(301, "Invalid analytics name")        
 

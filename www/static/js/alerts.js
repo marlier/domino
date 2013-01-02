@@ -69,7 +69,13 @@ function get_alerts(div,sidebar_div) {
         search_terms = []
     };
     search_terms = $.unique(search_terms);
-    var url = "/api/alert?limit=0&sort="+sort+"&search="+search_terms.join(",");
+
+    var limit = $('#limit').val();
+    if ( limit == "All" ) {
+        limit = 0;
+    };
+
+    var url = "/api/alert?limit="+limit+"&sort="+sort+"&search="+search_terms.join(",");
     console.debug(url);
     $.getJSON(url,function(json){
         console.debug('done getting json');
@@ -78,6 +84,76 @@ function get_alerts(div,sidebar_div) {
         hideLoading("getting alerts");
         return json;
     }); 
+
+    // get count of OK alerts
+    $.ajax({
+        type: 'GET',
+        url: "/api/analytics?name=count&limit="+limit+"&sort="+sort+"&search=status:OK,"+search_terms.join(","),
+        async: false,
+        dataType: "json",
+        success: function(data, textStatus, jqXHR){
+            ok = data[0]['count'];
+        },    
+        error: function(jqXHR, textStatus, errorThrown){
+            ok = 0;
+        }
+    });
+
+    // get count of warning alerts
+    $.ajax({
+        type: 'GET',
+        url: "/api/analytics?name=count&limit="+limit+"&sort="+sort+"&search=status:warning,"+search_terms.join(","),
+        async: false,
+        dataType: "json",
+        success: function(data, textStatus, jqXHR){
+            warning = data[0]['count']
+        },         
+        error: function(jqXHR, textStatus, errorThrown){
+            warning = 0;
+        }       
+    });
+
+    // get count of critical alerts
+    $.ajax({
+        type: 'GET',
+        url: "/api/analytics?name=count&limit="+limit+"&sort="+sort+"&search=status:critical,"+search_terms.join(","),
+        async: false,
+        dataType: "json",
+        success: function(data, textStatus, jqXHR){
+            critical = data[0]['count']
+        },
+        error: function(jqXHR, textStatus, errorThrown){
+            critical = 0;
+        } 
+    });
+
+    // get count of unknown alerts
+    $.ajax({
+        type: 'GET',
+        url: "/api/analytics?name=count&limit="+limit+"&sort="+sort+"&search=status:unknown,"+search_terms.join(","),
+        async: false,
+        dataType: "json",
+        success: function(data, textStatus, jqXHR){
+            unknown = data[0]['count']
+        },
+        error: function(jqXHR, textStatus, errorThrown){
+            unknown = 0;
+        } 
+    });
+
+    total = ok + warning + critical + unknown
+
+    $("#statebar .progress #ok").css('width', ((ok / total) * 100)+"%");
+    $("#statebar .progress #warning").css('width', ((warning / total) * 100)+"%");
+    $("#statebar .progress #critical").css('width', ((critical / total) * 100)+"%");
+    $("#statebar .progress #unknown").css('width', ((unknown / total) * 100)+"%");
+
+    $("#statebar .stats-plain #ok").text(ok);
+    $("#statebar .stats-plain #warning").text(warning);
+    $("#statebar .stats-plain #critical").text(critical);
+    $("#statebar .stats-plain #unknown").text(unknown);    
+    $("#statebar .stats-plain #total").text(total);
+
 };
 
 function print_alerts(alerts,alert_div,sidebar_div) {
@@ -184,19 +260,6 @@ function print_alerts(alerts,alert_div,sidebar_div) {
     // load unicorn.js now that we've finished building our sidebar
     $.getScript("/static/js/unicorn.js", function(data, textStatus, jqxhr) {});
     
-    total = ok + warning + critical + unknown
-
-    $("#statebar .progress #ok").css('width', ((ok / total) * 100)+"%");
-    $("#statebar .progress #warning").css('width', ((warning / total) * 100)+"%");
-    $("#statebar .progress #critical").css('width', ((critical / total) * 100)+"%");
-    $("#statebar .progress #unknown").css('width', ((unknown / total) * 100)+"%");
-
-    $("#statebar .stats-plain #ok").text(ok);
-    $("#statebar .stats-plain #warning").text(warning);
-    $("#statebar .stats-plain #critical").text(critical);
-    $("#statebar .stats-plain #unknown").text(unknown);    
-    $("#statebar .stats-plain #total").text(total);
-
     console.debug("done printing sidebar");
     hideLoading();
 };
