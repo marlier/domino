@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Domino by CBarraford</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Domino</h1>
+        <p>Domino is an alerting frontend to any monitoring solution</p>
+
+        <p class="view"><a href="https://github.com/CBarraford/domino">View the Project on GitHub <small>CBarraford/domino</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/CBarraford/domino/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/CBarraford/domino/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/CBarraford/domino">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p>Domino is an open source alerting fronted for any monitoring system. It is backend agnostic, and can receive alerts from ANY source via http calls. It has built in SMS and phone call capabilities using Twilio's API.</p>
+
+<p>Key features</p>
+
+<ul>
+<li>alerting via SMS, telephone, and email. (with usage of the API, you can create your own means of alerting)</li>
+<li>can be used with any existing monitoring solution. Domino does not know or care where the alerts are coming from.</li>
+<li>automatic escalation of alerts.</li>
+<li>create teams to direct alert traffic to the right people</li>
+<li>Ack alerts, get a list of unacked alerts by sending a text message or calling your team's phone number.</li>
+<li>highly customizable to fit your alerting and escalation procedures</li>
+<li>Full accessability through the API</li>
+<li>Get basic stats on your alerts (most frequest, newest, oldest, graphing datapoints, or build your own stats using the API)</li>
+</ul><p>Documentation
+documentation is available on the github wiki.</p>
+
+<p>Denpencies</p>
+
+<ul>
+<li>Flask (http://<a href="http://flask.pocoo.org/">http://flask.pocoo.org/</a>)</li>
+<li>twilio-python (<a href="https://github.com/twilio/twilio-python">https://github.com/twilio/twilio-python</a>)</li>
+<li>MySQLdb (<a href="http://sourceforge.net/projects/mysql-python/">http://sourceforge.net/projects/mysql-python/</a>)</li>
+<li>Simplejson (<a href="http://pypi.python.org/pypi/simplejson/">http://pypi.python.org/pypi/simplejson/</a>)</li>
+</ul><p>Important Notes</p>
+
+<ul>
+<li>The server you run Domino on and the mysql server must be on UTC timezone</li>
+<li>This software does use Twilio (<a href="http://www.twilio.com">www.twilio.com</a>) to handle SMS and phone calls. If you want to use this, you must setup your own Twilio account.</li>
+<li>Your Domino-comm.py service must be accessable by twilio's servers can make http calls to it</li>
+</ul><p>DISCLAIMER
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/CBarraford">CBarraford</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-25972582-2");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
