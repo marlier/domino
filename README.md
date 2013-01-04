@@ -7,7 +7,8 @@ Key features
  * automatic escalation of alerts.
  * Group alerts and route them to the right people via tags
  * highly customizable to fit your alerting and escalation procedures
- * Full accessability through the read/write restful API. 
+ * Full accessability through the read/write restful API.
+ * Create rules that add/remove alert tags based on critieria you specify.
  * Get basic stats on your alerts (most frequest, newest, oldest, graphing datapoints, or build your own stats)
  
 Documentation
