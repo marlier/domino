@@ -149,18 +149,22 @@ def process_request(objType, id=0):
     apicall = Api.Api(**data)
     apicall.id = id
     apicall.objType = objType
-
     # make search terms into array
     if apicall.search != '' and apicall.search != None:
         s = []
-        for x in apicall.search.split(','):
-            if ":" not in x:
-                s[-1] = "%s %s" %(s[-1], x)
-            else:
-                s.append(x)
+        for search_terms in apicall.search.split(','):
+            z = []
+            for x in search_terms.split():
+                if ":" not in x:
+                    z[-1] = "%s %s" %(z[-1], x)
+                else:
+                    z.append(x)
+            s.append(z)
         apicall.search = s
     else:
         apicall.search = []
+    if len(apicall.search) == 1:
+        apicall.search = apicall.search[0]
 
     # convert sort term to something myql understands
     if apicall.sort == "oldest":

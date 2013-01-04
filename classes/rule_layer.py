@@ -48,6 +48,7 @@ def get_rules(environment, colo, host, service, status, tag):
     return rules
 
 def compare_rule_vals(rule_val, my_val):
+    print rule_val, my_val
     if rule_val is None: return True
     if my_val is not None:
         if isinstance(rule_val, int) or isinstance(rule_val, long) or isinstance(rule_val, float):

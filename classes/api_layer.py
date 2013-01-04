@@ -193,12 +193,18 @@ class Api():
         self.populate(200,"OK",dict_objects)
 
     def getHistory(self):
-        objects = Alert.all_alert_history(self.since)
+        if self.id==0 or self.id == None:
+            objects = Alert.get_alerts_with_filter(self.search, self.sort, self.limit, self.offset, "alerts_history")
+        else:
+            objects = [Alert.Alert(self.id)]
         for o in objects:
             o.status = o.status_wordform()
             o.summary = o.summarize()
-        objects = self.processGetResults(objects)
-        self.populate(200,"OK",objects)
+        dict_objects = []
+        for o in objects:
+            if hasattr(o, "scrub"):
+                dict_objects.append(o.scrub())
+        self.populate(200,"OK",dict_objects)
 
     def getUser(self):
         if self.id==0 or self.id == None:

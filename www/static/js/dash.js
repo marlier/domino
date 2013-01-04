@@ -90,21 +90,26 @@ function graph(div, segment, unit) {
 	    	if (dataset.search == 0) {
 		    	dataset.search = "All";
     		} else {
-	    		dataset.search = dataset.search.join('+');
+	    		dataset.search = $.makeArray(dataset.search).join('+');
 		    };
             tmp = {label: dataset.search, data: mydata, lines: {show: true}, points: {show: true}}
             datasets.push(tmp);
         });
+        console.debug('foo');
+        console.debug(datasets);
         $.plot(
             $(div),
             datasets,
             {
                 xaxis: {
-                   mode: "time",
-                   timeformat: "%b %d %h:%M:%S"
+                    mode: "time",
+                    timeformat: "%b %d %h:%M:%S"
+                },
+                yaxis: {
+                    tickDecimals: 0
                 },
                 legend: {
-                   show: true,
+                    show: true,
                 }
             }
             );

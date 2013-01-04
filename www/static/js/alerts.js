@@ -1,4 +1,5 @@
 var table = "alert";
+var search_terms = ["status:-ok"];
 
 $(document).ready(function(){
     attrs = window.location.href.slice(window.location.href.indexOf('?') + 1)
@@ -25,14 +26,6 @@ $(document).ready(function(){
     $(document).keyup(function(e) {
         alt = false
     });
-
-    search_terms = getCookie('search_terms');
-    console.debug(search_terms);
-    if ( search_terms == null ) {
-        search_terms = ["status:-ok"];
-    };
-
-    $.cookies.test();
 
     $('#alerts #presets').change(function(e) {
         console.debug('presets changed');
@@ -83,14 +76,13 @@ function get_alerts(div,sidebar_div) {
     showLoading("getting alerts");
     sort = $('#alerts #sort').val();
     search_terms = $.unique(search_terms);
-    setCookie(search_terms, search_terms.join(','), 30);
 
     var limit = $('#limit').val();
     if ( limit == "All" ) {
         limit = 0;
     };
 
-    var url = "/api/alert?limit="+limit+"&sort="+sort+"&search="+search_terms.join(",");
+    var url = "/api/alert?limit="+limit+"&sort="+sort+"&search="+search_terms.join("+");
     console.debug(url);
     $.getJSON(url,function(json){
         console.debug('done getting json');
@@ -103,7 +95,7 @@ function get_alerts(div,sidebar_div) {
     // get count of OK alerts
     $.ajax({
         type: 'GET',
-        url: "/api/analytics?name=count&limit="+limit+"&sort="+sort+"&search=status:OK,"+search_terms.join(","),
+        url: "/api/analytics?name=count&limit="+limit+"&sort="+sort+"&search=status:OK+"+search_terms.join("+"),
         async: false,
         dataType: "json",
         success: function(data, textStatus, jqXHR){
@@ -117,7 +109,7 @@ function get_alerts(div,sidebar_div) {
     // get count of warning alerts
     $.ajax({
         type: 'GET',
-        url: "/api/analytics?name=count&limit="+limit+"&sort="+sort+"&search=status:warning,"+search_terms.join(","),
+        url: "/api/analytics?name=count&limit="+limit+"&sort="+sort+"&search=status:warning+"+search_terms.join("+"),
         async: false,
         dataType: "json",
         success: function(data, textStatus, jqXHR){
@@ -131,7 +123,7 @@ function get_alerts(div,sidebar_div) {
     // get count of critical alerts
     $.ajax({
         type: 'GET',
-        url: "/api/analytics?name=count&limit="+limit+"&sort="+sort+"&search=status:critical,"+search_terms.join(","),
+        url: "/api/analytics?name=count&limit="+limit+"&sort="+sort+"&search=status:critical+"+search_terms.join("+"),
         async: false,
         dataType: "json",
         success: function(data, textStatus, jqXHR){
@@ -145,7 +137,7 @@ function get_alerts(div,sidebar_div) {
     // get count of unknown alerts
     $.ajax({
         type: 'GET',
-        url: "/api/analytics?name=count&limit="+limit+"&sort="+sort+"&search=status:unknown,"+search_terms.join(","),
+        url: "/api/analytics?name=count&limit="+limit+"&sort="+sort+"&search=status:unknown+"+search_terms.join("+"),
         async: false,
         dataType: "json",
         success: function(data, textStatus, jqXHR){
@@ -323,24 +315,3 @@ function print_search_terms() {
     console.debug('done adding search terms');
     hideLoading();
 };
-
-function setCookie(c_name,value,exdays) {
-    console.debug("setting cookie: "+ value);
-    var exdate=new Date();
-    exdate.setDate(exdate.getDate() + exdays);
-    var c_value=escape(value) + ((exdays==null) ? "" : "; expires="+exdate.toUTCString());
-    document.cookie=c_name + "=" + c_value;
-}
-
-function getCookie(c_name) {
-    console.debug('getting cookie');
-    var i,x,y,ARRcookies=document.cookie.split(";");
-    for (i=0;i<ARRcookies.length;i++) {
-        x=ARRcookies[i].substr(0,ARRcookies[i].indexOf("="));
-        y=ARRcookies[i].substr(ARRcookies[i].indexOf("=")+1);
-        x=x.replace(/^\s+|\s+$/g,"");
-        if (x==c_name) {
-            return unescape(y);
-        }
-    }
-}

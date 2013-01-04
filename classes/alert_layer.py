@@ -49,18 +49,14 @@ def graph_data(amount=7, units="HOUR", terms = None):
     Collect graph data
     '''
     terms_query = ''
-    if terms != None:
-        for t in terms:
-            if ":" in t:
-                key = t.split(":")[0].strip()
-                value = t.split(":")[1].strip()
-                if key == "status":
-                    value = to_int_status(value)
-                terms_query = "%s %s='%s' and" % (terms_query, key, value)
-    _db = Mysql.Database()
-    _db._cursor.execute( '''select COUNT(id) as count,createDate from alerts_history WHERE %s createDate >= DATE_SUB(NOW(),INTERVAL %s %s) group by %s(createDate);''' % (terms_query, amount, units, units))
-    raw_alerts = _db._cursor.fetchall()
-    _db.close()
+    for t in terms:
+        if ":" in t:
+            key = t.split(":")[0].strip()
+            value = t.split(":")[1].strip()
+            if key == "status":
+                value = to_int_status(value)
+            terms_query = "%s %s='%s' and" % (terms_query, key, value)
+    raw_alerts = Mysql.rawquery( '''select COUNT(id) as count,createDate from alerts_history WHERE %s createDate >= DATE_SUB(NOW(),INTERVAL %s %s) group by %s(createDate);''' % (terms_query, amount, units, units))
     d = []
     alerts = []
     # convert to dictionary
@@ -191,7 +187,6 @@ def get_alerts_with_filter(filt,sort,limit, offset=0, table="alerts", count=Fals
 
     if limit is not None and limit > 0:
         query += " limit %s, %s" % (offset, limit)
-    print query
     if count == True:
         return Mysql.rawquery(query)
     else:

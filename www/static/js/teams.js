@@ -13,6 +13,10 @@ $(document).ready(function(){
         save_team();
     });
 
+    $("#teamDetail #oncall_count").change(function() {
+        update_oncall($("#teamDetail #oncall_count").val());
+    });
+
     $(".member_tag").live('click', function() {
         $(this).parent().remove();
         update_oncall($("#teamDetail #oncall_count").val());

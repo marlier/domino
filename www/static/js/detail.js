@@ -10,7 +10,6 @@ $(document).ready(function(){
     get_detail_history("#history_table");
 
     $("#addTagBtn").click(function() {
-        console.debug("adding tag");
         tag = $("input#addatag").val();
 
         $.ajax({
@@ -32,7 +31,7 @@ $(document).ready(function(){
 
 function get_detail(){
     showLoading("get detail");
-    var url = "/api/alert?search="+detail_attrs.join(",");
+    var url = "/api/alert?search="+detail_attrs.join("+");
 
     $.getJSON(url,function(json){
         a = json[0]
@@ -61,13 +60,13 @@ function get_detail(){
         print_ackBtn(a);
 
         var url = "/api/rule?environment="+a.environment+"&colo="+a.colo+"&host="+a.host+"&service="+a.service+"&status="+a.status+"&tag="+a.tags;
+        console.debug(url);
         $.getJSON(url,function(json) {
             rules = json;
             $('#rules_rows .data-set').remove();
             $("#rules_total").text(rules.length);
             $("#rules_total").attr('title', rules.length + " rules displayed");
             $.each(rules,function(i,r) {
-                console.debug(r);
                 row = $('<tr>');
                 row.addClass('data-set');
                 row.append('<td class="alert-info">' + clean_value(r['environment']) + '</td>');
@@ -159,12 +158,11 @@ function clean_value(val) {
 
 function get_detail_history(div) {
     showLoading();
-    var url = "/api/history?since=90&search="+detail_attrs.join(",");
+    var url = "/api/history?since=90&search="+detail_attrs.join("+");
     console.debug(url);
     $.getJSON(url,function(json){
         $(".data-set").remove();
         $.each(json, function(i,a) {
-            console.debug(a);
             row = $('<tr>');
             if ( a.status == "OK" ) {
                 bgcolor = "alert-success";
@@ -205,7 +203,7 @@ function graph(div, a) {
             if (dataset.search == 0) {
                 dataset.search = "All";
             } else {
-                dataset.search = dataset.search.join(' + ');
+                dataset.search = $.makeArray(dataset.search).join(' + ');
             };  
             tmp = {label: dataset.search, data: mydata, lines: {show: true}, points: {show: true}}
             datasets.push(tmp);
@@ -217,7 +215,10 @@ function graph(div, a) {
                 xaxis: {
                     mode: "time",
                     timeformat: "%b %d %h:%M:%S"
-                },  
+                },
+                yaxis: {
+                    tickDecimals: 0
+                },
                 legend: {
                     show: true,
                     position: "nw"
