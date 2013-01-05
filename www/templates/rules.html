@@ -20,21 +20,14 @@
 
 			<div id="top"></div>
 			
-            <div id="sidebar">
-                <a href="#" class="visible-phone"><i class="icon icon-list-alt"></i> Rules</a>
-                <ul id="sidebar_data">
-                   <li><a href="/rules"><i class="active icon icon-list-alt"></i> <span>Rules</span></a></li>
-                </ul>
-            </div>
-
-			<div id="content">
+			<div id="content span12">
 				<div id="data widget-box">
                     <div class="widget-title">
                         <span class="icon"><i class="icon-list-alt"></i></span>
                         <h5>Rules</h5>
                         <span id="rules_total" class="label label-info tip-left"></span>
                     </div>
-                    <table id="rules_rows" class="table table-bordered">
+                    <table id="rules_rows" class="table table-bordered" style="background-color:white;">
                         <tr>
                             <th>Environment</th>
                             <th>Colo</th>
@@ -42,13 +35,14 @@
                             <th>Service</th>
                             <th>Status</th>
                             <th>Tag</th>
-                            <th>TTL</th>
+                            <th>TTL (in hours)</th>
                             <th>Add Tag</th>
                             <th>Remove Tag</th>
                             <th>Buttons</th>
                         </tr>
                         <tr>
                             <td id="attrTitle" class="alert-info" colspan="6">Attributes</td>
+                            <td class=""></td>
                             <td id="actionTitle" class="alert-success" colspan="2">Actions</td>
                         </tr>
                         <tr>

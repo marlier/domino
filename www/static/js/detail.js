@@ -75,6 +75,7 @@ function get_detail(){
                 row.append('<td class="alert-info">' + clean_value(r['service']) + '</td>');
                 row.append('<td class="alert-info">' + clean_value(r['state']) + '</td>');
                 row.append('<td class="alert-info">' + clean_value(r['tag']) + '</td>');
+                row.append('<td class="">' + clean_value(r['ttl']) + '</td>');
                 row.append('<td class="alert-success">' + clean_value(r['addTag']) + '</td>');
                 row.append('<td class="alert-success">' + clean_value(r['removeTag']) + '</td>');
                 $("#rules_rows").append(row);
