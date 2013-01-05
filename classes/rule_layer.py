@@ -85,6 +85,7 @@ class Rule:
             self.environment = None
             self.tag = None
             self.status = None
+            self.ttl = None
             self.addTag = None
             self.removeTag = None
             self.id = id
