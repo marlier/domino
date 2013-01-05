@@ -66,16 +66,23 @@ function getRelTime(thedate) {
     one_hour = 60*60;
     one_day = 60*60*24;
     date_diff = Math.floor(now.getTime() / 1000) - Math.floor(d / 1000)
-    if ( date_diff < 60 ) {
-        ts = Math.ceil(date_diff) + " seconds ago";
-    } else if ( date_diff / one_min <= 60 ) {         
-        ts = Math.ceil(date_diff / one_min) +" min ago";
-    } else if ( date_diff / one_hour <= 24 ) {
-        ts = Math.ceil(date_diff / one_hour) + " hours ago";
+    if ( date_diff < 0 ) {
+        suffix = " remaining";
+        date_diff = Math.abs(date_diff);
     } else {
-        ts = Math.ceil(date_diff / one_day) + " days ago";
+        suffix = " ago"
     };
-    return ts
+
+    if ( date_diff < 60 ) {
+        ts = Math.ceil(date_diff) + " seconds";
+    } else if ( date_diff / one_min <= 60 ) {         
+        ts = Math.ceil(date_diff / one_min) +" min";
+    } else if ( date_diff / one_hour <= 24 ) {
+        ts = Math.ceil(date_diff / one_hour) + " hours";
+    } else {
+        ts = Math.ceil(date_diff / one_day) + " days";
+    };
+    return ts + suffix
 }
 
 function validate_email(email) {

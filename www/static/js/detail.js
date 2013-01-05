@@ -67,6 +67,16 @@ function get_detail(){
             $("#rules_total").text(rules.length);
             $("#rules_total").attr('title', rules.length + " rules displayed");
             $.each(rules,function(i,r) {
+                //get reltime of ttl
+                if ( r['ttl'] != null ) {
+                    d = new Date(0);
+                    d.setUTCSeconds(r.createDate);
+                    d.setHours(d.getHours()+r['ttl']);
+                    relTime = getRelTime(d);
+                } else {
+                    relTime = 'None';
+                };
+
                 row = $('<tr>');
                 row.addClass('data-set');
                 row.append('<td class="alert-info">' + clean_value(r['environment']) + '</td>');
@@ -75,7 +85,7 @@ function get_detail(){
                 row.append('<td class="alert-info">' + clean_value(r['service']) + '</td>');
                 row.append('<td class="alert-info">' + clean_value(r['state']) + '</td>');
                 row.append('<td class="alert-info">' + clean_value(r['tag']) + '</td>');
-                row.append('<td class="">' + clean_value(r['ttl']) + '</td>');
+                row.append('<td title="'+relTime+'" class="">' + clean_value(r['ttl']) + '</td>');
                 row.append('<td class="alert-success">' + clean_value(r['addTag']) + '</td>');
                 row.append('<td class="alert-success">' + clean_value(r['removeTag']) + '</td>');
                 $("#rules_rows").append(row);

@@ -34,7 +34,15 @@ function print_rules(rules, rules_div) {
     $("#rules_total").text(rules.length);
     $("#rules_total").attr('title', rules.length + " rules displayed");
     $.each(rules,function(i,r) {
-        console.debug(r);
+        //get reltime of ttl
+        if ( r['ttl'] != null ) { 
+            d = new Date(0);
+            d.setUTCSeconds(r.createDate);
+            d.setHours(d.getHours()+r['ttl']);
+            relTime = getRelTime(d);
+        } else {
+            relTime = 'None';
+        };
         row = $('<tr>');
         row.addClass('data-set');
         row.append('<td class="alert-info">' + clean_value(r['environment']) + '</td>');
@@ -43,7 +51,7 @@ function print_rules(rules, rules_div) {
         row.append('<td class="alert-info">' + clean_value(r['service']) + '</td>');
         row.append('<td class="alert-info">' + clean_value(r['status']) + '</td>');
         row.append('<td class="alert-info">' + clean_value(r['tag']) + '</td>');
-        row.append('<td class=""> ' + clean_value(r['ttl']) + '</td>');
+        row.append('<td title="'+relTime+'"class=""> ' + clean_value(r['ttl']) + '</td>');
         row.append('<td class="alert-success">' + clean_value(r['addTag']) + '</td>');
         row.append('<td class="alert-success">' + clean_value(r['removeTag']) + '</td>');
         row.append('<td><div class="btn-group"><a href="#" id="'+r['id']+'" title="Edit" class="tip-top editBtn btn btn-info btn-small"><i class="icon-white icon-pencil"></i></a><a href="#" id="'+r['id']+'" title="Delete" class="tip-top delBtn btn btn-danger btn-small"><i class="icon-white icon-remove-sign"></i></a></div></td>');
