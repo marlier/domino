@@ -1,19 +1,29 @@
 var table = "alert";
-var search_terms = ["status:-ok"];
+
+search_terms = getURLParameter('search').split(',');
+
+if ( search_terms == "null" ) {
+    var search_terms = ["status:-ok"];
+};
 
 $(document).ready(function(){
-    attrs = window.location.href.slice(window.location.href.indexOf('?') + 1)
-    attrs = attrs.replace(/=/gi, ":").split('&');
-    console.debug(attrs);
-    
-
     console.debug('starting query')
     $("#loadingDiv").show();
+
+    limit = getURLParameter('limit');
+    if ( limit != "null" ) { 
+        $('#alerts #limit').val(limit)
+    };
+
+    sort = getURLParameter('sort');
+    if ( sort != "null" ) { 
+        $("#alerts #sort").val(sort);
+    };
+
 	get_alerts("#alerts_data","#sidebar_data");
 	
 	$("#search_input").keyup(function(event){
     	if(event.keyCode == 13){
-			//console.debug($("#search_input").val());
         	add_search_terms($("#search_input").val());
     	}
 	});
@@ -315,3 +325,10 @@ function print_search_terms() {
     console.debug('done adding search terms');
     hideLoading();
 };
+
+function getURLParameter(name) {
+    return decodeURI(
+        (RegExp(name + '=' + '(.+?)(&|$)').exec(location.search)||[,null])[1]
+    );  
+};
+

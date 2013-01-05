@@ -65,7 +65,7 @@ def compare_rule_vals(rule_val, my_val):
         return False
     return True
 
-def expire_rules();
+def expire_rules():
     '''
     This deletes any rules that has a TTL that is expired
     '''
