@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # this is a service that listens for traffic from Twilio's servers
+# this also sends out repeat alerts when appropriate to
 
 from flask import Flask, request, Response
 import os, sys
@@ -18,6 +19,7 @@ import dominoCLI as domino
 import user_layer as User
 import alert_layer as Alert
 import team_layer as Team
+import rule_layer as Rule
 import util_layer as Util
 
 conf = Util.load_conf()
@@ -191,6 +193,9 @@ def check_alerts():
     # intentionally creating an infinite loop.
     foobar = True
     while foobar == True:
+        # delete any rules that have expired
+        Rule.expire_rules();
+
         # looking for alerts that are due to page
         for a in Alert.check_alerts():
             if a.hasTag('silent'):

@@ -169,7 +169,7 @@ class Database:
                 c.execute(cmd)
                 cmd = '''CREATE TABLE IF NOT EXISTS notifications (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, noteType VARCHAR(15), message TEXT, tags VARCHAR(255), status INT NOT NULL DEFAULT 3, link VARCHAR(255), alert INT NOT NULL DEFAULT 0)'''
                 c.execute(cmd)
-                cmd = '''CREATE TABLE IF NOT EXISTS inbound_rules (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, host CHAR(20), service CHAR(50), environment CHAR(20), colo CHAR(20), status INT, tag VARCHAR(255), addTag VARCHAR(255), removeTag VARCHAR(255), UNIQUE active(environment,colo,host,service,tag,status));'''
+                cmd = '''CREATE TABLE IF NOT EXISTS inbound_rules (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, host CHAR(20), service CHAR(50), environment CHAR(20), colo CHAR(20), status INT, tag VARCHAR(255), ttl INT, addTag VARCHAR(255), removeTag VARCHAR(255), UNIQUE active(environment,colo,host,service,tag,status));'''
                 c.execute(cmd)
                 self.connectDB()
                 return True

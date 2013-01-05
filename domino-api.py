@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# This runs as a service. It listens for API requests
+# This runs as a service. It listens for API requests and web ui requests
 
 from flask import Flask, request, json, make_response, render_template, url_for
 import os, sys
