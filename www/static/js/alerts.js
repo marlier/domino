@@ -171,6 +171,9 @@ function get_alerts(div,sidebar_div) {
     $("#statebar .stats-plain #unknown").text(unknown);    
     $("#statebar .stats-plain #total").text(total);
 
+    quick_url = $(window).attr('location')['origin'] + $(window).attr('location')['pathname'] + "?sort=" + sort + "&limit=" + limit + "&search=" + search_terms.join(",");
+    $("#bookmark").attr('href', quick_url);
+
 };
 
 function print_alerts(alerts,alert_div,sidebar_div) {
