@@ -306,7 +306,9 @@ class Alert():
         try:
             self.lastAlertSent = datetime.datetime.utcnow()
             self.save()
-            if "silent" in self.tags.split(','): return True
+            if self.hasTag("silent"): return True
+            if self.check_dependencies() == False:
+                return True
             newNotification = Notification.Notification()
             if "page" in self.tags.split(','):
                 newNotification.noteType = "page"
@@ -383,6 +385,16 @@ class Alert():
         except Exception, e:
             Util.strace(e)
             return False
+
+    def check_dependencies(self):
+        '''
+        Checks to see if the dependencies of this alert are in ok status or not. Return true if all are OK
+        '''
+        alerts = Mysql.query('''SELECT id from alerts where status != 0 and (environment = %s) and (colo = "" or colo = %s) and (host = "" or host = %s) and service = ""''' % (self.environment, self.colo, self.host), 'alerts')
+        if len(alerts) > 0:
+            return False
+        else:
+            return True
 
     def hasTag(self, tag):
         '''

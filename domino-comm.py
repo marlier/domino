@@ -198,12 +198,7 @@ def check_alerts():
 
         # looking for alerts that are due to page
         for a in Alert.check_alerts():
-            if a.hasTag('silent'):
-                # don't alert, just update lastAlertSent timestamp
-                a.lastAlertSent = datetime.datetime.utcnow()
-                a.save()
-            else:
-                a.send_alert()
+            a.send_alert()
         time.sleep(5)
 
 if __name__ == "__main__":
