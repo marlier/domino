@@ -5,7 +5,7 @@
 # run a healthcheck on the system
 
 from ConfigParser import SafeConfigParser
-import sys, traceback
+import sys, traceback, os
 import logging
 
 def init_logging(log_file_name = 'server'):
@@ -14,6 +14,9 @@ def init_logging(log_file_name = 'server'):
 	var log_file_name is the file name without a file extension
 	'''
 	conf = load_conf()
+	# create log directory if it doesn't already exist
+	if not os.path.exists(conf['logdir']):
+	    os.makedirs(conf['logdir'])
 	logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', filename='%s/%s.log' % (conf['logdir'], log_file_name),level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p')
 
 def load_conf(config_file = 'domino.conf'):
