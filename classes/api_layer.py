@@ -314,7 +314,7 @@ class Api():
                 lastAlert = lastAlert[0]
                 alertFound = True
             logging.info("Recieved alert submission")
-            if alertFound == True and (lastAlert.service == self.service and lastAlert.status == self.status and lastAlert.host == self.host and lastAlert.colo == self.colo and lastAlert.environment == self.environment):
+            if alertFound == True and (lastAlert.service == self.service and lastAlert.status == int(self.status) and lastAlert.host == self.host and lastAlert.colo == self.colo and lastAlert.environment == self.environment):
                 if lastAlert.message == self.message:
                     self.populate(200,"OK",json.dumps("Repeat alert"))
                 else:
