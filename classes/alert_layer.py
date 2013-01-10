@@ -235,6 +235,10 @@ class Alert():
             self.id = id
         else:
             self.load(id)
+            tags = self.tags.split(',')
+            # remove blank tags
+            tags = filter (lambda a: a != '', tags)
+            self.tags = ','.join(tags)
             self.id = int(id)
 
     def load(self, id):
