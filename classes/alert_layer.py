@@ -133,7 +133,7 @@ def get_current_alert(environment,colo,host,service):
     '''
     Get the current status of an alert specified by environment, colo, host, and service
     '''
-    return Mysql.query('''SELECT * FROM alerts WHERE environment = "'%s'" and colo = "'%s'" and host = "'%s'" and service = "'%s'" LIMIT 1''' % (environment, colo, host, service), "alerts")
+    return Mysql.query('''SELECT * FROM alerts WHERE environment = "%s" and colo = "%s" and host = "%s" and service = "%s" LIMIT 1''' % (environment, colo, host, service), "alerts")
     
 def check_alerts():
     '''
@@ -390,7 +390,7 @@ class Alert():
         '''
         Checks to see if the dependencies of this alert are in ok status or not. Return true if all are OK
         '''
-        alerts = Mysql.query('''SELECT id from alerts where status != 0 and (environment = %s) and (colo = "" or colo = %s) and (host = "" or host = %s) and service = ""''' % (self.environment, self.colo, self.host), 'alerts')
+        alerts = Mysql.query('''SELECT id from alerts where status != 0 and (environment = "%s") and (colo = "" or colo = "%s") and (host = "" or host = "%s") and service = ""''' % (self.environment, self.colo, self.host), 'alerts')
         if len(alerts) > 0:
             return False
         else:

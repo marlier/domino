@@ -330,7 +330,10 @@ class Api():
                 newalert.service = self.service
                 newalert.colo = self.colo
                 newalert.environment = self.environment
-                newalert.tags = self.tags
+                tags = self.tags.split(',')
+                # remove blank tags
+                tags = filter (lambda a: a != '', tags)
+                newalert.tags = ','.join(tags)
                 newalert.remote_addr = self.remote_ip_address
                 try:
                     if self.status is None:

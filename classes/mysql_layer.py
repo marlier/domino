@@ -33,9 +33,9 @@ def query(q_string,table=None):
     Query the db with the given string and return with an array of user objects.
     '''
     try:
+        #logging.debug("Running mysql query: %s" % q_string)
         _db = Database()
         _db._cursor.execute( '''%s''' % (q_string))
-        #logging.debug("Running mysql query: %s" % q_string)
         temp = _db._cursor.fetchall()
         if len(temp) == 0: return []
         objects = []
