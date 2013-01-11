@@ -45,7 +45,7 @@ function get_detail(){
         d.setUTCSeconds(a.createDate);
         $("#status #date").text(d.toTimeString() + " (" + getRelTime(d) + ")");
         $("#status #status").text(a.status);
-        $("#status #message").text(a.message);
+        $("#status #message").html(a.message.replace(/\\n/g, "<br />"));
         if ( a.status == "OK" ) {
             $("#status .widget-content").addClass("alert alert-success");
         } else if ( a.status == "Warning" ) {
