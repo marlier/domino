@@ -190,7 +190,7 @@ function get_detail_history(div) {
             dateString = d.toTimeString();
             row.append("<td class='span3'>"+dateString+"</td>");
             row.append("<td class='span1'>"+a.status+"</td>");
-            row.append("<td>"+a.message+"</td>");
+            row.append("<td>"+a.message.replace(/\\n/g, "<br />")+"</td>");
             $(div).append(row);
         });
         hideLoading();
