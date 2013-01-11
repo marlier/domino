@@ -22,6 +22,9 @@ def applyRules(alert):
             if rule.removeTag != 'NULL' and rule.removeTag is not None:
                 for tag in rule.removeTag.split(','):
                     if tag in tags: tags.remove(tag)
+            # remove blank tags
+            tags = filter (lambda a: a != '', tags)
+            logging.info(tags)
             alert.tags = ",".join(tags)
     return alert.tags
 
