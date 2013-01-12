@@ -47,6 +47,9 @@ $(document).ready(function(){
             search_terms.push("tags:silent");
         } else if ( preset == "Paging" ) { 
             search_terms.push("tags:page");
+        } else if ( preset == "Unacked Problems" ) {
+            search_terms.push("status:-ok");
+            search_terms.push("ack:false");
         } else if ( preset == "Everything" ) { 
             search_terms = []
         }; 
