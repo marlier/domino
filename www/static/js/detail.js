@@ -101,7 +101,7 @@ function print_ackBtn(a) {
     acktime = new Date (0);
     acktime.setUTCSeconds(a.createDate);
     $(".ack-data-set").remove();
-    if (a.ack == 0) {
+    if (a.ack == 1) {
         $("#status .widget-title").append('<div class="buttons ack-data-set"><a id="'+a.id+'" class="btn btn-mini active pull-right"><i class="icon-ok-sign"></i> Acknowledge</a><span id="acktime" class="label label-info tip-left">'+getRelTime(acktime)+'</span></div>');
         ackAction = "unack";
     } else {

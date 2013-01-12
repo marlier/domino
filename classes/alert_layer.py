@@ -226,7 +226,7 @@ class Alert():
             self.colo = ''
             self.environment = ''
             self.status = 3
-            self.ack = 1
+            self.ack = 0
             self.ackby = 0
             self.remote_ip_address = '0.0.0.0'
             self.acktime = '0000-00-00 00:00:00'
@@ -279,7 +279,7 @@ class Alert():
         '''
         logging.debug("Acknowledging alert: %s" % self.id)
         try:
-            self.ack = 0
+            self.ack = 1
             self.ackby = user_id
             self.acktime = datetime.datetime.utcnow()
             self.save()
@@ -294,7 +294,7 @@ class Alert():
         '''
         logging.debug("Unacknowledging alert: %s" % self.id)
         try:
-            self.ack = 1
+            self.ack = 0
             self.acktime = '0000-00-00 00:00:00'
             self.save()
             return True
