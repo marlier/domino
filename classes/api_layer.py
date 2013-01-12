@@ -56,7 +56,7 @@ class Api():
         self.id = 0
         
         # default alert vars
-        self.ack = 1
+        self.ack = 0
         self.message = None
 
         # default rule vars
@@ -343,7 +343,7 @@ class Api():
                 except:
                     pass
                 if newalert.status == 0:
-                    newalert.ack = 0
+                    newalert.ack = 1
                 newalert.teams = Team.get_teams(self.teams)
                 # apply inbound rules (if any)
                 newalert.tags = Rule.applyRules(newalert)
