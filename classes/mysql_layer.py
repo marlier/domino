@@ -157,11 +157,11 @@ class Database:
                 c.execute(cmd)
                 cmd = "use %s;" % (conf['mysql_db'])
                 c.execute(cmd)
-                cmd = '''CREATE TABLE IF NOT EXISTS alerts (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, message TEXT, ack INT NOT NULL DEFAULT 0, ackby INT NOT NULL DEFAULT 0, acktime TIMESTAMP, lastAlertSent TIMESTAMP, tries INT NOT NULL DEFAULT 0, host CHAR(20), service CHAR(50), environment CHAR(20), colo CHAR(20), status INT NOT NULL DEFAULT 3, tags VARCHAR(255), remote_ip_address VARCHAR(45), UNIQUE active(environment,colo,host,service));'''
+                cmd = '''CREATE TABLE IF NOT EXISTS alerts (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, message TEXT, ack INT NOT NULL DEFAULT 0, ackby INT NOT NULL DEFAULT 0, acktime TIMESTAMP, lastAlertSent TIMESTAMP, tries INT NOT NULL DEFAULT 0, host CHAR(40), service CHAR(80), environment CHAR(40), colo CHAR(40), status INT NOT NULL DEFAULT 3, tags VARCHAR(255), remote_ip_address VARCHAR(45), UNIQUE active(environment,colo,host,service));'''
                 c.execute(cmd)
-                cmd = '''CREATE TABLE IF NOT EXISTS alerts_history (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, message TEXT, ack INT NOT NULL DEFAULT 0, ackby INT NOT NULL DEFAULT 0, acktime TIMESTAMP, lastAlertSent TIMESTAMP, tries INT NOT NULL DEFAULT 0, host CHAR(20), service CHAR(50), environment CHAR(20), colo CHAR(20), status INT NOT NULL DEFAULT 3, tags VARCHAR(255), remote_ip_address VARCHAR(45));'''
+                cmd = '''CREATE TABLE IF NOT EXISTS alerts_history (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP, message TEXT, ack INT NOT NULL DEFAULT 0, ackby INT NOT NULL DEFAULT 0, acktime TIMESTAMP, lastAlertSent TIMESTAMP, tries INT NOT NULL DEFAULT 0, host CHAR(40), service CHAR(80), environment CHAR(40), colo CHAR(40), status INT NOT NULL DEFAULT 3, tags VARCHAR(255), remote_ip_address VARCHAR(45));'''
                 c.execute(cmd)
-                cmd = '''CREATE TABLE IF NOT EXISTS users (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, name CHAR(50), email CHAR(50), phone varchar(50), lastAlert INT NOT NULL DEFAULT 0);'''
+                cmd = '''CREATE TABLE IF NOT EXISTS users (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, name CHAR(50), email CHAR(50), phone varchar(12), lastAlert INT NOT NULL DEFAULT 0);'''
                 c.execute(cmd)
                 cmd = '''CREATE TABLE IF NOT EXISTS teams (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, name CHAR(50), email CHAR(50), oncall_count INT NOT NULL DEFAULT 0, catchall INT NOT NULL DEFAULT 1, members TEXT, phone CHAR(12));'''
                 c.execute(cmd)
@@ -169,7 +169,7 @@ class Database:
                 c.execute(cmd)
                 cmd = '''CREATE TABLE IF NOT EXISTS notifications (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, noteType VARCHAR(15), message TEXT, tags VARCHAR(255), status INT NOT NULL DEFAULT 3, link VARCHAR(255), alert INT NOT NULL DEFAULT 0)'''
                 c.execute(cmd)
-                cmd = '''CREATE TABLE IF NOT EXISTS inbound_rules (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, host CHAR(20), service CHAR(50), environment CHAR(20), colo CHAR(20), status INT, tag VARCHAR(255), ttl INT, addTag VARCHAR(255), removeTag VARCHAR(255), UNIQUE active(environment,colo,host,service,tag,status));'''
+                cmd = '''CREATE TABLE IF NOT EXISTS inbound_rules (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, host CHAR(40), service CHAR(80), environment CHAR(40), colo CHAR(40), status INT, tag VARCHAR(255), ttl INT, addTag VARCHAR(255), removeTag VARCHAR(255), UNIQUE active(environment,colo,host,service,tag,status));'''
                 c.execute(cmd)
                 self.connectDB()
                 return True

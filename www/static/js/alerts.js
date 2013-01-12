@@ -241,7 +241,9 @@ function print_alerts(alerts,alert_div,sidebar_div) {
             btns.append('<a href="#" term="environment" tag="'+a.environment+'" class="btn btn-large btn-info addSearch">'+a.environment+'</a>');
             btns.append('<a href="#" term="colo" tag="'+a.colo+'" class="btn btn-large btn-info addSearch">'+a.colo+'</a>');
             btns.append('<a href="#" term="host" tag="'+a.host+'" class="btn btn-large btn-info addSearch">'+a.host+'</a>');
-            btns.append('<a href="#" term="service" tag="'+a.service+'" class="btn btn-large btn-info addSearch">'+a.service+'</a>');
+            if (a.service != '') {
+                btns.append('<a href="#" term="service" tag="'+a.service+'" class="btn btn-large btn-info addSearch">'+a.service+'</a>');
+            };
             btns.append('<a href="#" term="status" tag="'+a.status+'" class="btn btn-large btn'+class_name+' addSearch">'+a.status+'</a>');
             tagBtns = $('<ul>');
             tagBtns.addClass('nav nav-pills');
