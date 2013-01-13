@@ -163,7 +163,7 @@ class Database:
                 c.execute(cmd)
                 cmd = '''CREATE TABLE IF NOT EXISTS users (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, name CHAR(50), email CHAR(50), phone varchar(12), lastAlert INT NOT NULL DEFAULT 0);'''
                 c.execute(cmd)
-                cmd = '''CREATE TABLE IF NOT EXISTS teams (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, name CHAR(50), email CHAR(50), oncall_count INT NOT NULL DEFAULT 0, catchall INT NOT NULL DEFAULT 1, members TEXT, phone CHAR(12));'''
+                cmd = '''CREATE TABLE IF NOT EXISTS teams (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, name CHAR(50), email CHAR(50), oncall_count INT NOT NULL DEFAULT 0, catchall INT NOT NULL DEFAULT 1, members TEXT, phone CHAR(12), parent INT NOT NULL DEFAULT 0);'''
                 c.execute(cmd)
                 cmd = '''CREATE TABLE IF NOT EXISTS healthcheck (id INT PRIMARY KEY AUTO_INCREMENT, createDate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, name CHAR(30));'''
                 c.execute(cmd)
