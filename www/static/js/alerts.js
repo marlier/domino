@@ -147,7 +147,9 @@ function print_alerts(alerts,alert_div,sidebar_div) {
             hosts.push(a.host);
         };
         if( $.inArray(a.service, services) == -1 ){
-            services.push(a.service);
+            if ( a.service != '' ) {
+                services.push(a.service);
+            };
         };
         if( $.inArray(a.status, statuses) == -1 ){
             statuses.push(a.status);

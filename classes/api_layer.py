@@ -384,16 +384,10 @@ class Api():
             newuser.email = self.email
             newuser.phone = self.phone
             if newuser.save():
-                logging.info("Sucessfully created new user: %s" % (newuser.name))
-                valid_code = Twilio.validate_phone(newuser)
-                if valid_code['success'] == False:
-                    self.populate(1401,valid_code['message'])
-                    return
-                elif valid_code['success'] == True:
-                    self.populate(1400,"Validation Code: %s" % (valid_code))
-                    return
+                self.populate(200,"OK")
+                return
             else:
-                self.populate(1305, "Failed to save team data")
+                self.populate(1305, "Failed to save user data")
         elif self.id != 0:
             try:
                 obj = User.User(self.id)
@@ -524,7 +518,7 @@ class Api():
         if valid_code['success'] == False:
             self.populate(404,valid_code['message'])
         elif valid_code['success'] == True:
-            self.populate(200, "OK", {'verifcation_code': valid_code['message']})
+            self.populate(200, "OK", {'verification_code': valid_code['message']})
 
     def dereg_phone(self):
         user = User.User(self.id)

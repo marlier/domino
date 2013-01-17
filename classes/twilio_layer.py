@@ -73,6 +73,8 @@ def validate_phone(user):
 	logging.debug("Creating validation code for new phone number/user")
 	try:
 		response = auth().caller_ids.validate(user.phone)
+                logging.debug(response)
+                logging.debug(response["validation_code"])
 		return {"success":True, "message" : response["validation_code"]}
 	except Exception, e:
 		if e.status == 400:
