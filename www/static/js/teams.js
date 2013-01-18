@@ -131,7 +131,7 @@ function save_team() {
 	var name = $("input#name").val();
 	var email = $("input#email").val();
 	var phone = $("input#phone").val();
-	var oncall_count = $("input#oncall_count").val();
+	var oncall_count = $("#oncall_count").val();
 	var catchall = $("input#catchall").is(':checked');
 	if ( catchall == true ) {
 		catchall = 0;
