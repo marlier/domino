@@ -52,7 +52,7 @@ def get_user_by_name(name):
     ''' 
     Return a user object by giving the name of that user
     '''
-    return Mysql.query('''SELECT * FROM users WHERE name = "%s"''' % (name), "users")
+    return Mysql.query('''SELECT * FROM users WHERE name = "%s" LIMIT 1''' % (name), "users")[0]
 
 def get_user_by_phone(phone):
 	'''

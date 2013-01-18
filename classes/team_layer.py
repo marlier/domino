@@ -67,7 +67,7 @@ def get_team_by_name(name):
     '''
     Return a team object by giving the name of that team
     '''
-    return Mysql.query('''SELECT * FROM teams WHERE name = "%s"''' % (name), "teams")
+    return Mysql.query('''SELECT * FROM teams WHERE name = "%s" LIMIT 1''' % (name), "teams")[0]
 
 def get_team_by_phone(phone):
     '''
