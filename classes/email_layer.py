@@ -47,10 +47,17 @@ class Email:
                 self.to.append(user.email)
                     
         self.subject = self.alert.subjectize()
-        self.message = '''%s
-        
-%s:%s/detail?host=%s&environment=%s&colo=%s&service=%s
-        ''' % (self.alert.message, conf['api_address'], conf['api_port'], urllib.quote_plus(self.alert.host), urllib.quote_plus(self.alert.environment), urllib.quote_plus(self.alert.colo), urllib.quote_plus(self.alert.service))
+        self.message = '''
+Service: %s
+Host: %s
+Colo: %s
+Environment: %s
+Tags: %s
+More info: %s:%s/detail?host=%s&environment=%s&colo=%s&service=%s
+
+Message:
+%s
+''' % (self.alert.service, self.alert.host, self.alert.colo, self.alert.environment, self.alert.tags, conf['api_address'], conf['api_port'], urllib.quote_plus(self.alert.host), urllib.quote_plus(self.alert.environment), urllib.quote_plus(self.alert.colo), urllib.quote_plus(self.alert.service), self.alert.message)
         message = MIMEText(self.message)
         message['Subject'] = self.subject
         message['From'] = self.username
