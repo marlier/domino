@@ -62,9 +62,7 @@ function print_teams(teams,team_div,sidebar_div) {
             $(".sortable").disableSelection();
 
 
-            if ( team.catchall == 0 ) {
-                $('#teamDetail #catchall').prop('checked', true);
-            };
+            $('#teamDetail #catchall').prop('checked', team.catchall);
             $("#teamDetail #oncall_count").val(team.oncall_count);
             $("#saveBtn").html('<a id="saveBtn" class="btn btn-mini"><i class="icon-pencil"></i> Save</a></div>')
         });
@@ -132,11 +130,10 @@ function save_team() {
 	var email = $("input#email").val();
 	var phone = $("input#phone").val();
 	var oncall_count = $("#oncall_count").val();
-	var catchall = $("input#catchall").is(':checked');
-	if ( catchall == true ) {
-		catchall = 0;
+	if ( $("input#catchall").is(':checked') ) {
+		catchall = true;
 	} else {
-		catchall = 1;
+		catchall = false;
 	}
 	
 	

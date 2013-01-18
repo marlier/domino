@@ -61,7 +61,7 @@ def get_default_teams():
     '''
     Return the default team
     '''
-    return Mysql.query('''SELECT * FROM teams WHERE catchall = 0''', "teams")
+    return Mysql.query('''SELECT * FROM teams WHERE catchall = true''', "teams")
 
 def get_team_by_name(name):
     '''
@@ -128,7 +128,7 @@ class Team:
             self.name = ''
             self.email = ''
             self.members = ''
-            self.catchall = 1
+            self.catchall = 0
             self.oncall_count = 0
             self.phone = conf['twilio_number']
             self.id = id
