@@ -139,7 +139,13 @@ def check_alerts():
     '''
     This returns a list of alerts that needs a notification sent out.
     '''
-    return Mysql.query('''SELECT * FROM alerts WHERE ack != 0 AND (NOW() - lastAlertSent) > %s ORDER BY id DESC''' % (conf['alert_interval']), "alerts")
+    return Mysql.query('''SELECT * FROM alerts WHERE status > 0 and ack != 0 AND (NOW() - lastAlertSent) > %s ORDER BY id DESC''' % (conf['alert_interval']), "alerts")
+
+def check_paging_alerts():
+    ''' 
+    This returns a list of paging alerts that needs a notification sent out.
+    '''
+    return Mysql.query('''SELECT * FROM alerts WHERE status > 0 and ack != 0 AND (NOW() - lastAlertSent) > %s and tags REGEXP '(page|^page,|,page,|,page$)' ORDER BY id DESC''' % (conf['page_alert_interval']), "alerts")
 
 def get_alerts_with_filter(filt,sort,limit, offset=0, table="alerts", count=False):
     '''

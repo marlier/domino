@@ -67,7 +67,11 @@ text_limit=2
 [alerting]
 # how often you want to send an alert in seconds
 # smallest value would be 5 seconds
-alert_interval=300
+alert_interval=900
+
+# host often you want to send a PAGING alert in seconds
+# smallest value would be 5 seconds
+page_alert_interval=300
 
 # the number of alerts to escalate it to next level of people
 # comment out if you do not want to escalate or set to 0

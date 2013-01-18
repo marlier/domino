@@ -197,8 +197,13 @@ def check_alerts():
         Rule.expire_rules();
 
         # looking for alerts that are due to page
+        for a in Alert.check_paging_alerts():
+            a.send_alert()
+
+        # look for other alerts that are due send notifications
         for a in Alert.check_alerts():
             a.send_alert()
+
         time.sleep(5)
 
 if __name__ == "__main__":
