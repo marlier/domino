@@ -342,17 +342,19 @@ class Api():
                         newalert.status = int(self.status)
                 except:
                     pass
-                if newalert.status == 0:
-                    newalert.ack = 1
                 newalert.teams = Team.get_teams(self.teams)
                 # apply inbound rules (if any)
                 newalert.tags = Rule.applyRules(newalert)
                 # save alert
                 if newalert.save() == True:
-                    if newalert.send_alert() == True:
+                    # don't send an alert if its in OK status
+                    if newalert.status == 0:
                         self.populate(200,"OK")
                     else:
-                        self.populate(1202, "Failed to send new alert")
+                        if newalert.send_alert() == True:
+                            self.populate(200,"OK")
+                        else:
+                            self.populate(1202, "Failed to send new alert")
                 else:
                     self.populate(1202, "Failed to save new alert")
         elif self.id != 0:
