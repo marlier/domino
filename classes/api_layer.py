@@ -310,7 +310,7 @@ class Api():
             # check to see if this alert is a new different than the one before it
             lastAlert = Alert.get_current_alert(self.environment, self.colo, self.host, self.service)
             alertFound = False
-            if len(lastAlert) != 0:
+            if len(lastAlert) > 0:
                 lastAlert = lastAlert[0]
                 alertFound = True
             logging.info("Recieved alert submission")
@@ -347,8 +347,8 @@ class Api():
                 newalert.tags = Rule.applyRules(newalert)
                 # save alert
                 if newalert.save() == True:
-                    # don't send an alert if its in OK status
-                    if newalert.status == 0:
+                    # don't send an alert if its in OK status and is first time alert
+                    if newalert.status == 0 and alertFound == False:
                         self.populate(200,"OK")
                     else:
                         if newalert.send_alert() == True:
