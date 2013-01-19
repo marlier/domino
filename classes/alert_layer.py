@@ -120,9 +120,9 @@ def active(team=None):
     All active alerts
     '''
     if team == None:
-        return Mysql.query('''SELECT * FROM alerts WHERE ack != 0 ORDER BY id DESC''', "alerts")
+        return Mysql.query('''SELECT * FROM alerts WHERE status > 0 and ack != 0 ORDER BY id DESC''', "alerts")
     else:
-        all_alerts = Mysql.query('''SELECT * FROM alerts WHERE ack != 0 ORDER BY id DESC''', "alerts")
+        all_alerts = Mysql.query('''SELECT * FROM alerts WHERE status > 0 and ack != 0 ORDER BY id DESC''', "alerts")
         team_alerts = []
         for a in all_alerts:
             if team in a.tags.split(','):
