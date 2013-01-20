@@ -43,7 +43,7 @@ function get_detail(){
     
         d = new Date (0);
         d.setUTCSeconds(a.createDate);
-        $("#status #date").text(d.toTimeString() + " (" + getRelTime(d) + ")");
+        $("#status #date").text(d.toLocaleString() + " (" + getRelTime(d) + ")");
         $("#status #status").text(a.status);
         $("#status #message").html(a.message.replace(/\\n/g, "<br />"));
         if ( a.status == "OK" ) {
@@ -98,9 +98,10 @@ function get_detail(){
 };
 
 function print_ackBtn(a) {
-    showLoading();
-    acktime = new Date (0);
-    acktime.setUTCSeconds(a.createDate);
+    showLoading('ackbutton');
+    acktime = new Date(0);
+    //FIXME - this forces EST, boooooo
+    acktime.setUTCSeconds(parseInt(a.acktime) - 18000);
     $(".ack-data-set").remove();
     if (a.ack == 1) {
         $("#status .widget-title").append('<div class="buttons ack-data-set"><a id="'+a.id+'" class="btn btn-mini active pull-right"><i class="icon-ok-sign"></i> Acknowledge</a><span id="acktime" class="label label-info tip-left">'+getRelTime(acktime)+'</span></div>');
@@ -129,7 +130,7 @@ function print_ackBtn(a) {
             }
         });
     });
-    hideLoading();
+    hideLoading('ackbutton');
 };
 
 function print_tags(tags) {
@@ -188,9 +189,8 @@ function get_detail_history(div) {
             row.addClass('data-set alert '+bgcolor);
             d = new Date (0);
             d.setUTCSeconds(a.createDate);
-            dateString = d.toTimeString();
+            dateString = d.toLocaleString();
             row.append("<td class='span3'>"+dateString+"</td>");
-            row.append("<td class='span1'>"+a.status+"</td>");
             row.append("<td>"+a.message.replace(/\\n/g, "<br />")+"</td>");
             $(div).append(row);
         });
