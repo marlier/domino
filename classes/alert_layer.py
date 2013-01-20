@@ -97,6 +97,42 @@ def graph_data(amount=7, units="HOUR", terms = None):
     
     return {'unit':units, 'segment':amount, 'search':terms, 'datapoints':graph_data, 'min':min, 'max':max}
 
+def uptime(since=None,environment=None,colo=None,host=None,service=None):
+    '''
+    This function finds the uptime of a specific service
+    '''
+    if since == None: since = 30
+    # get the number of alerts that occurred during the timeperiod
+    count = Mysql.rawquery('''SELECT COUNT(id) as count FROM alerts_history WHERE environment = "%s" and colo = "%s" and host = "%s" and service = "%s" and createDate >= DATE_SUB(NOW(),INTERVAL %s DAY) order by createDate DESC''' % (environment, colo, host, service, since))[0]['count']
+    # get the data from these historical alerts, plus 1 more to get the state of the alert at the beginning of the timeperiod
+    alerts = Mysql.rawquery('''SELECT status, createDate FROM alerts_history WHERE environment = "%s" and colo = "%s" and host = "%s" and service = "%s" order by createDate DESC LIMIT %s''' % (environment, colo, host, service, int(count) + 1))
+    alerts = list(alerts)
+    # inserting the current datetime
+    alerts.insert(0, { 'createDate': datetime.datetime.utcnow() } )
+    dataset = []
+    total_time = 0
+    ok_time = 0
+    wordform = ["OK", "Warning", "Critical", "Unknown"]
+    for i,x in enumerate(alerts):
+        if i == 0: continue
+        diff = (alerts[i-1]['createDate'] - alerts[i]['createDate']).seconds
+        status = int(alerts[i]['status'])
+        if status == 0: ok_time += diff
+        if status > 3:
+            status = "Unknown"
+        else:
+            status = wordform[status]
+        dataset.append( { "duration": diff, "status": status, 'startDate':alerts[i]['createDate'].strftime('%s') } )
+        total_time += diff
+    if total_time < (since * 24 * 60 * 60):
+        # looks like the alert is newer than the timeperiod specified, assigning the previous time as 'Unknown'
+        dataset.append( { "duration": ((since * 24 * 60 * 60) - total_time), "status": "Unknown", "startDate":(datetime.datetime.utcnow() - datetime.timedelta(days=7)).strftime('%s') } )
+        total_time = (since * 24 * 60 * 60)
+    percentage = round((float(ok_time) / total_time) * 100, 4)
+    return { "uptime":ok_time, "downtime":(total_time - ok_time), "totaltime": total_time, "percentage":percentage, "dataset":dataset }
+
+
+
 def all_alert_history(since=None):
     '''
     Get all alerts.

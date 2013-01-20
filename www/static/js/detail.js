@@ -92,6 +92,7 @@ function get_detail(){
             });
             hideLoading("get detail");
         });
+        uptime("#uptime", a);
         graph("#history_graph", a);
     });
 };
@@ -195,6 +196,45 @@ function get_detail_history(div) {
         });
         hideLoading();
         return json;
+    });
+};
+
+function uptime(div, a) {
+    showLoading("uptime");
+    var url = "/api/analytics?name=uptime&since=30&environment="+a.environment+"&colo="+a.colo+"&host="+a.host+"&service="+a.service;
+    console.debug(url);
+    $.ajax({
+        type: 'GET',
+        url: url,
+        dataType: "json",
+        success: function(data, textStatus, jqXHR){
+            hideLoading("uptime");
+            console.debug(data);
+            $("#uptime-percentage").text(data['percentage'] + "%");
+            total_time = data['totaltime'];
+            bar = $("#uptime .progress");
+            $.each(data['dataset'],function(i,r) {
+                seg = $('<div>');
+                seg.addClass('bar');
+                if ( r['status'] == "OK" ) {
+                    seg.addClass('bar-success');
+                } else if ( r['status'] == "Warning" ) {
+                    seg.addClass('bar-warning');
+                } else if ( r['status'] == "Critical" ) {
+                    seg.addClass('bar-danger');
+                } else {
+                    seg.addClass('bar-info');
+                };
+                seg.css('width', ((r['duration'] / total_time) * 100)+"%" );
+                bar.prepend(seg);
+            });
+        },    
+        error: function(jqXHR, textStatus, errorThrown){
+            console.debug(textStatus);
+            console.debug(errorThrown);
+            console.debug(jqXHR);
+            hideLoading("uptime");
+        }     
     });
 };
 

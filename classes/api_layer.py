@@ -256,7 +256,7 @@ class Api():
     def getAnalytics(self):
         if self.name == None:
             # return list of analytics names that are supported
-            self.populate(200, "OK", ['frequent', 'count'])
+            self.populate(200, "OK", ['frequent', 'count', 'uptime'])
         elif self.name == "frequent":
             objects = Alert.frequent_alerts(self.since)
             dict_objects = []
@@ -272,6 +272,9 @@ class Api():
         elif self.name == "count":
             objects = Alert.get_alerts_with_filter(self.search, self.sort, self.limit, self.offset, "alerts", True)
             self.populate(200, "OK",objects)
+        elif self.name == "uptime":
+            objects = Alert.uptime(self.since, self.environment, self.colo, self.host, self.service)
+            self.populate(200, "OK", objects)
         else:
             self.populate(301, "Invalid analytics name")        
 

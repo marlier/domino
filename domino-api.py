@@ -217,6 +217,7 @@ def process_request(objType, id=0):
             resp.status = "%s %s" % (apicall.status, apicall.status_message)
         else:
             resp = make_response(404)
+    print resp.__dict__
     return resp
 
 ##### web ui ######
