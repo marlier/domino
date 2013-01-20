@@ -134,7 +134,7 @@ def uptime(since=None,environment=None,colo=None,host=None,service=None):
         # looks like the alert is newer than the timeperiod specified, assigning the previous time as 'Unknown'
         dataset.append( { "duration": ((since * 24 * 60 * 60) - total_time), "status": "Unknown", "startDate":(datetime.datetime.utcnow() - datetime.timedelta(days=7)).strftime('%s') } )
         total_time = (since * 24 * 60 * 60)
-    percentage = round((float(ok_time) / total_time) * 100, 4)
+    percentage = "{0:.4f}".format((float(ok_time) / total_time) * 100, 4)
     return { "uptime":ok_time, "downtime":(total_time - ok_time), "totaltime": total_time, "percentage":percentage, "dataset":dataset }
 
 
@@ -276,6 +276,7 @@ class Alert():
             self.status = 3
             self.ack = 0
             self.ackby = 0
+            self.createDate = datetime.datetime.utcnow()
             self.remote_ip_address = '0.0.0.0'
             self.acktime = '0000-00-00 00:00:00'
             self.lastAlertSent = '0000-00-00 00:00:00'
@@ -308,12 +309,12 @@ class Alert():
         logging.debug("Saving alert: %s" % self.id)
         try:
             _db = Mysql.Database()
-            _db._cursor.execute('''REPLACE INTO alerts (id,message,ack,ackby,acktime,lastAlertSent,tries,host,service,environment,colo,status,tags,remote_ip_address) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (self.id, self.message, self.ack, self.ackby, self.acktime, self.lastAlertSent, self.tries, self.host, self.service, self.environment, self.colo, self.status, self.tags, self.remote_ip_address))
+            _db._cursor.execute('''REPLACE INTO alerts (id,createDate,message,ack,ackby,acktime,lastAlertSent,tries,host,service,environment,colo,status,tags,remote_ip_address) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (self.id, self.createDate, self.message, self.ack, self.ackby, self.acktime, self.lastAlertSent, self.tries, self.host, self.service, self.environment, self.colo, self.status, self.tags, self.remote_ip_address))
             if self.id == 0:
                 _db._cursor.execute('''SELECT id FROM alerts ORDER BY id DESC LIMIT 1''')
                 tmp = _db._cursor.fetchone()
                 self.id = tmp['id']
-            _db._cursor.execute('''REPLACE INTO alerts_history (id,message,ack,ackby,acktime,lastAlertSent,tries,host,service,environment,colo,status,tags,remote_ip_address) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (self.id,self.message,self.ack,self.ackby,self.acktime, self.lastAlertSent, self.tries,self.host,self.service, self.environment, self.colo, self.status, self.tags, self.remote_ip_address))
+            _db._cursor.execute('''REPLACE INTO alerts_history (id,createDate,message,ack,ackby,acktime,lastAlertSent,tries,host,service,environment,colo,status,tags,remote_ip_address) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)''', (self.id, self.createDate, self.message, self.ack, self.ackby, self.acktime, self.lastAlertSent, self.tries, self.host, self.service, self.environment, self.colo, self.status, self.tags, self.remote_ip_address))
             _db.save()
             _db.close()
             return True
