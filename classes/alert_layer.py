@@ -115,15 +115,21 @@ def uptime(since=None,environment=None,colo=None,host=None,service=None):
     wordform = ["OK", "Warning", "Critical", "Unknown"]
     for i,x in enumerate(alerts):
         if i == 0: continue
-        diff = (alerts[i-1]['createDate'] - alerts[i]['createDate']).seconds
+        diff = int((alerts[i-1]['createDate'] - alerts[i]['createDate']).total_seconds())
         status = int(alerts[i]['status'])
         if status == 0: ok_time += diff
         if status > 3:
             status = "Unknown"
         else:
             status = wordform[status]
+        if diff + total_time > (since * 24 * 60 * 60):
+            # the last alert duration is longer than the timeperiod specified, chopping it
+            diff = (since * 24 * 60 * 60) - total_time
+            total_time = since * 24 * 60 * 60
+            alerts[i]['createDate'] = datetime.datetime.utcnow() - datetime.timedelta(days=since)
+        else:
+            total_time += diff
         dataset.append( { "duration": diff, "status": status, 'startDate':alerts[i]['createDate'].strftime('%s') } )
-        total_time += diff
     if total_time < (since * 24 * 60 * 60):
         # looks like the alert is newer than the timeperiod specified, assigning the previous time as 'Unknown'
         dataset.append( { "duration": ((since * 24 * 60 * 60) - total_time), "status": "Unknown", "startDate":(datetime.datetime.utcnow() - datetime.timedelta(days=7)).strftime('%s') } )
