@@ -449,7 +449,7 @@ class Api():
             try:
                 obj = Team.Team(self.id)
                 # save the original members of the team to see if its changed
-                orig_members = User.get_users(self.members)
+                orig_members = obj.members
                 obj.__dict__.update(data)
                 obj.members = User.get_users(self.members)
                 if obj.save() == True:

@@ -177,20 +177,21 @@ class Team:
         '''
         This method sends sms messages to tell people that whose on call has been changed
         '''
+        print "notifying people of oncall change"
         # send sms to everyone whose oncall (only if their place has changed)
         current_member_ids = []
         for i, u in enumerate(self.members):
             current_member_ids.append(u.id)
-            if orig[i].id != u.id:
-                #send sms to u
+            if orig[i].id != u.id and int(self.oncall_count) > (i):
+                # send sms to u
                 Twilio.send_sms(u, self, None, "You're now on call for team %s in spot %d" % (self.name, (i+1)))
         # notify people who are no longer on call
         orig_oncall = orig[:int(self.oncall_count)]
         current_oncall = current_member_ids[:int(self.oncall_count)]
         for u in orig_oncall:
             if u.id not in current_oncall:
-                #send sms to u for not being oncall
-                Twilio.send_sms(m, self, None, "You're no longer on call for team %s" % (self.name))
+                # send sms to u for not being oncall
+                Twilio.send_sms(u, self, None, "You're no longer on call for team %s" % (self.name))
             
     def scrub(self):
         '''
