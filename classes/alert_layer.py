@@ -411,6 +411,10 @@ class Alert():
                             num = int(math.ceil(self.tries/escalate))
                             if num == 0: num = 1
                             alert_users = team.on_call()[:num]
+                            # now see if enough tries warrants paging the parent team
+                            if len(alert_users) < num:
+                                parent = Team.Team(team.parent)
+                                alert_users = alert_users + parent.on_call()[:(num - len(alert_users))]
                         else:
                             alert_users = team.oncall[0]
                         # loop through users to alert

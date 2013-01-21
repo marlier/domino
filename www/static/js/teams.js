@@ -4,6 +4,10 @@ var oncall_count = 1;
 user_list = new Array();
 team_list = new Array();
 selected = new Array();
+parent_id = {};
+parent_id[0] = 'None';
+parent_name = {};
+parent_name['None'] = 0;
 
 $(document).ready(function(){
 	query("#data","#sidebar_data");
@@ -34,6 +38,9 @@ function print_teams(teams,team_div,sidebar_div) {
     $.each(teams,function(i,t) {
         team_list.push(t);
         $(sidebar_div).append('<li class="data-set"><a class="team_name" href="#" id="'+t.id+'">'+t.name+'</a></li>');
+        parent_name[t.name] = t.id;
+        parent_id[t.id] = t.name;
+        $("#parent").append("<option>"+t.name+"</option>")
     });
 
     $(".team_name").click(function() {
@@ -47,7 +54,8 @@ function print_teams(teams,team_div,sidebar_div) {
             $("#teamDetail #name").val(team.name);
             $("#teamDetail #email").val(team.email);
             $("#teamDetail #phone").val(team.phone);
-
+            $("#parent").val(parent_id[team.parent]);
+    
             $("#members").html('');
             $.each(team.members,function(i,m) {
                 $("#members").append('<li><a id="'+m.id+'" class="member_tag"><i class="icon-white icon-remove"></i> '+m.name+'</a></li>');
@@ -130,6 +138,7 @@ function save_team() {
 	var email = $("input#email").val();
 	var phone = $("input#phone").val();
 	var oncall_count = $("#oncall_count").val();
+    var _parent = parent_name[$("#parent").val()];
 	if ( $("input#catchall").is(':checked') ) {
 		catchall = true;
 	} else {
@@ -161,6 +170,7 @@ function save_team() {
 		"members": members,
 		"oncall_count": oncall_count,
 		"catchall": catchall,
+        "parent": _parent,
 		"phone": phone
 	});
     console.debug(jsonData);

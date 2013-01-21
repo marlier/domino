@@ -129,6 +129,7 @@ class Team:
             self.email = ''
             self.members = ''
             self.catchall = 0
+            self.parent = 0
             self.oncall_count = 0
             self.phone = conf['twilio_number']
             self.id = id
@@ -163,7 +164,7 @@ class Team:
         Save the team to the db.
         '''
         logging.debug("Saving team: %s" % self.name)
-        return Mysql.save('''REPLACE INTO teams (id,name,email,members,oncall_count,phone,catchall) VALUES (%s,'%s','%s','%s',%s,'%s',%s)''' % (self.id,self.name,self.email,User.flatten_users(self.members),self.oncall_count,self.phone,self.catchall))
+        return Mysql.save('''REPLACE INTO teams (id,createDate,name,email,members,oncall_count,phone,catchall,parent) VALUES (%s,'%s','%s','%s','%s',%s,'%s',%s,%s)''' % (self.id,self.createDate,self.name,self.email,User.flatten_users(self.members),self.oncall_count,self.phone,self.catchall,self.parent))
             
     def delete(self):
         '''
