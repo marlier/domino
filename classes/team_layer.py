@@ -177,7 +177,6 @@ class Team:
         '''
         This method sends sms messages to tell people that whose on call has been changed
         '''
-        print "notifying people of oncall change"
         # send sms to everyone whose oncall (only if their place has changed)
         current_member_ids = []
         for i, u in enumerate(self.members):
