@@ -78,6 +78,10 @@ function print_users(users,user_div,sidebar_div) {
             $("#teamDetail #email").val(user.email);
             $("#teamDetail #phone").val(user.phone);
             $("#saveBtn").html('<a id="saveBtn" class="btn btn-mini"><i class="icon-pencil"></i> Save</a></div>')
+	    $("#saveBtn").click(function() {
+        	console.debug('creating/modifying user');
+	        saveUser();
+	    });
         });        
     });
 
