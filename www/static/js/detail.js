@@ -211,7 +211,7 @@ function uptime(div, a) {
             hideLoading("uptime");
             console.debug(data);
             $("#uptime-percentage").text(data['percentage'] + "%");
-            total_time = data['totaltime'];
+            total_time = (30 * 24 * 60 * 60);
             bar = $("#uptime .progress");
             $.each(data['dataset'],function(i,r) {
                 seg = $('<div>');
@@ -222,7 +222,7 @@ function uptime(div, a) {
                     seg.addClass('bar-warning');
                 } else if ( r['status'] == "Critical" ) {
                     seg.addClass('bar-danger');
-                } else {
+                } else if ( r['status'] == "Unknown" ) {
                     seg.addClass('bar-info');
                 };
                 seg.css('width', ((r['duration'] / total_time) * 100)+"%" );
