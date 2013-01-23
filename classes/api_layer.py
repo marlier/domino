@@ -479,13 +479,17 @@ class Api():
 
     def delAlert(self):
         try:
-            obj = Alert.Alert(self.id)
-            obj.delete()
+            if self.id==0 or self.id == None:
+                objects = Alert.get_alerts_with_filter(self.search, self.sort, self.limit, self.offset)
+            else:
+                objects = [Alert.Alert(self.id)]
+            for o in objects:
+                o.delete()
             self.populate(200,"OK")
         except Exception, e:
             self.populate(1502,e.__str__())
             Util.strace(e)
-            return 
+            return
 
     def delUser(self):
         try:

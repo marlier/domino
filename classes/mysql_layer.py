@@ -122,7 +122,7 @@ def delete(table, id):
     '''
     try:
         _db = Database()
-        _db._cursor.execute( '''DELETE FROM %s WHERE id=%s''' % (table, id))
+        _db._cursor.execute( '''DELETE FROM %s WHERE id = %s''' % (table, id))
         _db.save()
         _db.close()
         return True
