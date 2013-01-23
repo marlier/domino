@@ -77,13 +77,15 @@ function get_detail(){
                     relTime = 'None';
                 };
 
+		console.debug(r);
+
                 row = $('<tr>');
                 row.addClass('data-set');
                 row.append('<td class="alert-info">' + clean_value(r['environment']) + '</td>');
                 row.append('<td class="alert-info">' + clean_value(r['colo']) + '</td>');
                 row.append('<td class="alert-info">' + clean_value(r['host']) + '</td>');
                 row.append('<td class="alert-info">' + clean_value(r['service']) + '</td>');
-                row.append('<td class="alert-info">' + clean_value(r['state']) + '</td>');
+                row.append('<td class="alert-info">' + clean_value(r['status']) + '</td>');
                 row.append('<td class="alert-info">' + clean_value(r['tag']) + '</td>');
                 row.append('<td title="'+relTime+'" class="">' + clean_value(r['ttl']) + '</td>');
                 row.append('<td class="alert-success">' + clean_value(r['addTag']) + '</td>');

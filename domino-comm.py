@@ -50,7 +50,7 @@ def sms():
     team = Team.get_team_by_phone(d['To'])[0]
     # make sure person sending the text is an authorized user of Domino
     if user == False:
-        logging.error("Forwarding SMS by %s\n%s" % (d['From'], d))
+        logging.error("Forwarding SMS from %s\n%s" % (d['From'], d))
 	myauth = Twilio.auth()
 	# to=user.phone, from_=team.phone, body=text_segment
 	myauth.sms.messages.create(to=team.members[0].phone, from_=team.phone, body="%s\nFrom: %s" % (d['Body'], d['From']))
