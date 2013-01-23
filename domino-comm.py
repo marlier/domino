@@ -95,10 +95,10 @@ Press 2 to acknowledge this alert.
         elif int(d['Digits']) == 2:
             if alert.ack_alert(receiver):
                 r.say("The alert has been acknowledged. Thank you and goodbye.")
-                r.redirect(url="/call/%s?init=false" % (alert.id))
+                r.redirect(url="/call/%s?init=false" % (alert.id), methods=['GET'])
             else:
                 r.say("Sorry, failed to acknowledge the alert. Please try it via SMS")
-                r.redirect(url="/call/%s?init=false" % (alert.id))
+                r.redirect(url="/call/%s?init=false" % (alert.id), methods=['GET'])
         elif d['Digits'] == 0:
             with r.gather(action="/call/%s?init=false" % (alert.id), timeout="30", method="GET", numDigits="1") as g:
                 g.say('''%s''' % (digitOpts))
@@ -165,11 +165,11 @@ def inboundcall():
         elif int(d['Digits']) == 1:
             # getting the status of alerts
             r.say(domino.run("alert status -f " + requester.phone))
-            r.redirect(url="/call?init=false")
+            r.redirect(url="/call?init=false",  method="GET")
         elif int(d['Digits']) == 2:
             # acking the last alert sent to the user calling
             r.say(domino.run("alert ack -f " + requester.phone))
-            r.redirect(url="/call?init=false")
+            r.redirect(url="/call?init=false",  method="GET")
         elif int(d['Digits']) == 3:
             # calling the other users on call
             if len(oncall_users) == 1 and Team.check_oncall_user(requester, team) == True:

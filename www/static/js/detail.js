@@ -100,8 +100,7 @@ function get_detail(){
 function print_ackBtn(a) {
     showLoading('ackbutton');
     acktime = new Date(0);
-    //FIXME - this forces EST, boooooo
-    acktime.setUTCSeconds(parseInt(a.acktime) - 18000);
+    acktime.setUTCSeconds(parseInt(a.acktime));
     $(".ack-data-set").remove();
     if (a.ack == 1) {
         $("#status .widget-title").append('<div class="buttons ack-data-set"><a id="'+a.id+'" class="btn btn-mini active pull-right"><i class="icon-ok-sign"></i> Acknowledge</a><span id="acktime" class="label label-info tip-left">'+getRelTime(acktime)+'</span></div>');
