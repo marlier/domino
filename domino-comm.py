@@ -50,8 +50,10 @@ def sms():
     team = Team.get_team_by_phone(d['To'])[0]
     # make sure person sending the text is an authorized user of Domino
     if user == False:
-        logging.error("Unauthorized access attempt via SMS by %s\n%s" % (d['From'], d))
-        r.sms("You are not an authorized user")
+        logging.error("Forwarding SMS by %s\n%s" % (d['From'], d))
+	myauth = Twilio.auth()
+	# to=user.phone, from_=team.phone, body=text_segment
+	myauth.sms.messages.create(to=team.members[0].phone, from_=team.phone, body="%s\nFrom: %s" % (d['Body'], d['From']))
     else:
         # split the output into 160 character segments
         for text_segment in Twilio.split_sms(domino.run("%s -m -t %s -f %s" %(d['Body'],team.name,d['From']))):
