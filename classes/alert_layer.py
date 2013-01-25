@@ -156,14 +156,14 @@ def all_alerts(since=None):
     else:
         return Mysql.query('''SELECT * FROM alerts WHERE id > %s ORDER BY id DESC''' % (since), "alerts")
 
-def active(team=None):
+def paging_active(team=None):
     '''
-    All active alerts
+    All active paging alerts
     '''
     if team == None:
-        return Mysql.query('''SELECT * FROM alerts WHERE status > 0 and ack != 0 ORDER BY id DESC''', "alerts")
+        return Mysql.query('''SELECT * FROM alerts WHERE status > 0 and ack != true and tags REGEXP '(page|^page,|,page,|,page$)' ORDER BY id DESC''', "alerts")
     else:
-        all_alerts = Mysql.query('''SELECT * FROM alerts WHERE status > 0 and ack != 0 ORDER BY id DESC''', "alerts")
+        all_alerts = Mysql.query('''SELECT * FROM alerts WHERE status > 0 and ack != true and tags REGEXP '(%s|^%s,|,%s,|,%s$)(=?page|^page,|,page,|,page$)' ORDER BY id DESC''' % (team,team,team,team), "alerts")
         team_alerts = []
         for a in all_alerts:
             if team in a.tags.split(','):
@@ -180,13 +180,13 @@ def check_alerts():
     '''
     This returns a list of alerts that needs a notification sent out.
     '''
-    return Mysql.query('''SELECT * FROM alerts WHERE status > 0 and ack != 0 AND (NOW() - lastAlertSent) > %s ORDER BY id DESC''' % (conf['alert_interval']), "alerts")
+    return Mysql.query('''SELECT * FROM alerts WHERE status > 0 and ack != true AND (NOW() - lastAlertSent) > %s ORDER BY id DESC''' % (conf['alert_interval']), "alerts")
 
 def check_paging_alerts():
     ''' 
     This returns a list of paging alerts that needs a notification sent out.
     '''
-    return Mysql.query('''SELECT * FROM alerts WHERE status > 0 and ack != 0 AND (NOW() - lastAlertSent) > %s and tags REGEXP '(page|^page,|,page,|,page$)' ORDER BY id DESC''' % (conf['page_alert_interval']), "alerts")
+    return Mysql.query('''SELECT * FROM alerts WHERE status > 0 and ack != true AND (NOW() - lastAlertSent) > %s and tags REGEXP '(page|^page,|,page,|,page$)' ORDER BY id DESC''' % (conf['page_alert_interval']), "alerts")
 
 def get_alerts_with_filter(filt,sort,limit, offset=0, table="alerts", count=False):
     '''

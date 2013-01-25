@@ -166,11 +166,11 @@ def inboundcall():
             r.say(timeout_msg)
         elif int(d['Digits']) == 1:
             # getting the status of alerts
-            r.say(domino.run("alert status -f " + requester.phone))
+            r.say(domino.run("alert status -f %s -t '%s'" % (requester.phone, team.name)))
             r.redirect(url="/call?init=false",  method="GET")
         elif int(d['Digits']) == 2:
             # acking the last alert sent to the user calling
-            r.say(domino.run("alert ack -f " + requester.phone))
+            r.say(domino.run("alert ack -f '%s'" % requester.phone))
             r.redirect(url="/call?init=false",  method="GET")
         elif int(d['Digits']) == 3:
             # calling the other users on call

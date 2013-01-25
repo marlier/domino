@@ -95,19 +95,19 @@ function get_alerts(div,sidebar_div) {
         limit = 0;
     };
 
-    $.ajaxSetup({
-        timeout: 20000
-    });
-
     var url = "/api/alert?limit=0&sort="+sort+"&search="+search_terms.join("+");
     console.debug(url);
-    $.getJSON(url,function(json){
-        console.debug('done getting json');
-        print_alerts(json,div,sidebar_div);
-        print_search_terms();
-        hideLoading("getting alerts");
-        return json;
-    }); 
+    $.ajax({
+        dataType: "json",
+	    url: url,
+        timeout: 30000,
+	    success: function(json) {
+            console.debug('done getting json');
+            print_alerts(json,div,sidebar_div);
+            print_search_terms();
+            hideLoading("getting alerts");	    
+	    }
+    });
 
     quick_url = $(window).attr('location')['origin'] + $(window).attr('location')['pathname'] + "?sort=" + sort + "&limit=" + limit + "&search=" + search_terms.join(",");
     $("#bookmark").attr('href', quick_url);
