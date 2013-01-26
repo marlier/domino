@@ -55,9 +55,15 @@ def sms():
 	# to=user.phone, from_=team.phone, body=text_segment
 	myauth.sms.messages.create(to=team.members[0].phone, from_=team.phone, body="%s\nFrom: %s" % (d['Body'], d['From']))
     else:
-        # split the output into 160 character segments
-        for text_segment in Twilio.split_sms(domino.run("%s -m -t %s -f %s" %(d['Body'],team.name,d['From']))):
-            r.sms(text_segment)
+        body = d['Body'].lower().strip()
+        if body.startswith('ack'):
+            r = ack(user,team,False)
+        elif body.startswith('ack all'):
+            r = ack(user, team, True)
+        elif body.startswith('status'):
+            r = status(user,team)
+        # send sms return
+        myauth.send_sms(user, team, None, r)
     return str(r)
 
 @app.route('/call/<int:alert_id>', methods=['GET'])
@@ -79,9 +85,9 @@ def outboundcall():
     # check if this call was initialized by sending an alert
     # the digit options to press
     digitOpts = '''
-Press 1 to hear the message.
-Press 2 to acknowledge this alert.
-'''
+        Press 1 to hear the message.
+        Press 2 to acknowledge this alert.
+                '''
     receiver = User.get_user_by_phone(d['To'])
     alert = Alert.Alert(alert_id)
     # check if this is the first interaction for this call session
@@ -166,11 +172,11 @@ def inboundcall():
             r.say(timeout_msg)
         elif int(d['Digits']) == 1:
             # getting the status of alerts
-            r.say(domino.run("alert status -f %s -t '%s'" % (requester.phone, team.name)))
+            r.say(status(requester,team))
             r.redirect(url="/call?init=false",  method="GET")
         elif int(d['Digits']) == 2:
             # acking the last alert sent to the user calling
-            r.say(domino.run("alert ack -f '%s'" % requester.phone))
+            r.say(ack(requester,team))
             r.redirect(url="/call?init=false",  method="GET")
         elif int(d['Digits']) == 3:
             # calling the other users on call
@@ -187,6 +193,24 @@ def inboundcall():
         else:
             r.say("Sorry, number you pressed is not valid. Please try again.")
     return str(r)
+
+def ack(user, team, ack_all=False):
+    '''
+    Ack an alert (or all)
+    '''
+    alert = Alert.Alert(user.lastAlert)
+    alert.ack_alert(user)
+    return "Acknowledged"
+
+def status(user, team):
+    ''' 
+    Printing out alerts that haven't been acked and paging.
+    '''
+    alerts = Alert.active(opts.team)
+    if len(alerts) == 0: return "No active alerts."
+    for a in alerts:
+        output=output + "%s" % (a.print_alert(opts.mobile))
+    return output
 
 def check_alerts():
     '''
