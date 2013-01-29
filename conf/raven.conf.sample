@@ -1,0 +1,15 @@
+# This is a sample raven config
+# Raven is a CLI tool to send alerts to Doimino
+
+[defaults]
+
+environment=
+colo=
+host=
+status=1
+tags=
+
+server=127.0.0.1
+port=8009
+logdir=/var/log/domino
+queueDir=/opt/domino/raven/queue

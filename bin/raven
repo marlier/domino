@@ -1,0 +1,165 @@
+#!/usr/bin/env python
+
+import sys, os, select, urllib2
+from optparse import OptionParser
+import simplejson as json
+import cPickle as pickle
+from ConfigParser import SafeConfigParser
+import logging
+
+version="Raven 0.05"
+
+
+def main():
+    # Parse the command line
+    parser = OptionParser()
+    parser.add_option('-m', '--message', dest='message', help='The message of the alert', type='string', default=None)
+    parser.add_option('-H', '--host', dest='host', help='Hostname', type='string', default=None)
+    parser.add_option('-v', '--service', dest='service', help='Service name', type='string', default=None)
+    parser.add_option('-e', '--environment', dest='environment', help='Environment (ie Production, QA, Staging)', type='string', default=None)
+    parser.add_option('-C', '--colo', dest='colo', help='Colo or datacenter name', type='string', default=None)
+    parser.add_option('-s', '--status', dest='status', help='Alert status. 0=OK, 1=Warning, 2=Critical, 3=Unknown', type='string', default=None)
+    parser.add_option('-T', '--tags', dest='tags', help='Tags. A comma separated list of "tags" or "cagetories" this alert is associated', type='string', default=None)
+    parser.add_option('-z', '--server', dest='server', help='Domino Server address', type='string', default=None)
+    parser.add_option('-p', '--port', dest='port', help='Domino Port', type='int', default=None)
+    parser.add_option('-c', '--config', dest='config', help='Raven config file (required)', type='string', default=None)
+    parser.add_option('-d', '--queue-dir', dest='queueDir', help='Temp directory to store queue files', type='string', default=None)
+    parser.add_option('-r', '--resend', dest='resend', help='Resend failed alerts from disk', action="store_true", default=False)
+    parser.add_option('-V', '--version', dest='version', help='Print version number', action="store_true")
+    (opts, args) = parser.parse_args()
+
+    # print version number and exit
+    if opts.version == True:
+        print version
+        sys.exit(0)
+
+    # check for config file
+    if opts.config == None:
+        if os.path.exists('/opt/domino/raven/raven.conf'):
+            opts.config = '/opt/domino/raven/raven.conf'
+        else:
+            print "Error: No config file passed (-c)"
+            sys.exit(1)
+
+    #load conf
+    parser = SafeConfigParser()
+    parser.read(opts.config)
+    conf={}
+    #take in all keys and values from the conf file into the variable "conf"
+    for section_name in parser.sections():
+        for name, value in parser.items(section_name):
+            conf[name] = value
+
+
+    conf['port']=int(conf['port'])
+
+    if not os.path.exists('%s/%s.log' % (conf['logdir'], 'raven')):
+        try:
+            os.makedirs(conf['logdir'])
+        except:
+            pass
+        f = file('%s/%s.log' % (conf['logdir'], 'raven'), "w+")
+        f.close()
+
+    #init logging
+    logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', filename='%s/%s.log' % (conf['logdir'], 'raven'),level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p')
+
+    # set default values
+    alert = conf
+
+    if select.select([sys.stdin,],[],[],0.0)[0]:
+        alert['message'] = sys.stdin.read()
+    else:
+        alert['message'] = opts.message
+    if alert['message'] == None:
+        print "Error: No message passed. This can be done via stdin or --message (-m)"
+        sys.exit(1)
+    if opts.host != None: alert['host']=opts.host
+    if opts.service != None: alert['service']=opts.service
+    if opts.environment != None: alert['environment']=opts.environment
+    if opts.colo != None: alert['colo']=opts.colo
+    if opts.status != None: alert['status']=opts.status
+    if len(opts.status) > 1:
+        if alert['status'].lower() == "ok":
+            alert['status'] = 0
+        elif alert['status'].lower() == "warning":
+            alert['status'] = 1
+        elif alert['status'].lower() == "critical":
+            alert['status'] = 2
+        else:
+            alert['status'] = 3
+    if opts.tags != None: alert['tags']=opts.tags
+    if opts.server != None: alert['server']=opts.server
+    if opts.port != None: alert['port']=opts.port
+
+    if opts.resend == False:
+        sendAlert(alert)
+    else:
+        resend(opt.queueDir)
+
+def resend(pDir):
+    '''
+    Looping through saved pickle files to try to send again
+    '''
+    for subdir, dirs, files in os.walk(pDir):
+        for f in files:
+            if f.endswith(".pickle"):
+                FILE = open(f, 'r')
+                alert = cPickle.load(FILE)
+                FILE.close()
+                sendAlert(alert, False)
+
+def sendAlert(alert, overwrite=True):
+    '''
+    Send an alert to domino
+    '''
+    summary='''Sending a raven: 
+        Environment: %s
+        Colo: %s
+        Host: %s
+        Service: %s
+        Status: %s
+        Tags: %s
+        Server: %s
+        Port: %s
+        Message: %s''' % (alert['environment'], alert['colo'], alert['host'], alert['service'], alert['status'], alert['tags'], alert['server'], alert['port'], alert['message'])
+
+    logging.info(summary)
+
+    url = "http://%s:%i/api/alert" % (alert['server'], alert['port'])
+
+    try:
+        # query the server
+        data = json.dumps(alert)
+        req = urllib2.Request(url, data, {'Content-Type': 'application/json'})
+        response = urllib2.urlopen(req)
+        rawreturn = response.read()
+    except urllib2.URLError, e:
+        logging.error(e)
+        print e
+        sys.exit(1)
+
+    ret = json.loads(rawreturn)
+
+    queueFile = "%s/%s_%s_%s_%s.pickle" % (opts.queueDir, alert['environment'], alert['colo'], alert['host'], alert['service'])
+
+    if response.code == 200:
+        print "Successfully sent message: %s" % (response.code)
+        # delete queued version of alert ( if exists ) because a more recent state has just been sent
+        if os.path.exists('%s/%s.log' % (conf['logdir'], 'raven')):
+            try:
+                os.remove(queueFile)
+            except:
+                pass
+        sys.exit(0)
+    else:
+        print "Failed to send message: %s" % (response.code)
+        if overwrite == True:
+            # write alert to queue directory
+            FILE = open(queueFile, "w")
+            pickle.dump(alert, FILE)
+            FILE.close()
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
