@@ -34,4 +34,10 @@ pip-log.txt
 # swap files
 *.swp
 
+
+# rpm build
+BUILD
+BUILDROOT
+RPMS
+
 .DS_Store

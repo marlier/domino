@@ -23,7 +23,6 @@ def main():
     parser.add_option('-z', '--server', dest='server', help='Domino Server address', type='string', default=None)
     parser.add_option('-p', '--port', dest='port', help='Domino Port', type='int', default=None)
     parser.add_option('-c', '--config', dest='config', help='Raven config file (required)', type='string', default=None)
-    parser.add_option('-d', '--queue-dir', dest='queueDir', help='Temp directory to store queue files', type='string', default=None)
     parser.add_option('-r', '--resend', dest='resend', help='Resend failed alerts from disk', action="store_true", default=False)
     parser.add_option('-V', '--version', dest='version', help='Print version number', action="store_true")
     (opts, args) = parser.parse_args()
@@ -35,8 +34,8 @@ def main():
 
     # check for config file
     if opts.config == None:
-        if os.path.exists('/opt/domino/raven/raven.conf'):
-            opts.config = '/opt/domino/raven/raven.conf'
+        if os.path.exists('/etc/raven.conf'):
+            opts.config = '/etc/raven.conf'
         else:
             print "Error: No config file passed (-c)"
             sys.exit(1)
@@ -95,13 +94,13 @@ def main():
     if opts.resend == False:
         sendAlert(alert)
     else:
-        resend(opt.queueDir)
+        resend()
 
-def resend(pDir):
+def resend():
     '''
     Looping through saved pickle files to try to send again
     '''
-    for subdir, dirs, files in os.walk(pDir):
+    for subdir, dirs, files in os.walk('/var/spool/raven'):
         for f in files:
             if f.endswith(".pickle"):
                 FILE = open(f, 'r')
@@ -141,7 +140,7 @@ def sendAlert(alert, overwrite=True):
 
     ret = json.loads(rawreturn)
 
-    queueFile = "%s/%s_%s_%s_%s.pickle" % (opts.queueDir, alert['environment'], alert['colo'], alert['host'], alert['service'])
+    queueFile = "/var/spool/raven/%s_%s_%s_%s.pickle" % (alert['environment'], alert['colo'], alert['host'], alert['service'])
 
     if response.code == 200:
         print "Successfully sent message: %s" % (response.code)

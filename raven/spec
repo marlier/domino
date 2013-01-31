@@ -1,0 +1,37 @@
+Name:       raven
+Version:    0.5
+Release:    1
+Summary:    Raven is a command line tool to send alerts to Domino
+
+Group:      unknown
+License:    Apache License 2.0
+URL:        git@github.com:CBarraford/domino.git
+Source0:    raven
+BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildArch:  noarch
+
+%description
+Raven is a command line tool to send alerts to Domino
+
+%prep
+cp -p %SOURCE0 .
+find .
+
+%install
+rm -rf "${RPM_BUILD_ROOT}"
+
+mkdir -p ${RPM_BUILD_ROOT}/usr/bin/
+cp ../raven ${RPM_BUILD_ROOT}/usr/bin/raven
+
+mkdir -p ${RPM_BUILD_ROOT}/var/spool/raven
+chmod 777 ${RPM_BUILD_ROOT}/var/spool/raven
+
+%clean
+rm -rf "${RPM_BUILD_ROOT}"
+
+%files
+%defattr(-,root,root,-)
+/usr/bin/raven
+/var/spool/raven
+
+%changelog
