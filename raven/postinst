@@ -1,3 +1,6 @@
 #!/bin/bash
 
 chmod 777 /var/spool/raven
+mkdir -p /var/log/domino
+touch /var/log/domino/raven.log
+chmod 777 /var/log/domino/raven.log

@@ -27,6 +27,10 @@ cp ../raven ${RPM_BUILD_ROOT}/usr/bin/raven
 mkdir -p ${RPM_BUILD_ROOT}/var/spool/raven
 chmod 777 ${RPM_BUILD_ROOT}/var/spool/raven
 
+mkdir -p ${RPM_BUILD_ROOT}/var/log/domino
+touch ${RPM_BUILD_ROOT}/var/log/domino/raven.log
+chmod 777 ${RPM_BUILD_ROOT}/var/log/domino/raven.log
+
 %clean
 rm -rf "${RPM_BUILD_ROOT}"
 
