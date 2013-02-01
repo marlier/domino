@@ -7,7 +7,7 @@ import cPickle as pickle
 from ConfigParser import SafeConfigParser
 import logging
 
-version="Raven 0.05"
+version="Raven 0.1.7"
 
 
 def main():
