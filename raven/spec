@@ -1,5 +1,4 @@
 Name:       raven
-Version:    0.5
 Release:    1
 Summary:    Raven is a command line tool to send alerts to Domino
 
@@ -9,6 +8,9 @@ URL:        git@github.com:CBarraford/domino.git
 Source0:    raven
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:  noarch
+
+%define version %(source ./version)
+Version:    version
 
 %description
 Raven is a command line tool to send alerts to Domino

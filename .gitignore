@@ -40,4 +40,8 @@ BUILD
 BUILDROOT
 RPMS
 
+# deb build
+raven-*
+raven_*
+
 .DS_Store
