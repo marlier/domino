@@ -7,7 +7,6 @@ cd raven-$version
 
 DEBFULLNAME="Chad Barraford"
 dh_make --createorig --indep --email "cbarraford@gmail.com"
-
 mkdir essentials
 mv debian/{changelog,compat,rules,control} essentials
 rm -r debian
@@ -21,6 +20,8 @@ chmod 755 src/usr/bin/raven
 # stage spool directory
 mkdir -p src/var/spool/raven
 chmod 777 src/var/spool/raven
+
+cp -p ../postinst debian
 
 # build package
 dpkg-buildpackage -uc -tc -rfakeroot
