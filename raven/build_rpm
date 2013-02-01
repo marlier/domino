@@ -7,3 +7,4 @@ rpmbuild --verbose \
     --define "_sourcedir ${buildroot}" \
     --define "_topdir ${buildroot}" \
     -bb "${buildroot}/spec"
+

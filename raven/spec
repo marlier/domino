@@ -1,7 +1,6 @@
 Name:       raven
 Release:    1
 Summary:    Raven is a command line tool to send alerts to Domino
-
 Group:      unknown
 License:    Apache License 2.0
 URL:        git@github.com:CBarraford/domino.git
@@ -9,8 +8,8 @@ Source0:    raven
 BuildRoot:  %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:  noarch
 
-%define version %(source ./version)
-Version:    version
+%define version %(grep ^version raven | sed 's/"//g' | awk '{ print $NF }')
+Version:    %{version}
 
 %description
 Raven is a command line tool to send alerts to Domino

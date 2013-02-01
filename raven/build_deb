@@ -1,14 +1,18 @@
 #!/bin/bash
-source ./version
+
+version=$(grep ^version raven | sed 's/"//g' | awk '{ print $NF }')
 
 mkdir raven-$version
 cd raven-$version
+
 DEBFULLNAME="Chad Barraford"
 dh_make --createorig --indep --email "cbarraford@gmail.com"
+
 mkdir essentials
 mv debian/{changelog,compat,rules,control} essentials
 rm -r debian
 mv essentials debian
+
 echo './src/* ./' > debian/raven.install
 # stage raven exec
 mkdir -p src/usr/bin
@@ -17,6 +21,7 @@ chmod 755 src/usr/bin/raven
 # stage spool directory
 mkdir -p src/var/spool/raven
 chmod 777 src/var/spool/raven
+
 # build package
 dpkg-buildpackage -uc -tc -rfakeroot
 dpkg --contents ../raven_$version-1_all.deb # inspect the resulting Debian package
