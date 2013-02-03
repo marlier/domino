@@ -219,18 +219,58 @@ def check_alerts():
     # intentionally creating an infinite loop.
     foobar = True
     while foobar == True:
-        # delete any rules that have expired
-        Rule.expire_rules();
+        if lock_check() == False:
+            # lock 'sending_alerts'
+            lock_write()
 
-        # looking for alerts that are due to page
-        for a in Alert.check_paging_alerts():
-            a.send_alert()
+            # delete any rules that have expired
+            Rule.expire_rules();
 
-        # look for other alerts that are due send notifications
-        for a in Alert.check_alerts():
-            a.send_alert()
+            # looking for alerts that are due to page
+            for a in Alert.check_paging_alerts():
+                a.send_alert()
+
+            # look for other alerts that are due send notifications
+            for a in Alert.check_alerts():
+                a.send_alert()
+            
+            # delete lock
+            lock_delete()
 
         time.sleep(5)
+
+def lock_check():
+    '''
+    This checks for a lock on sending alerts so that two servers aren't doing this task at the same time (High Availability)
+    '''
+    # skipping locks older than a minute in the chance that the process/db availability goes away while sending alerts
+    r = Mysql.rawquery('''SELECT COUNT(id) as count FROM locks WHERE name = 'sending_alerts' and locks = true and createDate >= DATE_SUB(NOW(),INTERVAL 1 MINUTE);''')
+    if r == False: return False
+    if r['count'] > 0:
+        return True
+    else:
+        return False
+
+def lock_write():
+    '''
+    This writes a lock for sending alerts
+    '''
+    r = Mysql.rawquery('''INSERT INTO locks SET name = "sending_alerts", locks = true;''')
+    if r == False:
+        return False
+    else:
+        return True
+    
+
+def lock_delete():
+    '''
+    This deletes the sending alerts lock
+    '''
+    r = Mysql.rawquery('''DELETE FROM locks WHERE name = "sending_alerts", locks = true;''')
+    if r == False:
+        return False
+    else:
+        return True
 
 if __name__ == "__main__":
     p = Process(target=check_alerts)
