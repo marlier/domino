@@ -80,37 +80,37 @@ class Api():
         try:
             self.id = int(self.id)
         except Exception, e:
-            self.populate(1003, "ID is not a integer")
+            self.populate(701, "ID is not a integer")
             return
         try:
             self.segment = int(self.segment)
         except Exception, e:
-            self.populate(1006, "Segment is not a integer")
+            self.populate(702, "Segment is not a integer")
             return
         try:
             self.limit = int(self.limit)
         except Exception, e:
-            self.populate(1007, "Limit is not a integer")
+            self.populate(703, "Limit is not a integer")
             return
         try:
             self.offset = int(self.offset)
         except Exception, e:
-            self.populate(1008, "Offset is not a integer")
+            self.populate(704, "Offset is not a integer")
             return
         try:
             self.since = int(self.since)
         except Exception, e:
-            self.populate(1009, "Since is not a integer")
+            self.populate(705, "Since is not a integer")
             return
         try:
             self.ack = int(self.ack)
         except Exception, e:
-            self.populate(1012, "Ack is not a integer")
+            self.populate(706, "Ack is not a integer")
             return
         try:
             self.oncall_count = int(self.oncall_count)
         except Exception, e:
-            self.populate(1013, "Oncall_count is not a integer")
+            self.populate(707, "Oncall_count is not a integer")
             return
 
     def ackAlert(self, ack):
@@ -130,9 +130,9 @@ class Api():
                 self.populate(200, "OK", objects)
                 return
             else:
-                self.populate(403, "Failed to ack alert")
+                self.populate(700, "Failed to ack alert")
         except Exception, e:
-            self.populate(403,e.__str__())
+            self.populate(700,e.__str__())
             Util.strace(e)
             return
 
@@ -153,7 +153,7 @@ class Api():
             self.populate(200, "OK", objects)
             return
         except Exception, e:
-            self.populate(1690,e.__str__())
+            self.populate(700,e.__str__())
             Util.strace(e)
             return
 
@@ -174,7 +174,7 @@ class Api():
             self.populate(200, "OK", objects)
             return
         except Exception, e:
-            self.populate(1691,e.__str__())
+            self.populate(700,e.__str__())
             Util.strace(e)
             return
 
@@ -251,7 +251,7 @@ class Api():
             data = Alert.graph_data(self.segment,self.unit,self.search)
             return self.populate(200,"OK",[data])
         else:
-            self.populate(1802,"Invalid API metic call: units parameter must be SECOND, MINUTE, HOUR, or DAY") 
+            self.populate(700,"Invalid API metic call: units parameter must be SECOND, MINUTE, HOUR, or DAY") 
 
     def getAnalytics(self):
         if self.name == None:
@@ -357,9 +357,9 @@ class Api():
                         if newalert.send_alert() == True:
                             self.populate(200,"OK")
                         else:
-                            self.populate(1202, "Failed to send new alert")
+                            self.populate(700, "Failed to send new alert")
                 else:
-                    self.populate(1202, "Failed to save new alert")
+                    self.populate(700, "Failed to save new alert")
         elif self.id != 0:
             try:
                 obj = Alert.Alert(self.id)
@@ -367,22 +367,22 @@ class Api():
                 if obj.save() == True:
                     self.populate(200,"OK")
                 else:
-                    self.populate(701,"Failed to save alert.")
+                    self.populate(700,"Failed to save alert.")
             except Exception, e:
-                self.populate(1602,e.__str__())
+                self.populate(700,e.__str__())
                 Util.strace(e)
                 return
 
     def setUser(self,data):
         if self.id == None or self.id == 0:
             if self.name == None or len(self.name) <= 0:
-                self.populate(1301,"No name parameter given in user creation")
+                self.populate(700,"No name parameter given in user creation")
                 return
             if self.email == None or len(self.email) <= 0 or "@" not in self.email:
-                self.populate(1302,"No or invalid email parameter given in user creation")
+                self.populate(700,"No or invalid email parameter given in user creation")
                 return
             if self.phone == None or len(self.phone) != 12:
-                self.populate(1303,"No or invalid phone number parameter given in user creation")
+                self.populate(700,"No or invalid phone number parameter given in user creation")
                 return
             newuser = User.User()
             newuser.name = self.name
@@ -392,7 +392,7 @@ class Api():
                 self.populate(200,"OK")
                 return
             else:
-                self.populate(1305, "Failed to save user data")
+                self.populate(700, "Failed to save user data")
         elif self.id != 0:
             try:
                 obj = User.User(self.id)
@@ -400,9 +400,9 @@ class Api():
                 if obj.save() == True:
                     self.populate(200,"OK")
                 else:
-                    self.populate(701,"Failed to save user.")
+                    self.populate(700,"Failed to save user.")
             except Exception, e:
-                self.populate(1602,e.__str__())
+                self.populate(700,e.__str__())
                 Util.strace(e)
                 return
 
@@ -426,12 +426,12 @@ class Api():
         if rule.save():
             self.populate(200, "OK", [rule.__dict__])
         else:
-            self.populate(1910, "Failed to save rule")
+            self.populate(700, "Failed to save rule")
             
     def setTeam(self,data):
         if self.id == None or self.id == 0:
             if self.name == None or len(self.name) <= 0:
-                self.populate(1901,"No name parameter given in team creation")
+                self.populate(700,"No name parameter given in team creation")
                 return
             newteam = Team.Team()
             newteam.name = self.name
@@ -444,7 +444,7 @@ class Api():
             if newteam.save():
                 self.populate(200,"OK")
             else:
-                self.populate(1902, "Failed to save team data")
+                self.populate(700, "Failed to save team data")
         else:
             try:
                 obj = Team.Team(self.id)
@@ -457,15 +457,15 @@ class Api():
                     obj.notifyOncallChange(orig_members)
                     self.populate(200,"OK")
                 else:
-                    self.populate(701,"Failed to save team.")
+                    self.populate(700,"Failed to save team.")
             except Exception, e:
-                self.populate(1602,e.__str__())
+                self.populate(700,e.__str__())
                 Util.strace(e)
                 return
 
     def rotateTeam(self):
         if self.id == None or self.id == 0:
-            self.populate(403, "Error: failed to give a valid team id")
+            self.populate(700, "Error: failed to give a valid team id")
         else:
             team = Team.Team(self.id)
             orig_members = team.members
@@ -475,7 +475,7 @@ class Api():
                 team.notifyOncallChange(orig_members)
                 self.populate(200, "OK")
             else:
-                self.populate(403, "Failed to save team")
+                self.populate(700, "Failed to save team")
 
     def delAlert(self):
         try:
@@ -487,7 +487,7 @@ class Api():
                 o.delete()
             self.populate(200,"OK")
         except Exception, e:
-            self.populate(1502,e.__str__())
+            self.populate(700,e.__str__())
             Util.strace(e)
             return
 
@@ -497,7 +497,7 @@ class Api():
             obj.delete()
             self.populate(200,"OK")
         except Exception, e:
-            self.populate(1502,e.__str__())
+            self.populate(700,e.__str__())
             Util.strace(e)
             return
 
@@ -507,7 +507,7 @@ class Api():
             obj.delete()
             self.populate(200,"OK")
         except Exception, e:
-            self.populate(1502,e.__str__())
+            self.populate(700,e.__str__())
             Util.strace(e)
             return
 
@@ -517,7 +517,7 @@ class Api():
             obj.delete()
             self.populate(200,"OK")
         except Exception, e:
-            self.populate(1502,e.__str__())
+            self.populate(700,e.__str__())
             Util.strace(e)
             return
 
@@ -525,7 +525,7 @@ class Api():
         user = User.User(self.id)
         valid_code = Twilio.validate_phone(user)
         if valid_code['success'] == False:
-            self.populate(404,valid_code['message'])
+            self.populate(700,valid_code['message'])
         elif valid_code['success'] == True:
             self.populate(200, "OK", {'verification_code': valid_code['message']})
 
@@ -534,7 +534,7 @@ class Api():
         if Twilio.invalidate_phone(user):
             self.populate(200,"OK")
         else:
-            self.populate(404, "failed")
+            self.populate(700, "failed")
 
     def sms_test(self):
         user = User.User(self.id)
@@ -544,7 +544,7 @@ class Api():
             self.populate(200, "OK")
         except Exception, e:
             Util.strace(e)
-            self.populate(404, "Fail: %s" % (e.__str__))
+            self.populate(700, "Fail: %s" % (e.__str__))
 
     def filter(self,objects):
         '''
