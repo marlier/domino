@@ -1,0 +1,5 @@
+include README.md
+graft bin
+graft classes
+graft www
+graft init
