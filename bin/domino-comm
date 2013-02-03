@@ -15,12 +15,12 @@ if (cmd_folder + "/classes") not in sys.path:
     sys.path.insert(0, cmd_folder + "/classes")
 
 import domino_twilio as Twilio
-import dominoCLI as domino
 import user as User
 import alert as Alert
 import team as Team
 import rule as Rule
 import util as Util
+import mysql as Mysql
 
 conf = Util.load_conf()
 Util.init_logging("comm")
