@@ -6,8 +6,8 @@ import smtplib
 import socket
 import urllib
 
-import user_layer as User
-import util_layer as Util
+import user as User
+import util as Util
 
 conf = Util.load_conf()
 

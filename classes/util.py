@@ -47,7 +47,7 @@ def load_conf(config_file = 'domino.conf'):
 def strace(e):
 	conf = load_conf()
 	logging.error(e.__str__())
-	import notification_layer as Notification
+	import notification as Notification
 	if conf['loglevel'] == 'DEBUG': traceback.print_exc(file=open('%s/strace.out' % (conf['logdir']), "a"))
 	newNotification = Notification.Notification()
 	newNotification.noteType = "error"
@@ -67,19 +67,19 @@ def healthcheck(healthtype):
 	try:
 		checks = {}
 		if healthtype == "comm" or healthtype == "alert":
-			import mysql_layer as Mysql
+			import mysql as Mysql
 			db_conn = Mysql.Database()
 			dbcheck = db_conn.healthcheck()
 			checks['Database'] = dbcheck
 		
 		if healthtype == "comm":
-			import email_layer as Email
+			import email as Email
 			email = Email.Email()
 			emailcheck = email.healthcheck()
 			checks['Email'] = emailcheck
 		
 		if healthtype == "comm":
-			import twilio_layer as Twilio
+			import twilio as Twilio
 			twiliocheck = Twilio.healthcheck()
 			checks['Twilio'] = twiliocheck
 

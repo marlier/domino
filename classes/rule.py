@@ -3,9 +3,9 @@
 import logging
 import datetime
 
-import mysql_layer as Mysql
-import util_layer as Util
-import alert_layer as Alert
+import mysql as Mysql
+import util as Util
+import alert as Alert
 
 def applyRules(alert):
     '''

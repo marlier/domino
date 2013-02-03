@@ -3,10 +3,10 @@
 import logging
 import datetime
 
-import mysql_layer as Mysql
-import team_layer as Team
-import twilio_layer as twilio
-import util_layer as Util
+import mysql as Mysql
+import team as Team
+import twilio as twilio
+import util as Util
 
 def all_users(since=None):
 	'''

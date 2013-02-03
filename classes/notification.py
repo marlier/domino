@@ -3,8 +3,8 @@
 import logging
 import datetime
 
-import mysql_layer as Mysql
-import util_layer as Util
+import mysql as Mysql
+import util as Util
 
 def all_notifications():
 	'''

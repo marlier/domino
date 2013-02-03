@@ -5,15 +5,15 @@ import simplejson as json
 from werkzeug.contrib.atom import AtomFeed
 from datetime import date
 
-import mysql_layer as Mysql
-import twilio_layer as Twilio
-import user_layer as User
-import alert_layer as Alert
-import team_layer as Team
-import email_layer as Email
-import rule_layer as Rule
-import notification_layer as Notification
-import util_layer as Util
+import mysql as Mysql
+import twilio as Twilio
+import user as User
+import alert as Alert
+import team as Team
+import email as Email
+import rule as Rule
+import notification as Notification
+import util as Util
 
 conf = Util.load_conf()
 Util.init_logging("api")

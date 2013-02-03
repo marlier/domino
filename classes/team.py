@@ -3,9 +3,9 @@
 import logging
 import datetime
 
-import mysql_layer as Mysql
-import user_layer as User
-import util_layer as Util
+import mysql as Mysql
+import user as User
+import util as Util
 
 conf = Util.load_conf()
 

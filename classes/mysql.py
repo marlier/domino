@@ -5,12 +5,12 @@ import MySQLdb, MySQLdb.cursors
 import datetime
 import random
 
-import util_layer as Util
-import user_layer as User
-import alert_layer as Alert
-import team_layer as Team
-import rule_layer as Rule
-import notification_layer as Notification
+import util as Util
+import user as User
+import alert as Alert
+import team as Team
+import rule as Rule
+import notification as Notification
 
 conf = Util.load_conf()
 

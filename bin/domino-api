@@ -13,9 +13,9 @@ cmd_folder = os.path.dirname((os.path.abspath(__file__)))
 if (cmd_folder + "/classes") not in sys.path:
     sys.path.insert(-1, cmd_folder + "/classes")
 
-import api_layer as Api
-import twilio_layer as Twilio
-import util_layer as Util
+import api as Api
+import twilio as Twilio
+import util as Util
 
 conf = Util.load_conf()
 Util.init_logging("api")

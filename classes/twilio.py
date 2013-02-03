@@ -6,10 +6,10 @@ import logging
 from twilio.rest import TwilioRestClient
 from twilio import twiml
 
-import user_layer as User
-import alert_layer as Alert
-import team_layer as Team
-import util_layer as Util
+import user as User
+import alert as Alert
+import team as Team
+import util as Util
 
 conf = Util.load_conf()
 

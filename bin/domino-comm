@@ -14,13 +14,13 @@ cmd_folder = os.path.dirname((os.path.abspath(__file__)))
 if (cmd_folder + "/classes") not in sys.path:
     sys.path.insert(-1, cmd_folder + "/classes")
 
-import twilio_layer as Twilio
+import twilio as Twilio
 import dominoCLI as domino
-import user_layer as User
-import alert_layer as Alert
-import team_layer as Team
-import rule_layer as Rule
-import util_layer as Util
+import user as User
+import alert as Alert
+import team as Team
+import rule as Rule
+import util as Util
 
 conf = Util.load_conf()
 Util.init_logging("comm")
