@@ -79,7 +79,7 @@ def healthcheck(healthtype):
 			checks['Email'] = emailcheck
 		
 		if healthtype == "comm":
-			import twilio as Twilio
+			import domino_twilio as Twilio
 			twiliocheck = Twilio.healthcheck()
 			checks['Twilio'] = twiliocheck
 

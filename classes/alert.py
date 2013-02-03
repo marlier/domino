@@ -6,7 +6,7 @@ from datetime import date, timedelta
 import math
 
 import mysql as Mysql
-import twilio as Twilio
+import domino_twilio as Twilio
 import user as User
 import team as Team
 import email as Email

@@ -6,7 +6,7 @@ from werkzeug.contrib.atom import AtomFeed
 from datetime import date
 
 import mysql as Mysql
-import twilio as Twilio
+import domino_twilio as Twilio
 import user as User
 import alert as Alert
 import team as Team

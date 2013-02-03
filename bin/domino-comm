@@ -10,11 +10,11 @@ import time
 from multiprocessing import Process
 
 # add classes location to sys.path
-cmd_folder = os.path.dirname((os.path.abspath(__file__)))
+cmd_folder = os.path.dirname(os.path.dirname((os.path.abspath(__file__))))
 if (cmd_folder + "/classes") not in sys.path:
-    sys.path.insert(-1, cmd_folder + "/classes")
+    sys.path.insert(0, cmd_folder + "/classes")
 
-import twilio as Twilio
+import domino_twilio as Twilio
 import dominoCLI as domino
 import user as User
 import alert as Alert

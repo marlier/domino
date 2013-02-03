@@ -5,7 +5,7 @@ import datetime
 
 import mysql as Mysql
 import team as Team
-import twilio as twilio
+import domino_twilio as twilio
 import util as Util
 
 def all_users(since=None):
