@@ -39,6 +39,7 @@ pip-log.txt
 BUILD
 BUILDROOT
 RPMS
+MANIFEST
 
 # deb build
 raven-*
