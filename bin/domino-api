@@ -20,8 +20,8 @@ import util as Util
 conf = Util.load_conf()
 Util.init_logging("api")
 
-tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'www/templates')
-static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'www/static')
+tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../www/templates')
+static_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../www/static')
 
 app = Flask(__name__, template_folder=tmpl_dir, static_folder=static_dir)
 
