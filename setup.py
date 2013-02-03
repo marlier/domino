@@ -16,7 +16,8 @@ else:
 base_dir = '/opt/domino/'
 
 data_files = [ 
-    (base_dir, ['README.md'])
+    (base_dir, ['README.md']),
+    ('/var/log/domino', [])
 ]
 
 distro = platform.dist()[0]
