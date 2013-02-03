@@ -50,6 +50,9 @@ data_files.append(('%s/classes' % base_dir,
                    glob('classes/*.py')))
 pkgPath('%s/www' % base_dir, 'www')
 
+if distro in ['centos', 'redhat']:
+    data_files.append(('/etc/init.d', ['init/domino-api', 'init/domino-comm']))
+
 setup(
     name='domino',
     version='0.1',
