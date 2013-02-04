@@ -35,10 +35,3 @@ To build an RPM of Domino run the following command
     python setup.py bdist_rpm
 ```
 
-Raven
-=====
-
-Raven is a command line tool that sends alerts to Domino. If domino fails to recieve the alert, raven will queue it locally to be attempted to be sent later ( This is done by running the tool with the '-r' option). It is reccommended that you have a cron setup to run 'raven -r' every 5 minutes (or so). This allows fault tolerance. In the event the domino server is unavailable for any reason, when it comes back online everything will be automatically get up-to-date.
-
-DISCLAIMER
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
