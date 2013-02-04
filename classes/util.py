@@ -19,7 +19,7 @@ def init_logging(log_file_name = 'server'):
 	    os.makedirs(conf['logdir'])
 	logging.basicConfig(format='%(asctime)s - %(levelname)s: %(message)s', filename='%s/%s.log' % (conf['logdir'], log_file_name),level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p')
 
-def load_conf(config_file = 'domino.conf'):
+def load_conf(config_file = '../domino.conf'):
 	'''
 	This function loads the conf file into the program's memory
 	'''
