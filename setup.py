@@ -53,9 +53,15 @@ pkgPath('%s/www' % base_dir, 'www')
 if distro in ['centos', 'redhat']:
     data_files.append(('/etc/init.d', ['init/domino-api', 'init/domino-comm']))
 
+def get_version():
+    f = open('%s/version.txt' % os.path.dirname(os.path.realpath(__file__)))
+    version = ''.join(f.readlines()).rstrip()
+    f.close()
+    return version
+
 setup(
     name='domino',
-    version='0.1',
+    version=get_version(),
     url='https://github.com/CBarraford/domino',
     author='Chad Barraford',
     author_email='cbarraford@gmail.com',

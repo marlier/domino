@@ -35,3 +35,9 @@ To build an RPM of Domino run the following command
     python setup.py bdist_rpm
 ```
 
+Building a DEB
+==============
+To build a deb package, you must have "python-stdeb" installed.
+```
+    python setup.py --command-packages=stdeb.command bdist_deb
+```

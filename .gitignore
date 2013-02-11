@@ -44,5 +44,6 @@ MANIFEST
 # deb build
 raven-*
 raven_*
+deb_dist
 
 .DS_Store
