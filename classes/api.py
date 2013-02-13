@@ -628,4 +628,4 @@ class Api():
                 feed.add("%s: %s" % (x['noteType'], x['id']), unicode(x['message']), id=x['id'], content_type="text", url=x['link'], updated=createDate, published=createDate)
             self.feed = feed.get_response()
         else:
-            self.fulljson = json.dumps(self.data, skipkeys=True, sort_keys=True, indent=4 * ' ')
+            self.fulljson = json.dumps(self.data, skipkeys=True, sort_keys=True, indent=4 * ' ', encoding="latin1")
