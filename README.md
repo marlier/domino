@@ -41,3 +41,5 @@ To build a deb package, you must have "python-stdeb" installed.
 ```
     python setup.py --command-packages=stdeb.command bdist_deb
 ```
+Packages will show up in deb_dist directory
+
