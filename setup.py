@@ -50,8 +50,12 @@ data_files.append(('%s/classes' % base_dir,
                    glob('classes/*.py')))
 pkgPath('%s/www' % base_dir, 'www')
 
+
+# init scripts
 if distro in ['centos', 'redhat']:
-    data_files.append(('/etc/init.d', ['init/domino-api', 'init/domino-comm']))
+    data_files.append(('/etc/init.d', ['redhat/init/domino-api', 'redhat/init/domino-comm']))
+if distro == 'Ubuntu':
+    data_files.append(('/etc/init', ['debian/upstart/domino-api.conf', 'debian/upstart/domino-comm.conf']))
 
 def get_version():
     f = open('%s/version.txt' % os.path.dirname(os.path.realpath(__file__)))
