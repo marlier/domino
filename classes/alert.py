@@ -210,9 +210,10 @@ def get_alerts_with_filter(filt,sort,limit, offset=0, table="alerts", count=Fals
                 negative = False
             if key == "tags":
                 if negative:
-                    search_terms.append("tags REGEXP '((?!%s)|(?!^%s,)|(?!,%s,)|(?!,%s$))'" % (value,value,value,value))
+                    isnot = "NOT "
                 else:
-                    search_terms.append("tags REGEXP '(%s|^%s,|,%s,|,%s$)'" % (value,value,value,value))
+                    isnot = ""
+                search_terms.append("tags %sREGEXP '(%s|^%s,|,%s,|,%s$)'" % (isnot,value,value,value,value))
             elif key == "message":
                 if negative:
                     search_terms.append("message NOT LIKE '%s'" % (value))
