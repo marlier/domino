@@ -23,7 +23,7 @@ Denpencies
  * Simplejson (http://pypi.python.org/pypi/simplejson/)
 
 Important Notes
- * This software does use Twilio (www.twilio.com) to handle SMS and phone calls. If you want to use these telcome features, you must setup your own Twilio account.
+ * This software does use Twilio (www.twilio.com) to handle SMS and phone calls. If you want to use these telcomm features, you must setup your own Twilio account.
  * One of the domino daemons (domino-comm) must be accessable by twilio's servers so they can make http calls to it.
 
 Building a RPM
