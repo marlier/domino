@@ -8,7 +8,7 @@ Key features
  * Be able to ack alerts via SMS and phone
  * Can be used with any existing monitoring systems(s). Domino aggregates alerts and does not know or care where the alerts are coming from.
  * Automatic escalation of alerts.
- * Group alerts and route them to the right people via taging them with user or team names
+ * Group alerts and route them to the right people by taging them with a user(s) or team name(s)
  * Full accessability through the read/write restful API.
  * Create rules that add/remove alert tags based on critieria you specify.
  * Get analyitics on your alerts (most frequest, newest, oldest, graphing datapoints, uptime, or build your own analyitics)
