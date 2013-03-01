@@ -13,10 +13,18 @@ Key features
  * Create rules that add/remove alert tags based on critieria you specify.
  * Get analyitics on your alerts (most frequest, newest, oldest, graphing datapoints, uptime, or build your own analyitics)
  
+Screenshots
+===========
+![Dashboard](/screenshots/dashboard.jpg "Dashboard")
+![Alserts](/screenshots/alerts.jpg "alerts")
+More screenshots are available in the "screenshots" directory
+
 Documentation
+=============
 documentation is available on the github [wiki](https://github.com/cbarraford/domino/wiki).
 
 Denpencies
+==========
  * Flask (http://http://flask.pocoo.org/)
  * twilio-python (https://github.com/twilio/twilio-python)
  * MySQLdb (http://sourceforge.net/projects/mysql-python/)
