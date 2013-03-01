@@ -15,8 +15,8 @@ Key features
  
 Screenshots
 ===========
-![Dashboard](screenshots/dashboard.jpg "Dashboard")
-![Alserts](screenshots/alerts.jpg "alerts")
+![Dashboard](https://raw.github.com/CBarraford/domino/master/screenshots/dashboard.png "Dashboard")
+![Alserts](https://raw.github.com/CBarraford/domino/master/screenshots/alerts.png "alerts")
 More screenshots are available in the "screenshots" directory
 
 Documentation
