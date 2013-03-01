@@ -15,8 +15,8 @@ Key features
  
 Screenshots
 ===========
-![Dashboard](/screenshots/dashboard.jpg "Dashboard")
-![Alserts](/screenshots/alerts.jpg "alerts")
+![Dashboard](screenshots/dashboard.jpg "Dashboard")
+![Alserts](screenshots/alerts.jpg "alerts")
 More screenshots are available in the "screenshots" directory
 
 Documentation
