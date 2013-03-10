@@ -4,6 +4,7 @@ Domino is an open source alerting fronted for any monitoring system or infrastru
 
 Key features
 ============
+ * Highly Available, scalable, and load balancing. Domino naturally runs in an active/active cluster
  * Alerting via SMS, telephone, RSS and email. (with usage of the API, you can create your own means of alerting)
  * Be able to ack alerts via SMS and phone
  * Can be used with any existing monitoring systems(s). Domino aggregates alerts and does not know or care where the alerts are coming from.
