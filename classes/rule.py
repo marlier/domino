@@ -3,7 +3,7 @@
 import logging
 import datetime
 
-import mysql as Mysql
+from cloudant import Cloudant
 import util as Util
 import alert as Alert
 

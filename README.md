@@ -28,7 +28,7 @@ Denpencies
 ==========
  * Flask (http://http://flask.pocoo.org/)
  * twilio-python (https://github.com/twilio/twilio-python)
- * MySQLdb (http://sourceforge.net/projects/mysql-python/)
+ * couchdb-python (https://code.google.com/p/couchdb-python/)
  * Simplejson (http://pypi.python.org/pypi/simplejson/)
 
 Important Notes
